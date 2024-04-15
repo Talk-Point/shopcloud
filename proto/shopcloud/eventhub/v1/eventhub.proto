@@ -1,0 +1,449 @@
+// EventHub API
+// The EventHub API is used to publish events to the correct topic and endpoint.
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package proto.shopcloud.eventhub.v1;
+
+option go_package="github.com/Talk-Point/shopcloud/proto/shopcloud/eventhub/v1";
+
+// Workspace represents a collection of topics and subscriptions
+message Workspace {
+    string id = 1;
+    string name = 2;
+    string environment = 3;
+    google.protobuf.Timestamp created_at = 4;
+    google.protobuf.Timestamp updated_at = 5;
+}
+
+// Represents an event that is published to a topic.
+message Event {
+    string id = 1;
+    string workspace = 2;
+    string topic = 3;
+    string payload = 4;
+    int32 ttl = 5;
+    repeated string tags = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+message Subscription {
+    string id = 1;
+    string name = 2;
+    string workspace = 3;
+    string status = 4;
+    bool is_active = 5;
+    bool is_paused = 6;
+    repeated string topics = 7;
+    string endpoint = 8;
+    string auth = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message Delivery {
+    string id = 1;
+    string event = 2;
+    string subscription = 3;
+    string status = 4; // Beispiel: "Progress", "Delivered", "Failed"
+    int32 retry_count = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+message Gateway {
+    string id = 1;
+    string workspace = 2;
+    string name = 3;
+    string code = 4;
+    string hash = 5;
+    string topic = 6;
+    string auth = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+// The EventHub service definition.
+// EventHub Service API receive Events and publish them to the correct topic thats received by the endpoint.
+//
+// - PublishEvent: Publish an event to a topic and create a event object
+// - DispatchEventToSubscriptions: Load the Subscriptions and create the Delivery objects
+// - PushDelivery: Push the Delivery to the endpoint
+service EventHubDispatcherService {
+    // Workspace
+    rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse);
+    rpc GetWorkspaceByName(GetWorkspaceByNameRequest) returns (GetWorkspaceByNameResponse);
+    rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse);
+    rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
+    rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse);
+    rpc GetOrCreateWorkspace(GetOrCreateWorkspaceRequest) returns (GetOrCreateWorkspaceResponse);
+    rpc AddUsersToWorkspace(AddUsersToWorkspaceRequest) returns (AddUsersToWorkspaceResponse);
+    rpc RemoveUsersFromWorkspace(RemoveUsersFromWorkspaceRequest) returns (RemoveUsersFromWorkspaceResponse);
+
+    // Event
+    rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
+    rpc DispatchEventToSubscriptions(DispatchEventToSubscriptionsRequest) returns (DispatchEventToSubscriptionsResponse);
+    rpc GetEvent(GetEventRequest) returns (Event);
+
+    // Subscription
+    rpc GetSubscription(GetSubscriptionRequest) returns (GetSubscriptionResponse);
+    rpc GetSubscriptionByName(GetSubscriptionByNameRequest) returns (GetSubscriptionByNameResponse);
+    rpc ListSubscriptions(ListSubscriptionsRequest) returns (ListSubscriptionsResponse);
+    rpc CreateSubscription(CreateSubscriptionRequest) returns (CreateSubscriptionResponse);
+    rpc DeleteSubscription(DeleteSubscriptionRequest) returns (DeleteSubscriptionResponse);
+    rpc GetOrCreateSubscription(GetOrCreateSubscriptionRequest) returns (GetOrCreateSubscriptionResponse);
+    rpc AddSubscriptionTopics(AddSubscriptionTopicsRequest) returns (AddSubscriptionTopicsResponse);
+    rpc RemoveSubscriptionTopics(RemoveSubscriptionTopicsRequest) returns (RemoveSubscriptionTopicsResponse);
+    rpc SetSubscriptionTopics(SetSubscriptionTopicsRequest) returns (SetSubscriptionTopicsResponse);
+    rpc ActivateSubscription(ActivateSubscriptionRequest) returns (ActivateSubscriptionResponse);
+    rpc DeactivateSubscription(DeactivateSubscriptionRequest) returns (DeactivateSubscriptionResponse);
+    rpc PauseSubscription(PauseSubscriptionRequest) returns (PauseSubscriptionResponse);
+    rpc ResumeSubscription(ResumeSubscriptionRequest) returns (ResumeSubscriptionResponse);
+
+    // Delivery
+    rpc GetDelivery(GetDeliveryRequest) returns (GetDeliveryResponse);
+    rpc ListDeliveries(ListDeliveriesRequest) returns (ListDeliveriesResponse);
+    rpc CreateDelivery(CreateDeliveryRequest) returns (CreateDeliveryResponse);
+    rpc DeleteDelivery(DeleteDeliveryRequest) returns (DeleteDeliveryResponse);
+    rpc PushDelivery(PushDeliveryRequest) returns (PushDeliveryResponse);
+
+    // Gateway
+    rpc GetGateway(GetGatewayRequest) returns (GetGatewayResponse);
+    rpc GetGatewayByCode(GetGatewayByCodeRequest) returns (GetGatewayByCodeResponse);
+    rpc GetGatewayByHash(GetGatewayByHashRequest) returns (GetGatewayByHashResponse);
+    rpc ListGateways(ListGatewaysRequest) returns (ListGatewaysResponse);
+    rpc CreateGateway(CreateGatewayRequest) returns (CreateGatewayResponse);
+    rpc DeleteGateway(DeleteGatewayRequest) returns (DeleteGatewayResponse);
+    rpc GetOrCreateGateway(GetOrCreateGatewayRequest) returns (GetOrCreateGatewayResponse);
+    rpc PublishToGateway(PublishToGatewayRequest) returns (PublishToGatewayResponse);
+}
+
+message GetGatewayByHashRequest {
+    string hash = 1;
+}
+
+message GetGatewayByHashResponse {
+    Gateway gateway = 1;
+}
+
+message GetGatewayRequest {
+    string id = 1;
+}
+
+message GetGatewayResponse {
+    Gateway gateway = 1;
+}
+
+message GetGatewayByCodeRequest {
+    string code = 1;
+    string workspace = 2;
+}
+
+message GetGatewayByCodeResponse {
+    Gateway gateway = 1;
+}
+
+message ListGatewaysRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+}
+
+message ListGatewaysResponse {
+    repeated Gateway gateways = 1;
+    string next_page_token = 2;
+}
+
+message CreateGatewayRequest {
+    string name = 1;
+    string workspace = 2;
+    string topic = 3;
+    string auth = 4;
+}
+
+message CreateGatewayResponse {
+    Gateway gateway = 1;
+}
+
+message DeleteGatewayRequest {
+    string id = 1;
+}
+
+message DeleteGatewayResponse {
+    Gateway gateway = 1;
+}
+
+message GetOrCreateGatewayRequest {
+    string name = 1;
+    string workspace = 2;
+    string topic = 3;
+    string auth = 4;
+}
+
+message GetOrCreateGatewayResponse {
+    Gateway gateway = 1;
+}
+
+message PublishToGatewayRequest {
+    string hash = 1;
+    string payload = 2;
+}
+
+message PublishToGatewayResponse {
+    string id = 1;
+}
+
+message GetSubscriptionByNameRequest {
+    string name = 1;
+    string workspace = 2;
+}
+
+message GetSubscriptionByNameResponse {
+    Subscription subscription = 1;
+}
+
+message GetOrCreateSubscriptionRequest {
+    string name = 1;
+    string workspace = 2;
+    repeated string topics = 3;
+    string endpoint = 4;
+    string auth = 5;
+}
+
+message GetOrCreateSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message GetWorkspaceByNameRequest {
+    string name = 1;
+}
+
+message GetWorkspaceByNameResponse {
+    Workspace workspace = 1;
+}
+
+message GetOrCreateWorkspaceRequest {
+    string Name = 1;
+}
+
+message GetOrCreateWorkspaceResponse {
+    Workspace workspace = 1;
+}
+
+message CreateDeliveryRequest {
+    string event = 1;
+    string subscription = 2;
+}
+
+message CreateDeliveryResponse {
+    string id = 1;
+}
+
+message AddUsersToWorkspaceRequest {
+    string id = 1;
+    repeated string users = 2;
+}
+
+message AddUsersToWorkspaceResponse {
+    Workspace workspace = 1;
+}
+
+message RemoveUsersFromWorkspaceRequest {
+    string id = 1;
+    repeated string users = 2;
+}
+
+message RemoveUsersFromWorkspaceResponse {
+    Workspace workspace = 1;
+}
+
+message DispatchEventToSubscriptionsRequest {
+    string event = 1;
+    int32 page_size = 2;
+    string next_page_token = 3;
+}
+
+message DispatchEventToSubscriptionsResponse {
+    repeated string subscriptions = 1;
+}
+
+message GetSubscriptionRequest {
+    string id = 1;
+}
+
+message GetSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message ListSubscriptionsRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+}
+
+message ListSubscriptionsResponse {
+    repeated Subscription subscriptions = 1;
+    string next_page_token = 2;
+}
+
+message CreateSubscriptionRequest {
+    string name = 1;
+    string workspace = 2;
+    repeated string topics = 3;
+    string endpoint = 4;
+    string auth = 5;
+}
+
+message CreateSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message DeleteSubscriptionRequest {
+    string id = 1;
+}
+
+message DeleteSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message AddSubscriptionTopicsRequest {
+    string id = 1;
+    repeated string topics = 2;
+}
+
+message AddSubscriptionTopicsResponse {
+    Subscription subscription = 1;
+}
+
+message RemoveSubscriptionTopicsRequest {
+    string id = 1;
+    repeated string topics = 2;
+}
+
+message RemoveSubscriptionTopicsResponse {
+    Subscription subscription = 1;
+}
+
+message SetSubscriptionTopicsRequest {
+    string id = 1;
+    repeated string topics = 2;
+}
+
+message SetSubscriptionTopicsResponse {
+    Subscription subscription = 1;
+}
+
+message ActivateSubscriptionRequest {
+    string id = 1;
+}
+
+message ActivateSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message DeactivateSubscriptionRequest {
+    string id = 1;
+}
+
+message DeactivateSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message PauseSubscriptionRequest {
+    string id = 1;
+}
+
+message PauseSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message ResumeSubscriptionRequest {
+    string id = 1;
+}
+
+message ResumeSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message GetDeliveryRequest {
+    string id = 1;
+}
+
+message GetDeliveryResponse {
+    Delivery delivery = 1;
+}
+
+message ListDeliveriesRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+}
+
+message ListDeliveriesResponse {
+    repeated Delivery deliveries = 1;
+    string next_page_token = 2;
+}
+
+message DeleteDeliveryRequest {
+    string id = 1;
+}
+
+message DeleteDeliveryResponse {
+    Delivery delivery = 1;
+}
+
+message PushDeliveryRequest {
+    string id = 1;
+}
+
+message PushDeliveryResponse {
+    bool is_success = 1;
+}
+
+message GetWorkspaceRequest {
+    string id = 1;
+}
+
+message GetWorkspaceResponse {
+    Workspace workspace = 1;
+}
+
+message ListWorkspacesRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+}
+
+message ListWorkspacesResponse {
+    repeated Workspace workspaces = 1;
+    string next_page_token = 2;
+}
+
+message CreateWorkspaceRequest {
+    string name = 1;
+}
+
+message CreateWorkspaceResponse {
+    Workspace workspace = 1;
+}
+
+message PublishEventRequest {
+    string workspace = 1;
+    string topic = 2;
+    string payload = 3;
+}
+
+message PublishEventResponse {
+    string id = 1;
+}
+
+message GetEventRequest {
+    string id = 1;
+}
+
+message DeleteWorkspaceRequest {
+    string id = 1;
+}
+
+message DeleteWorkspaceResponse {
+    Workspace workspace = 1;
+}
