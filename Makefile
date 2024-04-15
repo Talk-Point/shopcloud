@@ -10,7 +10,7 @@ test-cover:
 PROTO_FILES := $(shell find . -name '*.proto')
 
 lint:
-	buf lint
+	docker run --volume "$(pwd):/workspace" --workdir /workspace bufbuild/buf lint
 
 build: proto
-	buf generate
+	docker run --volume "$(pwd):/workspace" --workdir /workspace bufbuild/buf generate
