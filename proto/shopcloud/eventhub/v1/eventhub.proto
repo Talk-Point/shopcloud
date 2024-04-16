@@ -48,10 +48,11 @@ message Delivery {
     string id = 1;
     string event = 2;
     string subscription = 3;
-    string status = 4; // Beispiel: "Progress", "Delivered", "Failed"
-    int32 retry_count = 5;
-    google.protobuf.Timestamp created_at = 6;
-    google.protobuf.Timestamp updated_at = 7;
+    string topic = 4;
+    string status = 5; // Beispiel: "Progress", "Delivered", "Failed"
+    int32 retry_count = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
 }
 
 message Gateway {
@@ -125,9 +126,11 @@ service EventHubDispatcherService {
 message ListEventsRequest {
     int32 page_size = 1;
     string page_token = 2;
-    string workspace = 3;
-    string topic = 4;
-    string event = 5;
+    string order_by = 3;
+    string order_direction = 4;
+    string workspace = 5;
+    string topic = 6;
+    string event = 7;
 }
 
 message ListEventsResponse {
@@ -391,8 +394,10 @@ message GetDeliveryResponse {
 message ListDeliveriesRequest {
     int32 page_size = 1;
     string page_token = 2;
-    string event = 3;
-    string subscription = 4;
+    string order_by = 3;
+    string order_direction = 4;
+    string event = 5;
+    string subscription = 6;
 }
 
 message ListDeliveriesResponse {
