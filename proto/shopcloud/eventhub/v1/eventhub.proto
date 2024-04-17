@@ -9,6 +9,29 @@ package proto.shopcloud.eventhub.v1;
 
 option go_package="github.com/Talk-Point/shopcloud/proto/shopcloud/eventhub/v1";
 
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
 // Workspace represents a collection of topics and subscriptions
 message Workspace {
     string id = 1;
@@ -24,7 +47,7 @@ message Event {
     string workspace = 2;
     string topic = 3;
     string payload = 4;
-    int32 ttl = 5;
+    google.protobuf.Timestamp ttl = 5;
     repeated string tags = 6;
     google.protobuf.Timestamp created_at = 7;
     google.protobuf.Timestamp updated_at = 8;
@@ -45,14 +68,22 @@ message Subscription {
 }
 
 message Delivery {
+    enum Status {
+        STATUS_PENDING_UNSPECIFIED = 0;
+        STATUS_DELIVERED = 1;
+        STATUS_FAILED = 2;
+    }
+
     string id = 1;
     string event = 2;
-    string subscription = 3;
-    string topic = 4;
-    string status = 5; // Beispiel: "Progress", "Delivered", "Failed"
-    int32 retry_count = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
+    string topic = 3;
+    string subscription = 4;
+    string subscription_value = 5;
+    Status status = 6;
+    int32 retry_count = 7;
+    google.protobuf.Timestamp ttl = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
 }
 
 message Gateway {
@@ -63,8 +94,9 @@ message Gateway {
     string hash = 5;
     string topic = 6;
     string auth = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
+    bool is_active = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
 }
 
 // The EventHub service definition.
@@ -74,6 +106,9 @@ message Gateway {
 // - DispatchEventToSubscriptions: Load the Subscriptions and create the Delivery objects
 // - PushDelivery: Push the Delivery to the endpoint
 service EventHubDispatcherService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
     // Workspace
     rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse);
     rpc GetWorkspaceByName(GetWorkspaceByNameRequest) returns (GetWorkspaceByNameResponse);
@@ -81,13 +116,13 @@ service EventHubDispatcherService {
     rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
     rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse);
     rpc GetOrCreateWorkspace(GetOrCreateWorkspaceRequest) returns (GetOrCreateWorkspaceResponse);
-    rpc AddUsersToWorkspace(AddUsersToWorkspaceRequest) returns (AddUsersToWorkspaceResponse);
-    rpc RemoveUsersFromWorkspace(RemoveUsersFromWorkspaceRequest) returns (RemoveUsersFromWorkspaceResponse);
+    // rpc AddUsersToWorkspace(AddUsersToWorkspaceRequest) returns (AddUsersToWorkspaceResponse);
+    // rpc RemoveUsersFromWorkspace(RemoveUsersFromWorkspaceRequest) returns (RemoveUsersFromWorkspaceResponse);
 
     // Event
     rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
     rpc DispatchEventToSubscriptions(DispatchEventToSubscriptionsRequest) returns (DispatchEventToSubscriptionsResponse);
-    rpc GetEvent(GetEventRequest) returns (Event);
+    rpc GetEvent(GetEventRequest) returns (GetEventResponse);
     rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
 
     // Subscription
@@ -123,14 +158,43 @@ service EventHubDispatcherService {
     rpc PublishToGateway(PublishToGatewayRequest) returns (PublishToGatewayResponse);
 }
 
+message GetEventResponse {
+    Event event = 1;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
+
+message ListEventsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_WORKSPACE = 1;
+        FIELD_TOPIC = 2;
+        FIELD_CREATED_AT = 3;
+        FIELD_UPDATED_AT = 4;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
 message ListEventsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_UPDATED_AT = 2;
+    }
+
     int32 page_size = 1;
-    string page_token = 2;
-    string order_by = 3;
-    string order_direction = 4;
-    string workspace = 5;
-    string topic = 6;
-    string event = 7;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListEventsFilter filters = 6;
 }
 
 message ListEventsResponse {
@@ -163,11 +227,38 @@ message GetGatewayByCodeResponse {
     Gateway gateway = 1;
 }
 
-message ListGatewaysRequest {
-    int32 page_size = 1;
-    string page_token = 2;
+message ListGatewaysFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_WORKSPACE = 1;
+        FIELD_NAME = 2;
+        FIELD_TOPIC = 3;
+        FIELD_HASH = 4;
+        FIELD_CREATED_AT = 5;
+        FIELD_UPDATED_AT = 6;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
 }
 
+message ListGatewaysRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_NAME = 1;
+        ORDER_BY_TOPIC = 2;
+        ORDER_BY_CREATED_AT = 3;
+        ORDER_BY_UPDATED_AT = 4;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListGatewaysFilter filters = 6;
+}
 message ListGatewaysResponse {
     repeated Gateway gateways = 1;
     string next_page_token = 2;
@@ -242,7 +333,7 @@ message GetWorkspaceByNameResponse {
 }
 
 message GetOrCreateWorkspaceRequest {
-    string Name = 1;
+    string name = 1;
 }
 
 message GetOrCreateWorkspaceResponse {
@@ -294,9 +385,37 @@ message GetSubscriptionResponse {
     Subscription subscription = 1;
 }
 
+message ListSubscriptionsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_WORKSPACE = 1;
+        FIELD_STATUS = 2;
+        FIELD_IS_ACTIVE = 3;
+        FIELD_IS_PAUSED = 4;
+        FIELD_TOPCIS = 5;
+        FIELD_CREATED_AT = 6;
+        FIELD_UPDATED_AT = 7;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
 message ListSubscriptionsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_NAME = 1;
+        ORDER_BY_CREATED_AT = 2;
+        ORDER_BY_UPDATED_AT = 3;
+    }
+
     int32 page_size = 1;
-    string page_token = 2;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListSubscriptionsFilter filters = 6;
 }
 
 message ListSubscriptionsResponse {
@@ -391,13 +510,36 @@ message GetDeliveryResponse {
     Delivery delivery = 1;
 }
 
+message ListDeliveriesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_EVENT = 1;
+        FIELD_SUBSCRIPTION = 2;
+        FIELD_TOPIC = 3;
+        FIELD_STATUS = 4;
+        FIELD_CREATED_AT = 5;
+        FIELD_UPDATED_AT = 6;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
 message ListDeliveriesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_NAME = 1;
+        ORDER_BY_CREATED_AT = 2;
+        ORDER_BY_UPDATED_AT = 3;
+    }
+
     int32 page_size = 1;
-    string page_token = 2;
-    string order_by = 3;
-    string order_direction = 4;
-    string event = 5;
-    string subscription = 6;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListDeliveriesFilter filters = 6;
 }
 
 message ListDeliveriesResponse {
@@ -429,14 +571,40 @@ message GetWorkspaceResponse {
     Workspace workspace = 1;
 }
 
+message ListWorkspacesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_ENVIRONMENT = 2;
+        FIELD_CREATED_AT = 3;
+        FIELD_UPDATED_AT = 4;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
 message ListWorkspacesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_NAME = 1;
+        ORDER_BY_ENVIRONMENT = 2;
+        ORDER_BY_CREATED_AT = 3;
+        ORDER_BY_UPDATED_AT = 4;
+    }
+
     int32 page_size = 1;
-    string page_token = 2;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListWorkspacesFilter filters = 6;
 }
 
 message ListWorkspacesResponse {
     repeated Workspace workspaces = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
 message CreateWorkspaceRequest {
