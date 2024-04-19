@@ -1,0 +1,267 @@
+// Mailing API
+// THe Mailing API, can send Mails etc.
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package proto.shopcloud.mailing.v2;
+
+enum ContentType {
+    CONTENT_TYPE_TEXT_UNSPECIFIED = 0;
+    CONTENT_TYPE_HTML = 1;
+}
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+// Domain
+message Domain {
+    string id = 1;
+    string name = 2;
+    string host = 3;
+    string description = 4;
+    bool is_active = 5;
+    bool is_paused = 6;
+    string auth_username = 7;
+    string auth_password = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+message Message {
+    string id = 1;
+    string domain = 2;
+    string from = 3;
+    repeated string to = 4;
+    repeated string cc = 5;
+    repeated string bcc = 6;
+    string subject = 7;
+    string body = 8;
+    ContentType body_content_type = 9;
+    bool is_sent = 10;
+    string send_error = 11;
+    google.protobuf.Timestamp send_at = 12;
+    google.protobuf.Timestamp ttl = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
+}
+
+service MailingService {
+    // Public Gateways
+    rpc SendMessage (SendMessageRequest) returns (SendMessageResponse);
+    
+    // Message
+    rpc GetMessage (GetMessageRequest) returns (GetMessageResponse);
+    rpc ListMessages (ListMessagesRequest) returns (ListMessagesResponse);
+    rpc DeleteMessage (DeleteMessageRequest) returns (DeleteMessageResponse);
+    rpc DispatchMessage (DispatchMessageRequest) returns (DispatchMessageResponse);
+    
+    // Domain
+    rpc GetDomain (GetDomainRequest) returns (GetDomainResponse);
+    rpc ListDomains (ListDomainsRequest) returns (ListDomainsResponse);
+    rpc CreateDomain (CreateDomainRequest) returns (CreateDomainResponse);
+    rpc DeleteDomain (DeleteDomainRequest) returns (DeleteDomainResponse);
+    rpc ActivateDomain (ActivateDomainRequest) returns (ActivateDomainResponse);
+    rpc DeactivateDomain (DeactivateDomainRequest) returns (DeactivateDomainResponse);
+    rpc PauseDomain (PauseDomainRequest) returns (PauseDomainResponse);
+    rpc ResumeDomain (ResumeDomainRequest) returns (ResumeDomainResponse);
+    rpc DispatchMessageOnDomain (DispatchMessageOnDomainRequest) returns (DispatchMessageOnDomainResponse);
+}
+
+message DispatchMessageOnDomainRequest {
+    string domain_id = 1;
+    string message_id = 2;
+}
+
+message DispatchMessageOnDomainResponse {
+    bool is_success = 1;
+}
+
+message GetMessageRequest {
+    string id = 1;
+}
+
+message GetMessageResponse {
+    Message message = 1;
+}
+
+message DeleteMessageRequest {
+    string id = 1;
+}
+
+message DeleteMessageResponse {
+    Domain domain = 1;
+}
+
+message ListMessagesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_DOMAIN = 1;
+        FIELD_CREATED_AT = 2;
+        FIELD_UPDATED_AT = 3;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListMessagesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_DOMAIN = 1;
+        ORDER_BY_CREATED_AT = 2;
+        ORDER_BY_UPDATED_AT = 3;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListMessagesFilter filters = 6;
+}
+
+message ListMessagesResponse {
+    repeated Message messages = 1;
+    string next_page_token = 2;
+}
+
+message SendMessageRequest {    
+    string from = 1;
+    repeated string to = 2;
+    repeated string cc = 3;
+    repeated string bcc = 4;
+    string subject = 5;
+    string body = 6;
+    ContentType body_content_type = 7;
+}
+
+message SendMessageResponse {
+    string id = 1;
+}
+
+message DispatchMessageRequest {
+    string id = 1;
+}
+
+message DispatchMessageResponse {
+    bool is_success = 1;
+}
+
+message GetDomainRequest {
+    string id = 1;
+}
+
+message GetDomainResponse {
+    Domain domain = 1;
+}
+
+message ListDomainFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_HOST = 1;
+        FIELD_IS_ACTIVE = 2;
+        FIELD_IS_PAUSED = 4;
+        FIELD_CREATED_AT = 5;
+        FIELD_UPDATED_AT = 6;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListDomainsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_NAME = 1;
+        ORDER_BY_CREATED_AT = 2;
+        ORDER_BY_UPDATED_AT = 3;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListDomainFilter filters = 6;
+}
+
+message ListDomainsResponse {
+    repeated Domain domains = 1;
+    string next_page_token = 2;
+}
+
+message CreateDomainRequest {
+    string name = 1;
+    string host = 2;
+    string description = 3;
+    string auth_username = 4;
+    string auth_password = 5;
+}
+
+message CreateDomainResponse {
+    string id = 1;
+}
+
+message DeleteDomainRequest {
+    string id = 1;
+}
+
+message DeleteDomainResponse {
+    Domain domain = 1;
+}
+
+message ActivateDomainRequest {
+    string id = 1;
+}
+
+message ActivateDomainResponse {
+    Domain domain = 1;
+}
+
+message DeactivateDomainRequest {
+    string id = 1;
+}
+
+message DeactivateDomainResponse {
+    Domain domain = 1;
+}
+
+message PauseDomainRequest {
+    string id = 1;
+}
+
+message PauseDomainResponse {
+    Domain domain = 1;
+}
+
+message ResumeDomainRequest {
+    string id = 1;
+}
+
+message ResumeDomainResponse {
+    Domain domain = 1;
+}
