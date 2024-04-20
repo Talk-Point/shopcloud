@@ -49,10 +49,10 @@ message Event {
     string payload = 4;
     google.protobuf.Timestamp ttl = 5;
     repeated string tags = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
-    string gateway = 9;
-    string gateway_value = 10;
+    string gateway = 7;
+    string gateway_value = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
 }
 
 message Subscription {
