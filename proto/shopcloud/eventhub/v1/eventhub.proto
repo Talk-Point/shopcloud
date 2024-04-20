@@ -51,6 +51,8 @@ message Event {
     repeated string tags = 6;
     google.protobuf.Timestamp created_at = 7;
     google.protobuf.Timestamp updated_at = 8;
+    string gateway = 9;
+    string gateway_value = 10;
 }
 
 message Subscription {
@@ -175,6 +177,7 @@ message ListEventsFilter {
         FIELD_TOPIC = 2;
         FIELD_CREATED_AT = 3;
         FIELD_UPDATED_AT = 4;
+        FIELD_GATEWAY = 5;
     }
 
     Field field = 1;
@@ -199,7 +202,7 @@ message ListEventsRequest {
 
 message ListEventsResponse {
     repeated Event events = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
 message GetGatewayByHashRequest {
@@ -261,7 +264,7 @@ message ListGatewaysRequest {
 }
 message ListGatewaysResponse {
     repeated Gateway gateways = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
 message CreateGatewayRequest {
@@ -370,7 +373,7 @@ message RemoveUsersFromWorkspaceResponse {
 message DispatchEventToSubscriptionsRequest {
     string event = 1;
     int32 page_size = 2;
-    string next_page_token = 3;
+    string page_token = 3;
 }
 
 message DispatchEventToSubscriptionsResponse {
@@ -420,7 +423,7 @@ message ListSubscriptionsRequest {
 
 message ListSubscriptionsResponse {
     repeated Subscription subscriptions = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
 message CreateSubscriptionRequest {
@@ -544,7 +547,7 @@ message ListDeliveriesRequest {
 
 message ListDeliveriesResponse {
     repeated Delivery deliveries = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
 message DeleteDeliveryRequest {
