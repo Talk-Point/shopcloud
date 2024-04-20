@@ -68,6 +68,9 @@ message Message {
 }
 
 service MailingService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
     // Public Gateways
     rpc SendMessage (SendMessageRequest) returns (SendMessageResponse);
     
@@ -87,6 +90,12 @@ service MailingService {
     rpc PauseDomain (PauseDomainRequest) returns (PauseDomainResponse);
     rpc ResumeDomain (ResumeDomainRequest) returns (ResumeDomainResponse);
     rpc DispatchMessageOnDomain (DispatchMessageOnDomainRequest) returns (DispatchMessageOnDomainResponse);
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
 }
 
 message DispatchMessageOnDomainRequest {
