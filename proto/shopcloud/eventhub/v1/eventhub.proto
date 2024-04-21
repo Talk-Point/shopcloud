@@ -57,6 +57,10 @@ message Event {
 }
 
 message Subscription {
+    enum Type {
+        TYPE_HTTP_UNSPECIFIED = 0;
+    }
+
     string id = 1;
     string name = 2;
     string workspace = 3;
@@ -66,8 +70,10 @@ message Subscription {
     repeated string topics = 7;
     string endpoint = 8;
     string auth = 9;
-    google.protobuf.Timestamp created_at = 10;
-    google.protobuf.Timestamp updated_at = 11;
+    Type type = 10;
+    int32 retries_max = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
 }
 
 message Delivery {
