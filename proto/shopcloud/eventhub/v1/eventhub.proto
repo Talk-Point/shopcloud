@@ -47,12 +47,13 @@ message Event {
     string workspace = 2;
     string topic = 3;
     string payload = 4;
-    google.protobuf.Timestamp ttl = 5;
-    repeated string tags = 6;
-    string gateway = 7;
-    string gateway_value = 8;
-    google.protobuf.Timestamp created_at = 9;
-    google.protobuf.Timestamp updated_at = 10;
+    bool is_payload_valid = 5;
+    google.protobuf.Timestamp ttl = 6;
+    repeated string tags = 7;
+    string gateway = 8;
+    string gateway_value = 9;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
 }
 
 message Subscription {
@@ -77,15 +78,17 @@ message Delivery {
     }
 
     string id = 1;
-    string event = 2;
-    string topic = 3;
-    string subscription = 4;
-    string subscription_value = 5;
-    Status status = 6;
-    int32 retry_count = 7;
-    google.protobuf.Timestamp ttl = 8;
-    google.protobuf.Timestamp created_at = 9;
-    google.protobuf.Timestamp updated_at = 10;
+    string workspace = 2;
+    string event = 3;
+    string topic = 4;
+    string subscription = 5;
+    string subscription_value = 6;
+    Status status = 7;
+    int32 retry_count = 8;
+    string last_status = 9;
+    google.protobuf.Timestamp ttl = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
 }
 
 message Gateway {
@@ -141,6 +144,7 @@ service EventHubDispatcherService {
     rpc DeactivateSubscription(DeactivateSubscriptionRequest) returns (DeactivateSubscriptionResponse);
     rpc PauseSubscription(PauseSubscriptionRequest) returns (PauseSubscriptionResponse);
     rpc ResumeSubscription(ResumeSubscriptionRequest) returns (ResumeSubscriptionResponse);
+    rpc SetAuthSubscription(SetAuthSubscriptionRequest) returns (SetAuthSubscriptionResponse);
 
     // Delivery
     rpc GetDelivery(GetDeliveryRequest) returns (GetDeliveryResponse);
@@ -160,6 +164,28 @@ service EventHubDispatcherService {
     rpc PublishToGateway(PublishToGatewayRequest) returns (PublishToGatewayResponse);
 }
 
+message BasicAuth {
+    string username = 1;
+    string password = 2;
+}
+
+message TokenAuth {
+    string header = 1;
+    string token = 2;
+}
+
+message SetAuthSubscriptionRequest {
+    string id = 1;
+    oneof auth_method {
+        BasicAuth basic_auth = 2;
+        TokenAuth token_auth = 3;
+    }
+}
+
+message SetAuthSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
 message GetEventResponse {
     Event event = 1;
 }
@@ -175,9 +201,10 @@ message ListEventsFilter {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_WORKSPACE = 1;
         FIELD_TOPIC = 2;
-        FIELD_CREATED_AT = 3;
-        FIELD_UPDATED_AT = 4;
-        FIELD_GATEWAY = 5;
+        FIELD_GATEWAY = 3;
+        FIELD_IS_PAYLOAD_VALID = 4;
+        FIELD_CREATED_AT = 5;
+        FIELD_UPDATED_AT = 6;
     }
 
     Field field = 1;
@@ -411,6 +438,7 @@ message ListSubscriptionsRequest {
         ORDER_BY_NAME = 1;
         ORDER_BY_CREATED_AT = 2;
         ORDER_BY_UPDATED_AT = 3;
+        ORDER_BY_TOPICS = 4;
     }
 
     int32 page_size = 1;
@@ -431,7 +459,6 @@ message CreateSubscriptionRequest {
     string workspace = 2;
     repeated string topics = 3;
     string endpoint = 4;
-    string auth = 5;
 }
 
 message CreateSubscriptionResponse {
@@ -516,12 +543,13 @@ message GetDeliveryResponse {
 message ListDeliveriesFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
-        FIELD_EVENT = 1;
-        FIELD_SUBSCRIPTION = 2;
-        FIELD_TOPIC = 3;
-        FIELD_STATUS = 4;
-        FIELD_CREATED_AT = 5;
-        FIELD_UPDATED_AT = 6;
+        FIELD_WORKSPACE = 1;
+        FIELD_EVENT = 2;
+        FIELD_SUBSCRIPTION = 3;
+        FIELD_TOPIC = 4;
+        FIELD_STATUS = 5;
+        FIELD_CREATED_AT = 6;
+        FIELD_UPDATED_AT = 7;
     }
 
     Field field = 1;
