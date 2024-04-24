@@ -1,0 +1,17 @@
+// ConsoleHub API
+// THe ConsoleHub API to admistrate the cloud services from Talk-Point
+
+syntax = "proto3";
+
+package proto.shopcloud.consolehub.v1;
+
+service ConsoleHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
