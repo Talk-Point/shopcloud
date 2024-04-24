@@ -1,16 +1,11 @@
-// Mailing API
-// THe Mailing API, can send Mails etc.
+// MailHub API
+// THe MailHub API, can send Mails etc.
 
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-package proto.shopcloud.mailing.v2;
-
-enum ContentType {
-    CONTENT_TYPE_TEXT_UNSPECIFIED = 0;
-    CONTENT_TYPE_HTML = 1;
-}
+package proto.shopcloud.mailhub.v2;
 
 // Generic
 enum Operator {
@@ -37,37 +32,61 @@ enum Direction {
 
 // Domain
 message Domain {
+    enum Type {
+        TYPE_MAILGUN_EU_UNSPECIFIED = 0;
+        TYPE_MAILGUN_US = 1;
+    }
+
     string id = 1;
-    string name = 2;
-    string host = 3;
-    string description = 4;
-    bool is_active = 5;
-    bool is_paused = 6;
-    string auth_username = 7;
-    string auth_password = 8;
-    google.protobuf.Timestamp created_at = 9;
-    google.protobuf.Timestamp updated_at = 10;
+    string environment = 2;
+    Type type = 3;
+    string name = 4;
+    string code = 5;
+    string host = 6;
+    string description = 7;
+    bool is_active = 8;
+    bool is_paused = 9;
+    string auth = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
 }
 
 message Message {
+    enum ContentType {
+        CONTENT_TYPE_TEXT_UNSPECIFIED = 0;
+        CONTENT_TYPE_HTML = 1;
+        CONTENT_TYPE_EXTERNAL = 2;
+    }
+
+    enum Status {
+        STATUS_PENDING_UNSPECIFIED = 0;
+        STATUS_FAILED_SEND = 1;
+        STATUS_FAILED_CONTENT_FETCH = 2;
+        STATUS_SENDET = 3;
+    }
+
     string id = 1;
     string domain = 2;
-    string from = 3;
-    repeated string to = 4;
-    repeated string cc = 5;
-    repeated string bcc = 6;
-    string subject = 7;
-    string body = 8;
-    ContentType body_content_type = 9;
-    bool is_sent = 10;
-    string send_error = 11;
-    google.protobuf.Timestamp send_at = 12;
-    google.protobuf.Timestamp ttl = 13;
-    google.protobuf.Timestamp created_at = 14;
-    google.protobuf.Timestamp updated_at = 15;
+    string domain_value = 3;
+    string from = 4;
+    repeated string to = 5;
+    repeated string cc = 6;
+    repeated string bcc = 7;
+    string subject = 8;
+    string body = 9;
+    ContentType content_type = 10;
+    bool is_send = 11;
+    string send_error = 12;
+    google.protobuf.Timestamp send_at = 13;
+    string vendor_reference = 14;
+    string external_content_src = 15;
+    Status status = 16;
+    google.protobuf.Timestamp ttl = 17;
+    google.protobuf.Timestamp created_at = 18;
+    google.protobuf.Timestamp updated_at = 19;
 }
 
-service MailingService {
+service MailHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
 
@@ -79,6 +98,7 @@ service MailingService {
     rpc ListMessages (ListMessagesRequest) returns (ListMessagesResponse);
     rpc DeleteMessage (DeleteMessageRequest) returns (DeleteMessageResponse);
     rpc DispatchMessage (DispatchMessageRequest) returns (DispatchMessageResponse);
+    rpc FetchExternalContent (FetchExternalContentRequest) returns (FetchExternalContentResponse);
     
     // Domain
     rpc GetDomain (GetDomainRequest) returns (GetDomainResponse);
@@ -89,7 +109,15 @@ service MailingService {
     rpc DeactivateDomain (DeactivateDomainRequest) returns (DeactivateDomainResponse);
     rpc PauseDomain (PauseDomainRequest) returns (PauseDomainResponse);
     rpc ResumeDomain (ResumeDomainRequest) returns (ResumeDomainResponse);
-    rpc DispatchMessageOnDomain (DispatchMessageOnDomainRequest) returns (DispatchMessageOnDomainResponse);
+    rpc DispatchMessageToService (DispatchMessageToServiceRequest) returns (DispatchMessageToServiceResponse);
+}
+
+message FetchExternalContentRequest {
+    string id = 1;
+}
+
+message FetchExternalContentResponse {
+    Message message = 1;
 }
 
 message InfoRequest {}
@@ -98,12 +126,12 @@ message InfoResponse {
     string version = 1;
 }
 
-message DispatchMessageOnDomainRequest {
-    string domain_id = 1;
-    string message_id = 2;
+message DispatchMessageToServiceRequest {
+    string domain = 1;
+    string message = 2;
 }
 
-message DispatchMessageOnDomainResponse {
+message DispatchMessageToServiceResponse {
     bool is_success = 1;
 }
 
@@ -120,15 +148,16 @@ message DeleteMessageRequest {
 }
 
 message DeleteMessageResponse {
-    Domain domain = 1;
+    Message message = 1;
 }
 
 message ListMessagesFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_DOMAIN = 1;
-        FIELD_CREATED_AT = 2;
-        FIELD_UPDATED_AT = 3;
+        FIELD_VENDOR_REFERENCE = 2;
+        FIELD_CREATED_AT = 3;
+        FIELD_UPDATED_AT = 4;
     }
 
     Field field = 1;
@@ -154,17 +183,43 @@ message ListMessagesRequest {
 
 message ListMessagesResponse {
     repeated Message messages = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
-message SendMessageRequest {    
+message PlainEmail {
     string from = 1;
     repeated string to = 2;
     repeated string cc = 3;
     repeated string bcc = 4;
     string subject = 5;
     string body = 6;
-    ContentType body_content_type = 7;
+}
+
+message HtmlEmail {
+    string from = 1;
+    repeated string to = 2;
+    repeated string cc = 3;
+    repeated string bcc = 4;
+    string subject = 5;
+    string body = 6;
+}
+
+message ExternalContentEmail {
+    string from = 1;
+    repeated string to = 2;
+    repeated string cc = 3;
+    repeated string bcc = 4;
+    string subject = 5;
+    string body = 6;
+    string src = 7;
+}
+
+message SendMessageRequest {    
+    oneof email_type {
+        PlainEmail plain_email = 1;
+        HtmlEmail html_mail = 2;
+        ExternalContentEmail external_content_mail = 3;
+    }
 }
 
 message SendMessageResponse {
@@ -220,15 +275,15 @@ message ListDomainsRequest {
 
 message ListDomainsResponse {
     repeated Domain domains = 1;
-    string next_page_token = 2;
+    string page_token = 2;
 }
 
 message CreateDomainRequest {
     string name = 1;
     string host = 2;
     string description = 3;
-    string auth_username = 4;
-    string auth_password = 5;
+    string auth = 4;
+    Domain.Type type = 5;
 }
 
 message CreateDomainResponse {
