@@ -4,6 +4,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 package proto.shopcloud.mailhub.v2;
 
@@ -59,31 +60,40 @@ message Message {
     }
 
     enum Status {
-        STATUS_PENDING_UNSPECIFIED = 0;
-        STATUS_FAILED_SEND = 1;
-        STATUS_FAILED_CONTENT_FETCH = 2;
-        STATUS_SENDET = 3;
+        STATUS_UNSPECIFIED = 0;
+        STATUS_NEW = 1;
+        STATUS_PENDING = 2;
+        STATUS_FAILED_SEND = 3;
+        STATUS_FAILED_CONTENT_FETCH = 4;
+        STATUS_SENDET = 5;
+        STATUS_ACCEPTED = 6;
+        STATUS_DELIVERED = 7;
+        STATUS_TEMPORARY_FAIL = 8; 
+        STATUS_PERMANENT_FAIL = 9;
+        STATUS_SPAM = 10;
     }
 
     string id = 1;
-    string domain = 2;
-    string domain_value = 3;
-    string from = 4;
-    repeated string to = 5;
-    repeated string cc = 6;
-    repeated string bcc = 7;
-    string subject = 8;
-    string body = 9;
-    ContentType content_type = 10;
-    bool is_send = 11;
-    string send_error = 12;
-    google.protobuf.Timestamp send_at = 13;
-    string vendor_reference = 14;
-    string external_content_src = 15;
-    Status status = 16;
-    google.protobuf.Timestamp ttl = 17;
-    google.protobuf.Timestamp created_at = 18;
-    google.protobuf.Timestamp updated_at = 19;
+    string environment = 3;
+    string domain = 4;
+    string domain_value = 5;
+    string from = 6;
+    repeated string to = 7;
+    repeated string cc = 8;
+    repeated string bcc = 9;
+    string subject = 10;
+    string body = 11;
+    ContentType content_type = 12;
+    bool is_send = 13;
+    string send_error = 14;
+    google.protobuf.Timestamp send_at = 15;
+    string vendor_reference = 16;
+    string vendor_status = 17;
+    string external_content_src = 18;
+    Status status = 19;
+    google.protobuf.Timestamp ttl = 20;
+    google.protobuf.Timestamp created_at = 21;
+    google.protobuf.Timestamp updated_at = 22;
 }
 
 service MailHubService {
@@ -110,6 +120,19 @@ service MailHubService {
     rpc PauseDomain (PauseDomainRequest) returns (PauseDomainResponse);
     rpc ResumeDomain (ResumeDomainRequest) returns (ResumeDomainResponse);
     rpc DispatchMessageToService (DispatchMessageToServiceRequest) returns (DispatchMessageToServiceResponse);
+
+    // WebHook
+    rpc ReciveMailGunV3Webhook (ReciveMailGunV3WebhookRequest) returns (ReciveMailGunV3WebhookResponse);
+}
+
+message ReciveMailGunV3WebhookRequest {
+    google.protobuf.Struct payload = 1;
+    string event = 2; // optional can also per Header X-Event-Id
+    string topic = 3; // optional can also per Header X-Event-Topic
+}
+
+message ReciveMailGunV3WebhookResponse {
+    string id = 1;
 }
 
 message FetchExternalContentRequest {
