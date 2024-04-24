@@ -1,0 +1,223 @@
+// ConsoleHub API
+// THe ConsoleHub API to admistrate the cloud services from Talk-Point
+
+syntax = "proto3";
+
+package proto.shopcloud.consolehub.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+// Cloud Services
+message Service {
+    string name = 1;
+    string code = 2;
+    string description = 3;
+    bool is_active = 4;
+    repeated string scopes = 5;
+    string environment = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+// Service Endpoint
+message Node {
+    string service = 1;
+    string name = 2;
+    string code = 3;
+    string environment = 4;
+    string endpoint = 5;
+    string auth = 6;
+    bool is_active = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+service ConsoleHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // Cloud Services
+    rpc GetService(GetServiceRequest) returns (GetServiceResponse);
+    rpc GetCheckByCode(GetCheckByCodeRequest) returns (GetCheckByCodeResponse);
+    rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
+    rpc CreateService(CreateServiceRequest) returns (CreateServiceResponse);
+    rpc DeleteService(DeleteServiceRequest) returns (DeleteServiceResponse);
+
+    // Node Endpoints
+    rpc GetNode(GetNodeRequest) returns (GetNodeResponse);
+    rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+    rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse);
+    rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse);
+    rpc ActivateNode(ActivateNodeRequest) returns (ActivateNodeResponse);
+    rpc DeactivateNode(DeactivateNodeRequest) returns (DeactivateNodeResponse);
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
+
+message GetServiceRequest {
+    string id = 1;
+}
+
+message GetServiceResponse {
+    Service service = 1;
+}
+
+message GetCheckByCodeRequest {
+    string code = 1;
+}
+
+message GetCheckByCodeResponse {
+    Service service = 1;
+}
+
+
+message ListServicesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_CREATED_AT = 1;
+        FIELD_UPDATED_AT = 2;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListServicesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_UPDATED_AT = 2;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListServicesFilter filters = 6;
+}
+
+message ListServicesResponse {
+    repeated Service services = 1;
+    string page_token = 2;
+}
+
+message CreateServiceRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message CreateServiceResponse {
+    Service service = 1;
+}
+
+message DeleteServiceRequest {
+    string id = 1;
+}
+
+message DeleteServiceResponse {
+    Service service = 1;
+}
+
+message GetNodeRequest {
+    string id = 1;
+}
+
+message GetNodeResponse {
+    Node node = 1;
+}
+
+message ListNodesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_CREATED_AT = 1;
+        FIELD_UPDATED_AT = 2;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListNodesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_UPDATED_AT = 2;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListNodesFilter filters = 6;
+}
+
+message ListNodesResponse {
+    repeated Node nodes = 1;
+    string page_token = 2;
+}
+
+message CreateNodeRequest {
+    string service = 1;
+    string name = 2;
+    string endpoint = 3;
+    string auth = 4;
+}
+
+message CreateNodeResponse {
+    Node node = 1;
+}
+
+message DeleteNodeRequest {
+    string id = 1;
+}
+
+message DeleteNodeResponse {
+    Node node = 1;
+}
+
+message ActivateNodeRequest {
+    string id = 1;
+}
+
+message ActivateNodeResponse {
+    Node node = 1;
+}
+
+message DeactivateNodeRequest {
+    string id = 1;
+}
+
+message DeactivateNodeResponse {
+    Node node = 1;
+}

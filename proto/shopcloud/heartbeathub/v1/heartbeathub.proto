@@ -1,0 +1,245 @@
+// HeartbeatHub API
+// THe HeartbeatHub API to admistrate the cloud services from Talk-Point
+
+syntax = "proto3";
+
+package proto.shopcloud.heartbeathub.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+// Workspace represents a collection of checks
+message Workspace {
+    string id = 1;
+    string name = 2;
+    string environment = 3;
+    google.protobuf.Timestamp created_at = 4;
+    google.protobuf.Timestamp updated_at = 5;
+}
+
+message Check {
+    enum Status {
+        STATUS_NEW_UNSPECIFIED = 0;
+        STATUS_UP = 1;
+        STATUS_GRACE = 2;
+        STATUS_DOWN = 3;
+        STATUS_PAUSED = 4;
+    }
+
+    string id = 1;
+    string workspace = 2;
+    string name = 3;
+    string code = 4;
+    string description = 5;
+    string hash = 6;
+    Status status = 7;
+    int64 grace = 8;
+    int64 timeout = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message Ping {
+    enum Type {
+        TYPE_SUCCESS_UNSPECIFIED = 0;
+        TYPE_START = 1;
+    }
+    enum Method {
+        METHOD_GET_UNSPECIFIED = 0;
+        METHOD_POST = 1;
+        METHOD_PUT = 2;
+        METHOD_DELETE = 3;
+        METHOD_PATCH = 4;
+        METHOD_OPTIONS = 5;
+        METHOD_HEAD = 6;
+        METHOD_EMAIL = 7;
+    }
+
+    string id = 1;
+    string check = 2;
+    string check_value = 3;
+    Type type = 4;
+    Method method = 5;
+    string remote_addr = 6;
+    string user_agent = 7;
+    google.protobuf.Timestamp ttl = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+service HeartbeatHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // Gateways
+    rpc Ping(PingRequest) returns (PingResponse);
+
+    // Chekcs
+    rpc GetCheck(GetCheckRequest) returns (GetCheckResponse);
+    rpc GetCheckByHash(GetCheckByHashRequest) returns (GetCheckByHashResponse);
+    rpc ListChecks(ListChecksRequest) returns (ListChecksResponse);
+    rpc CreateCheck(CreateCheckRequest) returns (CreateCheckResponse);
+    rpc DeleteCheck(DeleteCheckRequest) returns (DeleteCheckResponse);
+    
+    // Pings
+    rpc GetPing(GetPingRequest) returns (GetPingResponse);
+    rpc ListPings(ListPingsRequest) returns (ListPingsResponse);
+    rpc DeletePing(DeletePingRequest) returns (DeletePingResponse);
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
+
+message PingRequest {
+    string hash = 1;
+    Ping.Method method = 2;
+    string remote_addr = 3;
+    string user_agent = 4;
+}
+
+message PingResponse {
+    string id = 1;
+}
+
+message GetCheckRequest {
+    string id = 1;
+}
+
+message GetCheckResponse {
+    Check check = 1;
+}
+
+message ListChecksFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_STATUS = 1;
+        FIELD_CREATED_AT = 2;
+        FIELD_UPDATED_AT = 3;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListChecksRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_UPDATED_AT = 2;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListChecksFilter filters = 6;
+}
+
+message ListChecksResponse {
+    repeated Check checks = 1;
+    string page_token = 2;
+}
+
+message GetCheckByHashRequest {
+    string hash = 1;
+}
+
+message GetCheckByHashResponse {
+    Check check = 1;
+}
+
+message CreateCheckRequest {
+    string workspace = 1;
+    string name = 2;
+    string code = 3;
+    string description = 4;
+    int64 grace = 5;
+    int64 timeout = 6;
+}
+
+message CreateCheckResponse {
+    Check check = 1;
+}
+
+message DeleteCheckRequest {
+    string id = 1;
+}
+
+message DeleteCheckResponse {
+    Check check = 1;
+}
+
+message GetPingRequest {
+    string id = 1;
+}
+
+message GetPingResponse {
+    Ping ping = 1;
+}
+
+message ListPingsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_CREATED_AT = 1;
+        FIELD_UPDATED_AT = 2;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListPingsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_UPDATED_AT = 2;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListPingsFilter filters = 6;
+}
+
+message ListPingsResponse {
+    repeated Ping pings = 1;
+    string page_token = 2;
+}
+
+message DeletePingRequest {
+    string id = 1;
+}
+
+message DeletePingResponse {
+    Ping ping = 1;
+}
