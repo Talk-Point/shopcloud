@@ -54,9 +54,11 @@ message Check {
     Status status = 9;
     int32 grace = 10;
     int32 timeout = 11;
-    google.protobuf.Timestamp last_check_at = 12;
-    google.protobuf.Timestamp created_at = 13;
-    google.protobuf.Timestamp updated_at = 14;
+    string ping_url = 12;
+    google.protobuf.Timestamp last_ping_at = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
+
 }
 
 message Ping {
@@ -101,6 +103,8 @@ service HeartbeatHubService {
     rpc CreateCheck(CreateCheckRequest) returns (CreateCheckResponse);
     rpc DeleteCheck(DeleteCheckRequest) returns (DeleteCheckResponse);
     rpc UpdateCheckPeriod(UpdateCheckPeriodRequest) returns (UpdateCheckPeriodResponse);
+    rpc PauseCheck(PauseCheckRequest) returns (PauseCheckResponse);
+    rpc ResumeCheck(ResumeCheckRequest) returns (ResumeCheckResponse);
     rpc CheckStatus(CheckStatusRequest) returns (CheckStatusResponse);
     rpc RunAllChecks(RunAllChecksRequest) returns (RunAllChecksResponse);
 
@@ -108,6 +112,22 @@ service HeartbeatHubService {
     rpc GetPing(GetPingRequest) returns (GetPingResponse);
     rpc ListPings(ListPingsRequest) returns (ListPingsResponse);
     rpc DeletePing(DeletePingRequest) returns (DeletePingResponse);
+}
+
+message PauseCheckRequest {
+    string id = 1;
+}
+
+message PauseCheckResponse {
+    Check check = 1;
+}
+
+message ResumeCheckRequest {
+    string id = 1;
+}
+
+message ResumeCheckResponse {
+    Check check = 1;
 }
 
 message UpdateCheckPeriodRequest {
@@ -246,8 +266,10 @@ message GetPingResponse {
 message ListPingsFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
-        FIELD_CREATED_AT = 1;
-        FIELD_UPDATED_AT = 2;
+        FIELD_CHECK = 1;
+        FIELD_CODE = 2;
+        FIELD_CREATED_AT = 3;
+        FIELD_UPDATED_AT = 4;
     }
 
     Field field = 1;
@@ -258,8 +280,9 @@ message ListPingsFilter {
 message ListPingsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-        ORDER_BY_UPDATED_AT = 2;
+        ORDER_BY_CODE = 1;
+        ORDER_BY_CREATED_AT = 2;
+        ORDER_BY_UPDATED_AT = 3;
     }
 
     int32 page_size = 1;
