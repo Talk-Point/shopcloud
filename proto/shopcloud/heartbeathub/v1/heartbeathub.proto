@@ -55,9 +55,10 @@ message Check {
     int32 grace = 10;
     int32 timeout = 11;
     string ping_url = 12;
-    google.protobuf.Timestamp last_ping_at = 13;
-    google.protobuf.Timestamp created_at = 14;
-    google.protobuf.Timestamp updated_at = 15;
+    repeated string tags = 13;
+    google.protobuf.Timestamp last_ping_at = 14;
+    google.protobuf.Timestamp created_at = 15;
+    google.protobuf.Timestamp updated_at = 16;
 
 }
 
@@ -195,9 +196,16 @@ message GetCheckResponse {
 message ListChecksFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
-        FIELD_STATUS = 1;
-        FIELD_CREATED_AT = 2;
-        FIELD_UPDATED_AT = 3;
+        FIELD_CODE = 1;
+        FIELD_TYPE = 2;
+        FIELD_PROJECT = 3;
+        FIELD_COMPONENT = 4;
+        FIELD_TASK = 5;
+        FIELD_HASH = 6;
+        FIELD_STATUS = 7;
+        FIELD_TAGS = 8;
+        FIELD_CREATED_AT = 9;
+        FIELD_UPDATED_AT = 10;
     }
 
     Field field = 1;
@@ -267,7 +275,7 @@ message ListPingsFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_CHECK = 1;
-        FIELD_CODE = 2;
+        FIELD_TYPE = 2;
         FIELD_CREATED_AT = 3;
         FIELD_UPDATED_AT = 4;
     }
@@ -280,9 +288,8 @@ message ListPingsFilter {
 message ListPingsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CODE = 1;
-        ORDER_BY_CREATED_AT = 2;
-        ORDER_BY_UPDATED_AT = 3;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_UPDATED_AT = 2;
     }
 
     int32 page_size = 1;
