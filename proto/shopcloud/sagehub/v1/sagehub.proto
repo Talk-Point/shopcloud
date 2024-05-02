@@ -1,0 +1,143 @@
+// SageHub API
+// To access the erp
+
+syntax = "proto3";
+
+package proto.shopcloud.sagehub.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+// Models
+message Action {
+    enum Type {
+        TYPE_ADD_UNSPECIFIED = 0;
+        TYPE_UPDATE = 1;
+        TYPE_DELETE = 2;
+    }
+
+    string id = 1;
+    Type type = 2;
+    string table = 3;
+    string by_user_id = 4;
+    string by_user_name = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+message LBAmazonItem {
+    int64 item_id = 1;
+    int32 mandant = 2;
+    string artikelnummer = 3;
+    int64 auspraegung_id = 4;
+    string title = 5;
+    string sku = 6;
+    string asin = 7;
+    string marketplace_id = 8;
+    int32 leadtime_to_ship = 9;
+}
+
+service SageHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // Actions
+    rpc GetAction(GetActionRequest) returns (GetActionResponse);
+    rpc ListActions(ListActionsRequest) returns (ListActionsResponse);
+
+    // Amazon
+    rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
+    rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
+}
+
+message UpdateAmazonItemLeadTimeToShipItem {
+    int32 mandant = 1;
+    int64 item_id = 2;
+    int32 lead_time_to_ship = 3;
+}
+
+message UpdateAmazonLeadTimesRequest {
+    repeated UpdateAmazonItemLeadTimeToShipItem items = 1;
+}
+
+message UpdateAmazonLeadTimesResponse {
+    bool is_success = 1;
+}
+
+message GetAmazonItemRequest {
+    int32 mandant = 1;
+    int64 item_id = 2;
+}
+
+message GetAmazonItemResponse {
+    LBAmazonItem item = 1;
+}
+
+message GetActionRequest {
+    string id = 1;
+}
+
+message GetActionResponse {
+    Action action = 1;
+}
+
+message ListActionsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_TYPE = 1;
+        FIELD_TABLE = 2;
+        FIELD_BY_USER_ID = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListActionsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListActionsFilter filters = 6;
+}
+
+message ListActionsResponse {
+    repeated Action actions = 1;
+    string page_token = 2;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
