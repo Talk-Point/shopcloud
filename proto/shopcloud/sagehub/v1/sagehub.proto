@@ -30,7 +30,20 @@ enum Direction {
     DIRECTION_DESC = 1;
 }
 
+// Scopes
+enum Scope {
+    SCOPE_UNSPECIFIED = 0;
+    SCOPE_READ = 1;
+    SCOPE_WRITE = 2;
+    SCOPE_ADMIN = 3;
+}
+
 // Models
+message ActionItem {
+    string reference = 1;
+    string value = 2;
+}
+
 message Action {
     enum Type {
         TYPE_ADD_UNSPECIFIED = 0;
@@ -41,9 +54,19 @@ message Action {
     string id = 1;
     Type type = 2;
     string table = 3;
-    string by_user_id = 4;
-    string by_user_name = 5;
+    repeated ActionItem items = 4;
+    string by_user = 5;
     google.protobuf.Timestamp created_at = 6;
+}
+
+message ApiKey {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    repeated Scope scopes = 4;
+    string secret = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
 }
 
 message LBAmazonItem {
@@ -66,9 +89,177 @@ service SageHubService {
     rpc GetAction(GetActionRequest) returns (GetActionResponse);
     rpc ListActions(ListActionsRequest) returns (ListActionsResponse);
 
+    // APIKeys
+    rpc GetApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
+    rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse);
+    rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
+    rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
+    rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+
     // Amazon
     rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
+
+    // KHKVKBelege
+    rpc GetVKBelegV1(GetVKBelegV1Request) returns (GetVKBelegV1Response);
+}
+
+enum PayedStatus {
+    PAYED_STATUS_NOT_PAID_UNSPECIFIED = 0;
+    PAYED_STATUS_PAID = 1;
+    PAYED_STATUS_UNDERPAID = 2;
+    PAYED_STATUS_OVERPAID = 3;
+}
+
+message VKBelegV1 {
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    int64 bel_id = 3;
+    string belegkennzeichen = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string kopftext = 7;
+    string referenznummer = 8;
+    string lieferbedingung = 9;
+    string user_kom_bearbeiter = 10;
+    google.protobuf.Timestamp user_kom_zeit = 11;
+    string user_zahlungsreferenz = 12;
+    google.protobuf.Timestamp user_cd = 13;
+    string user_belegjahr_belegnummer = 14;
+    double nettobetrag_ew = 15;
+    double bruttobetrag_ew = 16;
+    string versand = 17;
+    PayedStatus user_bezahlt = 18;
+    string zahlungskond = 19;
+    string inkassoart = 20;
+    double betrag = 21;
+    string email = 22;
+    string telefon = 23;
+    string a0_land = 24;
+    string a1_land = 25;
+    string memo = 26;
+}
+
+message VKBelegePositionenV1 {
+    int64 bel_pos_id = 1;
+    int64 vor_pos_id = 2;
+    string position = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    string bezeichnung_1 = 6;
+    string bezeichnung_2 = 7;
+    double gesamtpreis_intern_ew = 8;
+    double einzelpreis = 9;
+    double mittlerer_ek = 10;
+    double roherloes = 11;
+    double menge = 12;
+    bool ist_erledigt = 13;
+    string mengeneinheit = 14;
+    string menge_vp_einheit = 15;
+    bool user_sonepar_bestellt = 16;
+    google.protobuf.Timestamp user_sonepar_bestellt_markiert_datum = 17;
+    bool user_ep_bestellt = 18;
+    google.protobuf.Timestamp user_ep_bestellt_markiert_datum = 19;
+    string user_versandklasse = 20;
+    string user_sonepar_artikel = 21;
+    double user_bestand_sonepar = 22;
+    string user_ep_artikel = 23;
+    double user_bestand_ep = 24;
+    string user_zulieferer_code = 25;
+    string user_zulieferer_artikelnummer = 26;
+    double user_zulieferer_bestand = 27;
+}
+
+message VKBelegeWarehousePositionV1 {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double menge = 4;
+    string mengeneinheit = 5;
+    string menge_vp_einheit = 6;
+    double menge_vp_umrechnung = 7;
+    double lagerbestand = 8;
+    double dispobestand = 9;
+}
+
+message GetVKBelegV1Request {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+}
+
+message GetVKBelegV1Response {
+    VKBelegV1 beleg = 1;
+    repeated VKBelegePositionenV1 positions = 2;
+    repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
+}
+
+message GetApiKeyRequest {
+    string id = 1;
+}
+
+message GetApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message ListApiKeysFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_USERNAME = 1;
+        FIELD_EMAIL = 2;
+        FIELD_SECRET = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListApiKeysRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListApiKeysFilter filters = 6;
+}
+
+message ListApiKeysResponse {
+    repeated ApiKey api_keys = 1;
+    string page_token = 2;
+}
+
+message CreateApiKeyRequest {
+    string username = 1;
+    string email = 2;
+    repeated string scopes = 3;
+}
+
+message CreateApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message DeleteApiKeyRequest {
+    string id = 1;
+}
+
+message DeleteApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message UpdateScopesByApiKeyRequest {
+    string id = 1;
+    repeated string scopes = 2;
+}
+
+message UpdateScopesByApiKeyResponse {
+    ApiKey api_key = 1;
 }
 
 message UpdateAmazonItemLeadTimeToShipItem {
