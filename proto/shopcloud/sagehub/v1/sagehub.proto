@@ -81,6 +81,15 @@ message LBAmazonItem {
     int32 leadtime_to_ship = 9;
 }
 
+message Event {
+    string id = 1;
+    string ressource = 2;
+    string reference = 3;
+    string topic = 4;
+    google.protobuf.Timestamp ttl = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
 service SageHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
@@ -96,13 +105,63 @@ service SageHubService {
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
+    // Events
+    rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+    rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
+    rpc PushEvent(PushEventRequest) returns (PushEventResponse);
+
     // Amazon
     rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
-    // KHKVKBelege
+    // VKBelege
     rpc GetVKBelegV1(GetVKBelegV1Request) returns (GetVKBelegV1Response);
+    // VKBelegeStore
+    rpc GetVKBelegStoreV1(GetVKBelegStoreV1Request) returns (GetVKBelegStoreV1Response);
+    rpc SyncVKBelegStoreV1(SyncVKBelegStoreV1Request) returns (SyncVKBelegStoreV1Response);
 }
+
+message PushEventRequest {
+    string id = 1;
+}
+
+message PushEventResponse {
+    Event event = 1;
+}
+
+message GetEventRequest {
+    string id = 1;
+}
+
+message GetEventResponse {
+    Event event = 1;
+}
+
+message DeleteEventRequest {
+    string id = 1;
+}
+
+message DeleteEventResponse {
+    Event event = 1;
+}
+
+message GetVKBelegStoreV1Request {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+}
+
+message GetVKBelegStoreV1Response {
+    VKBelegV1 beleg = 1;
+    repeated VKBelegePositionenV1 positions = 2;
+    repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
+}
+
+message SyncVKBelegStoreV1Request {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+}
+
+message SyncVKBelegStoreV1Response {}
 
 enum PayedStatus {
     PAYED_STATUS_UNKNOW_UNSPECIFIED = 0;
@@ -139,6 +198,7 @@ message VKBelegV1 {
     string a0_land = 24;
     string a1_land = 25;
     string memo = 26;
+    repeated string tags = 27;
 }
 
 message VKBelegePositionenV1 {

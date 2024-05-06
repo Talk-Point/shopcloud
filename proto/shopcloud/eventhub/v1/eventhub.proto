@@ -32,6 +32,14 @@ enum Direction {
     DIRECTION_DESC = 1;
 }
 
+// Scopes
+enum Scope {
+    SCOPE_UNSPECIFIED = 0;
+    SCOPE_READ = 1;
+    SCOPE_WRITE = 2;
+    SCOPE_ADMIN = 3;
+}
+
 // Workspace represents a collection of topics and subscriptions
 message Workspace {
     string id = 1;
@@ -110,6 +118,16 @@ message Gateway {
     google.protobuf.Timestamp updated_at = 10;
 }
 
+message ApiKey {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    repeated Scope scopes = 4;
+    string secret = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
 // The EventHub service definition.
 // EventHub Service API receive Events and publish them to the correct topic thats received by the endpoint.
 //
@@ -168,6 +186,82 @@ service EventHubDispatcherService {
     rpc DeleteGateway(DeleteGatewayRequest) returns (DeleteGatewayResponse);
     rpc GetOrCreateGateway(GetOrCreateGatewayRequest) returns (GetOrCreateGatewayResponse);
     rpc PublishToGateway(PublishToGatewayRequest) returns (PublishToGatewayResponse);
+
+    // APIKeys
+    rpc GetApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
+    rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse);
+    rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
+    rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
+    rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+}
+
+message GetApiKeyRequest {
+    string id = 1;
+}
+
+message GetApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message ListApiKeysFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_USERNAME = 1;
+        FIELD_EMAIL = 2;
+        FIELD_SECRET = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListApiKeysRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListApiKeysFilter filters = 6;
+}
+
+message ListApiKeysResponse {
+    repeated ApiKey api_keys = 1;
+    string page_token = 2;
+}
+
+message CreateApiKeyRequest {
+    string username = 1;
+    string email = 2;
+    repeated string scopes = 3;
+}
+
+message CreateApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message DeleteApiKeyRequest {
+    string id = 1;
+}
+
+message DeleteApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message UpdateScopesByApiKeyRequest {
+    string id = 1;
+    repeated string scopes = 2;
+}
+
+message UpdateScopesByApiKeyResponse {
+    ApiKey api_key = 1;
 }
 
 message BasicAuth {
