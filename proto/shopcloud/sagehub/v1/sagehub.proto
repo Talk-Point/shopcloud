@@ -142,20 +142,20 @@ message EmitVKBelegEventsResponse {
     repeated EventItemVkBeleg events = 1;
 }
 
-enum EventVkBelegTopic {
-    EVENT_VK_BELEG_TOPIC_UNKNOW_UNSPECIFIED = 0;
-    EVENT_VK_BELEG_TOPIC_CREATED = 1;
-    EVENT_VK_BELEG_TOPIC_PAYED = 2;
-    EVENT_VK_BELEG_TOPIC_OVER_PAYED = 3;
-    EVENT_VK_BELEG_TOPIC_UNDER_PAYED = 4;
-    EVENT_VK_BELEG_TOPIC_MAHNSTUFE_1 = 5;
+enum EventTopic {
+    EVENT_TOPIC_UNKNOW_UNSPECIFIED = 0;
+    EVENT_TOPIC_VK_BELEG_CREATED = 1;
+    EVENT_TOPIC_VK_BELEG_PAYED = 2;
+    EVENT_TOPIC_VK_BELEG_OVER_PAYED = 3;
+    EVENT_TOPIC_VK_BELEG_UNDER_PAYED = 4;
+    EVENT_TOPIC_VK_BELEG_MAHNSTUFE_1 = 5;
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_2 = 6;
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_3 = 7;
 }
 
 message EventItemVkBeleg {
     string id = 1;
-    EventVkBelegTopic topic = 2;
+    EventTopic topic = 2;
     int32 mandant = 3;
     int64 bel_id = 4;
     google.protobuf.Timestamp created_at = 5;
@@ -175,7 +175,7 @@ message ListVKBelegEventsResponse {
 message GetVKBelegEventRequest {
     int32 mandant = 1;
     int64 bel_id = 2;
-    EventVkBelegTopic topic = 3;
+    EventTopic topic = 3;
 }
 
 // EVENT_VK_BELEG_TOPIC_CREATED
@@ -189,7 +189,7 @@ message EventVkBelegCreated {
 
 // EVENT_VK_BELEG_TOPIC_PAYED
 message EventVkBelegPayed {
-    EventVkBelegTopic topic = 1;
+    EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
     string belegart = 4;
@@ -202,7 +202,7 @@ message EventVkBelegPayed {
 
 // EVENT_VK_BELEG_TOPIC_OVER_PAYED
 message EventVkBelegOverPayed {
-    EventVkBelegTopic topic = 1;
+    EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
     string belegart = 4;
@@ -215,7 +215,7 @@ message EventVkBelegOverPayed {
 
 // EVENT_VK_BELEG_TOPIC_UNDER_PAYED
 message EventVkBelegUnderPayed {
-    EventVkBelegTopic topic = 1;
+    EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
     string belegart = 4;
@@ -228,7 +228,7 @@ message EventVkBelegUnderPayed {
 
 // EVENT_VK_BELEG_MAHNSTUFE_1
 message EventVkBelegMahnstufe1 {
-    EventVkBelegTopic topic = 1;
+    EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
     string belegart = 4;
