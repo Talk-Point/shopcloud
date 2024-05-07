@@ -116,9 +116,139 @@ service SageHubService {
 
     // VKBelege
     rpc GetVKBelegV1(GetVKBelegV1Request) returns (GetVKBelegV1Response);
-    // VKBelegeStore
-    rpc GetVKBelegStoreV1(GetVKBelegStoreV1Request) returns (GetVKBelegStoreV1Response);
-    rpc SyncVKBelegStoreV1(SyncVKBelegStoreV1Request) returns (SyncVKBelegStoreV1Response);
+    
+    // VKBelegEvents
+    rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
+    rpc EmitVKBelegEvents(EmitVKBelegEventsRequest) returns (EmitVKBelegEventsResponse);
+    rpc ListVKBelegEvents(ListVKBelegEventsRequest) returns (ListVKBelegEventsResponse);
+    rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
+}
+
+message FetchNewestVKBelegEventsRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+}
+
+message FetchNewestVKBelegEventsResponse {
+    repeated int64 bel_ids = 1;
+}
+
+message EmitVKBelegEventsRequest {
+    int32 mandant = 3;
+    int64 bel_id = 4;
+}
+
+message EmitVKBelegEventsResponse {
+    repeated EventItemVkBeleg events = 1;
+}
+
+enum EventVkBelegTopic {
+    EVENT_VK_BELEG_TOPIC_UNKNOW_UNSPECIFIED = 0;
+    EVENT_VK_BELEG_TOPIC_CREATED = 1;
+    EVENT_VK_BELEG_TOPIC_PAYED = 2;
+    EVENT_VK_BELEG_TOPIC_OVER_PAYED = 3;
+    EVENT_VK_BELEG_TOPIC_UNDER_PAYED = 4;
+    EVENT_VK_BELEG_TOPIC_MAHNSTUFE_1 = 5;
+    // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_2 = 6;
+    // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_3 = 7;
+}
+
+message EventItemVkBeleg {
+    string id = 1;
+    EventVkBelegTopic topic = 2;
+    int32 mandant = 3;
+    int64 bel_id = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+message ListVKBelegEventsRequest{
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string page_token = 3;
+}
+
+message ListVKBelegEventsResponse {
+    repeated EventItemVkBeleg events = 1;
+    string page_token = 2;
+}
+
+message GetVKBelegEventRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    EventVkBelegTopic topic = 3;
+}
+
+// EVENT_VK_BELEG_TOPIC_CREATED
+message EventVkBelegCreated {
+    VKBelegV1 beleg = 1;
+    repeated VKBelegePositionenV1 positions = 2;
+    repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
+    google.protobuf.Timestamp beleg_created_at = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+// EVENT_VK_BELEG_TOPIC_PAYED
+message EventVkBelegPayed {
+    EventVkBelegTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    string belegart = 4;
+    string kundengruppe = 5;
+    string referenznummer = 6;
+    string zahlungskond = 7;
+    string user_zahlungsreferenz = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+// EVENT_VK_BELEG_TOPIC_OVER_PAYED
+message EventVkBelegOverPayed {
+    EventVkBelegTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    string belegart = 4;
+    string kundengruppe = 5;
+    string referenznummer = 6;
+    string zahlungskond = 7;
+    string user_zahlungsreferenz = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+// EVENT_VK_BELEG_TOPIC_UNDER_PAYED
+message EventVkBelegUnderPayed {
+    EventVkBelegTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    string belegart = 4;
+    string kundengruppe = 5;
+    string referenznummer = 6;
+    string zahlungskond = 7;
+    string user_zahlungsreferenz = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+// EVENT_VK_BELEG_MAHNSTUFE_1
+message EventVkBelegMahnstufe1 {
+    EventVkBelegTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    string belegart = 4;
+    string kundengruppe = 5;
+    string referenznummer = 6;
+    string zahlungskond = 7;
+    string user_zahlungsreferenz = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+message GetVKBelegEventResponse {
+    oneof event {
+        EventVkBelegCreated created = 1;
+        EventVkBelegPayed payed = 2;
+        EventVkBelegOverPayed over_payed = 3;
+        EventVkBelegUnderPayed under_payed = 4;
+        EventVkBelegMahnstufe1 mahnstufe_1 = 5;
+        // EventVkBelegMahnstufe1 mahnstufe_2 = 6;
+        // EventVkBelegMahnstufe1 mahnstufe_3 = 7;
+    }
 }
 
 message PushEventRequest {
@@ -145,30 +275,20 @@ message DeleteEventResponse {
     Event event = 1;
 }
 
-message GetVKBelegStoreV1Request {
-    int32 mandant = 1;
-    int64 bel_id = 2;
-}
-
-message GetVKBelegStoreV1Response {
-    VKBelegV1 beleg = 1;
-    repeated VKBelegePositionenV1 positions = 2;
-    repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
-}
-
-message SyncVKBelegStoreV1Request {
-    int32 mandant = 1;
-    int64 bel_id = 2;
-}
-
-message SyncVKBelegStoreV1Response {}
-
 enum PayedStatus {
     PAYED_STATUS_UNKNOW_UNSPECIFIED = 0;
     PAYED_STATUS_NOT_PAID = 1;
     PAYED_STATUS_PAID = 2;
     PAYED_STATUS_UNDERPAID = 3;
     PAYED_STATUS_OVERPAID = 4;
+}
+
+enum MahnstufeStatus {
+    MAHNSTUFE_STATUS_UNKNOW_UNSPECIFIED = 0;
+    MAHNSTUFE_STATUS_0 = 1;
+    MAHNSTUFE_STATUS_1 = 2;
+    MAHNSTUFE_STATUS_2 = 3;
+    MAHNSTUFE_STATUS_3 = 4;
 }
 
 message VKBelegV1 {
@@ -199,6 +319,7 @@ message VKBelegV1 {
     string a1_land = 25;
     string memo = 26;
     repeated string tags = 27;
+    MahnstufeStatus user_mahnstufe = 28;
 }
 
 message VKBelegePositionenV1 {
@@ -299,7 +420,7 @@ message ListApiKeysResponse {
 message CreateApiKeyRequest {
     string username = 1;
     string email = 2;
-    repeated string scopes = 3;
+    repeated Scope scopes = 3;
 }
 
 message CreateApiKeyResponse {
