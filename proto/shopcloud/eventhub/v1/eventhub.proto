@@ -4,6 +4,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 package proto.shopcloud.eventhub.v1;
 
@@ -80,15 +81,18 @@ message Subscription {
     string auth = 9;
     Type type = 10;
     int32 retries_max = 11;
-    google.protobuf.Timestamp created_at = 12;
-    google.protobuf.Timestamp updated_at = 13;
+    google.protobuf.Duration delay = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
 }
 
 message Delivery {
     enum Status {
-        STATUS_PENDING_UNSPECIFIED = 0;
-        STATUS_DELIVERED = 1;
-        STATUS_FAILED = 2;
+        STATUS_NEW_UNSPECIFIED = 0;
+        STATUS_PENDING = 1;
+        STATUS_DELIVERED = 2;
+        STATUS_FAILED = 3;
+        STATUS_FILTERED = 4;
     }
 
     string id = 1;
@@ -100,9 +104,10 @@ message Delivery {
     Status status = 7;
     int32 retry_count = 8;
     string last_status = 9;
-    google.protobuf.Timestamp ttl = 10;
-    google.protobuf.Timestamp created_at = 11;
-    google.protobuf.Timestamp updated_at = 12;
+    google.protobuf.Duration delay = 10;
+    google.protobuf.Timestamp ttl = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
 }
 
 message Gateway {
@@ -145,8 +150,6 @@ service EventHubDispatcherService {
     rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
     rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse);
     rpc GetOrCreateWorkspace(GetOrCreateWorkspaceRequest) returns (GetOrCreateWorkspaceResponse);
-    // rpc AddUsersToWorkspace(AddUsersToWorkspaceRequest) returns (AddUsersToWorkspaceResponse);
-    // rpc RemoveUsersFromWorkspace(RemoveUsersFromWorkspaceRequest) returns (RemoveUsersFromWorkspaceResponse);
 
     // Event
     rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
@@ -169,6 +172,8 @@ service EventHubDispatcherService {
     rpc PauseSubscription(PauseSubscriptionRequest) returns (PauseSubscriptionResponse);
     rpc ResumeSubscription(ResumeSubscriptionRequest) returns (ResumeSubscriptionResponse);
     rpc SetAuthSubscription(SetAuthSubscriptionRequest) returns (SetAuthSubscriptionResponse);
+    rpc SetDelaySubscription(SetDelaySubscriptionRequest) returns (SetDelaySubscriptionResponse);
+    rpc RunFilter(RunFilterRequest) returns (RunFilterResponse);
 
     // Delivery
     rpc GetDelivery(GetDeliveryRequest) returns (GetDeliveryResponse);
@@ -193,6 +198,33 @@ service EventHubDispatcherService {
     rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+}
+
+message SetDelaySubscriptionRequest {
+    string id = 1;
+    google.protobuf.Duration delay = 2;
+}
+
+message SetDelaySubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message RunFilterRequest {
+    string filter_data = 1;
+    string event_data = 2;
+}
+
+message FilterItem {
+    string field = 1;
+    string value = 2;
+    string operator = 3;
+    string event_value = 4;
+    bool is_filtered = 5;
+}
+
+message RunFilterResponse {
+    bool is_filtered = 1;
+    repeated FilterItem filters = 2;
 }
 
 message GetApiKeyRequest {
@@ -240,7 +272,7 @@ message ListApiKeysResponse {
 message CreateApiKeyRequest {
     string username = 1;
     string email = 2;
-    repeated string scopes = 3;
+    repeated Scope scopes = 3;
 }
 
 message CreateApiKeyResponse {
@@ -257,7 +289,7 @@ message DeleteApiKeyResponse {
 
 message UpdateScopesByApiKeyRequest {
     string id = 1;
-    repeated string scopes = 2;
+    repeated Scope scopes = 2;
 }
 
 message UpdateScopesByApiKeyResponse {
@@ -477,15 +509,6 @@ message CreateDeliveryRequest {
 
 message CreateDeliveryResponse {
     string id = 1;
-}
-
-message AddUsersToWorkspaceRequest {
-    string id = 1;
-    repeated string users = 2;
-}
-
-message AddUsersToWorkspaceResponse {
-    Workspace workspace = 1;
 }
 
 message RemoveUsersFromWorkspaceRequest {
