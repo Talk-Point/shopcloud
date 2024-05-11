@@ -427,7 +427,6 @@ message ListChecksRequest {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
         ORDER_BY_UPDATED_AT = 2;
-        ORDER_BY_LAST_PING_AT = 3;
     }
 
     int32 page_size = 1;
