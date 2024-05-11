@@ -82,8 +82,9 @@ message Subscription {
     Type type = 10;
     int32 retries_max = 11;
     google.protobuf.Duration delay = 12;
-    google.protobuf.Timestamp created_at = 13;
-    google.protobuf.Timestamp updated_at = 14;
+    string transformer = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
 }
 
 message Delivery {
@@ -156,6 +157,8 @@ service EventHubDispatcherService {
     rpc DispatchEventToSubscriptions(DispatchEventToSubscriptionsRequest) returns (DispatchEventToSubscriptionsResponse);
     rpc GetEvent(GetEventRequest) returns (GetEventResponse);
     rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+    rpc Transform(TransformRequest) returns (TransformResponse);
+    rpc TransformEvent(TransformEventRequest) returns (TransformEventResponse);
 
     // Subscription
     rpc GetSubscription(GetSubscriptionRequest) returns (GetSubscriptionResponse);
@@ -173,6 +176,7 @@ service EventHubDispatcherService {
     rpc ResumeSubscription(ResumeSubscriptionRequest) returns (ResumeSubscriptionResponse);
     rpc SetAuthSubscription(SetAuthSubscriptionRequest) returns (SetAuthSubscriptionResponse);
     rpc SetDelaySubscription(SetDelaySubscriptionRequest) returns (SetDelaySubscriptionResponse);
+    rpc SetTransformerSubscription(SetTransformerSubscriptionRequest) returns (SetTransformerSubscriptionResponse);
     rpc RunFilter(RunFilterRequest) returns (RunFilterResponse);
 
     // Delivery
@@ -198,6 +202,33 @@ service EventHubDispatcherService {
     rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+}
+
+message SetTransformerSubscriptionRequest {
+    string id = 1;
+    string template = 2;
+}
+
+message SetTransformerSubscriptionResponse {
+    Subscription subscription = 1;
+}
+
+message TransformEventRequest {
+    string id = 1;
+    string template = 2;
+}
+
+message TransformEventResponse {
+    string payload = 1;
+}
+
+message TransformRequest {
+    string template = 1;
+    string payload = 2;
+}
+
+message TransformResponse {
+    string payload = 1;
 }
 
 message SetDelaySubscriptionRequest {
