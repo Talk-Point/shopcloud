@@ -70,6 +70,12 @@ message Subscription {
         TYPE_HTTP_UNSPECIFIED = 0;
     }
 
+    enum FilterType {
+        FILTER_TYPE_UNSPECIFIED = 0;
+        FILTER_TYPE_OUT = 1;
+        FILTER_TYPE_IN = 2;
+    }
+
     string id = 1;
     string name = 2;
     string workspace = 3;
@@ -83,8 +89,10 @@ message Subscription {
     int32 retries_max = 11;
     google.protobuf.Duration delay = 12;
     string transformer = 13;
-    google.protobuf.Timestamp created_at = 14;
-    google.protobuf.Timestamp updated_at = 15;
+    string filter_template = 14;
+    FilterType filter_type = 15;
+    google.protobuf.Timestamp created_at = 16;
+    google.protobuf.Timestamp updated_at = 17;
 }
 
 message Delivery {
@@ -177,6 +185,7 @@ service EventHubDispatcherService {
     rpc SetAuthSubscription(SetAuthSubscriptionRequest) returns (SetAuthSubscriptionResponse);
     rpc SetDelaySubscription(SetDelaySubscriptionRequest) returns (SetDelaySubscriptionResponse);
     rpc SetTransformerSubscription(SetTransformerSubscriptionRequest) returns (SetTransformerSubscriptionResponse);
+    rpc SetSubscriptionFilter(SetSubscriptionFilterRequest) returns (SetSubscriptionFilterResponse);
     rpc RunFilter(RunFilterRequest) returns (RunFilterResponse);
 
     // Delivery
@@ -202,6 +211,16 @@ service EventHubDispatcherService {
     rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+}
+
+message SetSubscriptionFilterRequest {
+    string id = 1;
+    string template = 2;
+    Subscription.FilterType filter_type = 3;
+}
+
+message SetSubscriptionFilterResponse {
+    Subscription subscription = 1;
 }
 
 message SetTransformerSubscriptionRequest {
