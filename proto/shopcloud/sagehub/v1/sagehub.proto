@@ -151,6 +151,7 @@ enum EventTopic {
     EVENT_TOPIC_VK_BELEG_MAHNSTUFE_1 = 5;
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_2 = 6;
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_3 = 7;
+    EVENT_TOPIC_VK_BELEG_CANCELD = 8;
 }
 
 message EventItemVkBeleg {
@@ -180,11 +181,12 @@ message GetVKBelegEventRequest {
 
 // EVENT_VK_BELEG_TOPIC_CREATED
 message EventVkBelegCreated {
-    VKBelegV1 beleg = 1;
-    repeated VKBelegePositionenV1 positions = 2;
-    repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
-    google.protobuf.Timestamp beleg_created_at = 4;
-    google.protobuf.Timestamp created_at = 5;
+    EventTopic topic = 1;
+    VKBelegV1 beleg = 2;
+    repeated VKBelegePositionenV1 positions = 3;
+    repeated VKBelegeWarehousePositionV1 warehouse_positions = 4;
+    google.protobuf.Timestamp beleg_created_at = 5;
+    google.protobuf.Timestamp created_at = 6;
 }
 
 // EVENT_VK_BELEG_TOPIC_PAYED
@@ -192,12 +194,13 @@ message EventVkBelegPayed {
     EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
-    string belegart = 4;
-    string kundengruppe = 5;
-    string referenznummer = 6;
-    string zahlungskond = 7;
-    string user_zahlungsreferenz = 8;
-    google.protobuf.Timestamp created_at = 9;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
 }
 
 // EVENT_VK_BELEG_TOPIC_OVER_PAYED
@@ -205,12 +208,13 @@ message EventVkBelegOverPayed {
     EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
-    string belegart = 4;
-    string kundengruppe = 5;
-    string referenznummer = 6;
-    string zahlungskond = 7;
-    string user_zahlungsreferenz = 8;
-    google.protobuf.Timestamp created_at = 9;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
 }
 
 // EVENT_VK_BELEG_TOPIC_UNDER_PAYED
@@ -218,12 +222,13 @@ message EventVkBelegUnderPayed {
     EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
-    string belegart = 4;
-    string kundengruppe = 5;
-    string referenznummer = 6;
-    string zahlungskond = 7;
-    string user_zahlungsreferenz = 8;
-    google.protobuf.Timestamp created_at = 9;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
 }
 
 // EVENT_VK_BELEG_MAHNSTUFE_1
@@ -231,12 +236,29 @@ message EventVkBelegMahnstufe1 {
     EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
-    string belegart = 4;
-    string kundengruppe = 5;
-    string referenznummer = 6;
-    string zahlungskond = 7;
-    string user_zahlungsreferenz = 8;
-    google.protobuf.Timestamp created_at = 9;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
+}
+
+// EVENT_TOPIC_VK_BELEG_CANCELD
+message EventVKBelegCanceled {
+    EventTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    string user_kopftext = 10;
+    repeated string user_tags = 11;
+    google.protobuf.Timestamp created_at = 12;
 }
 
 message GetVKBelegEventResponse {
@@ -248,6 +270,7 @@ message GetVKBelegEventResponse {
         EventVkBelegMahnstufe1 mahnstufe_1 = 5;
         // EventVkBelegMahnstufe1 mahnstufe_2 = 6;
         // EventVkBelegMahnstufe1 mahnstufe_3 = 7;
+        EventVKBelegCanceled canceled = 8;
     }
 }
 
