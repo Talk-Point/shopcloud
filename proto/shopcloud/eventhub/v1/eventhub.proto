@@ -167,6 +167,8 @@ service EventHubDispatcherService {
     rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
     rpc Transform(TransformRequest) returns (TransformResponse);
     rpc TransformEvent(TransformEventRequest) returns (TransformEventResponse);
+    rpc Filter(FilterRequest) returns (FilterResponse);
+    rpc FilterEvent(FilterEventRequest) returns (FilterEventResponse);
 
     // Subscription
     rpc GetSubscription(GetSubscriptionRequest) returns (GetSubscriptionResponse);
@@ -186,7 +188,6 @@ service EventHubDispatcherService {
     rpc SetDelaySubscription(SetDelaySubscriptionRequest) returns (SetDelaySubscriptionResponse);
     rpc SetTransformerSubscription(SetTransformerSubscriptionRequest) returns (SetTransformerSubscriptionResponse);
     rpc SetSubscriptionFilter(SetSubscriptionFilterRequest) returns (SetSubscriptionFilterResponse);
-    rpc RunFilter(RunFilterRequest) returns (RunFilterResponse);
 
     // Delivery
     rpc GetDelivery(GetDeliveryRequest) returns (GetDeliveryResponse);
@@ -211,6 +212,28 @@ service EventHubDispatcherService {
     rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+}
+
+message FilterRequest {
+    string template = 1;
+    string payload = 2;
+    Subscription.FilterType filter_type = 3;
+}
+
+message FilterResponse {
+    bool is_filtered = 1;
+    Subscription.FilterType filter_type = 3;
+}
+
+message FilterEventRequest {
+    string id = 1;
+    string template = 2;
+    Subscription.FilterType filter_type = 3;
+}
+
+message FilterEventResponse {
+    bool is_filtered = 1;
+    Subscription.FilterType filter_type = 2;
 }
 
 message SetSubscriptionFilterRequest {
@@ -257,24 +280,6 @@ message SetDelaySubscriptionRequest {
 
 message SetDelaySubscriptionResponse {
     Subscription subscription = 1;
-}
-
-message RunFilterRequest {
-    string filter_data = 1;
-    string event_data = 2;
-}
-
-message FilterItem {
-    string field = 1;
-    string value = 2;
-    string operator = 3;
-    string event_value = 4;
-    bool is_filtered = 5;
-}
-
-message RunFilterResponse {
-    bool is_filtered = 1;
-    repeated FilterItem filters = 2;
 }
 
 message GetApiKeyRequest {
