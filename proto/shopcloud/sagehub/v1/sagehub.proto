@@ -116,12 +116,82 @@ service SageHubService {
 
     // VKBelege
     rpc GetVKBelegV1(GetVKBelegV1Request) returns (GetVKBelegV1Response);
-    
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc EmitVKBelegEvents(EmitVKBelegEventsRequest) returns (EmitVKBelegEventsResponse);
     rpc ListVKBelegEvents(ListVKBelegEventsRequest) returns (ListVKBelegEventsResponse);
     rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
+    // VKBelegPulse
+    rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
+}
+
+enum VKBelegart {
+    VK_BELEGART_UNSPECIFIED = 0;
+    VK_BELEGART_AUFTRAGSBESTAETIGUNG = 1;
+    VK_BELEGART_KOMMISSIONIERAUFTRAG = 2;
+    VK_BELEGART_KOMMISSIONIERRECHNUNG = 3;
+    VK_BELEGART_SOFORTRECHNUNG = 4;
+    VK_BELEGART_RECHNUNG = 5;
+    VK_BELEGART_SOFORTSTORNORECHNUNG = 6;
+    VK_BELEGART_LIEFERSCHEIN = 7;
+    VK_BELEGART_KOMMISSIONIERLIEFERSCHEIN = 8;
+    VK_BELEGART_STORNORECHNUNG = 9;
+    VK_BELEGART_GUTSCHRIFT = 10;
+    VK_BELEGART_RUECKLIEFERSCHEIN = 11;
+    VK_BELEGART_KOMMISSIONIERABSCHLUSSLIEFERSCHEIN = 12;
+    VK_BELEGART_STRECKENLIEFERSCHEIN = 13;
+    VK_BELEGART_ANGEBOT = 14;
+    VK_BELEGART_STRECKENRUECKLIEFERSCHEIN = 15;
+    VK_BELEGART_DIREKTRECHNUNG = 16;
+    VK_BELEGART_PROFORMARECHNUNG = 17;
+    VK_BELEGART_STRECKENSOFORTRECHNUNG = 18;
+    VK_BELEGART_FILIAL_LIEFERSCHEIN = 19;
+    VK_BELEGART_STRECKENSOFORTSTORNORECHNUNG = 20;
+    VK_BELEGART_SOFORTAUFTRAG = 21;
+    VK_BELEGART_FILIAL_AUFTRAGSBESTAETIGUNG = 22;
+    VK_BELEGART_SAMMELRECHNUNG = 23;
+    VK_BELEGART_MUSTERBELEG = 24;
+}
+
+message GetVKBelegPulseRequest {
+    int32 mandant = 1;
+    string start_at = 2; // 2024-05-13T00:00:00+02:00
+    string end_at = 3;
+    repeated VKBelegart belegart_items = 4;
+}
+
+message VKBelegPulseV1 {
+    int32 mandant = 1;
+    string kundengruppe = 2;
+    int32 orders = 3;
+    double turnover = 4;
+    double product_qty = 5;
+    double product_turnover = 6;
+    double product_profit = 7;
+
+    message Metrics {
+        int32 orders = 1;
+        double turnover = 2;
+        double product_qty = 3;
+        double product_turnover = 4;
+        double product_profit = 5;
+    }
+
+    message Filters {
+        int32 mandant = 1;
+        string start_at = 2;
+        string end_at = 3;
+        repeated string belegart_items = 4;
+    }
+}
+
+message GetVKBelegPulseResponse {
+    int32 page_size = 1;
+    int32 page = 2;
+    int32 mandant = 3;
+    repeated VKBelegPulseV1 items = 4;
+    VKBelegPulseV1.Metrics metrics = 5;
+    VKBelegPulseV1.Filters filters = 6;
 }
 
 message FetchNewestVKBelegEventsRequest {
@@ -152,6 +222,7 @@ enum EventTopic {
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_2 = 6;
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_3 = 7;
     EVENT_TOPIC_VK_BELEG_CANCELD = 8;
+    EVENT_TOPIC_VK_BELEG_FULFILLED = 9;
 }
 
 message EventItemVkBeleg {
@@ -246,7 +317,7 @@ message EventVkBelegMahnstufe1 {
 }
 
 // EVENT_TOPIC_VK_BELEG_CANCELD
-message EventVKBelegCanceled {
+message EventVkBelegCanceled {
     EventTopic topic = 1;
     int32 mandant = 2;
     int64 bel_id = 3;
@@ -270,7 +341,7 @@ message GetVKBelegEventResponse {
         EventVkBelegMahnstufe1 mahnstufe_1 = 5;
         // EventVkBelegMahnstufe1 mahnstufe_2 = 6;
         // EventVkBelegMahnstufe1 mahnstufe_3 = 7;
-        EventVKBelegCanceled canceled = 8;
+        EventVkBelegCanceled canceled = 8;
     }
 }
 
@@ -343,6 +414,7 @@ message VKBelegV1 {
     string memo = 26;
     repeated string tags = 27;
     MahnstufeStatus user_mahnstufe = 28;
+    double roherloes = 29;
 }
 
 message VKBelegePositionenV1 {
