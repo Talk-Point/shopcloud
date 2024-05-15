@@ -118,6 +118,7 @@ service SageHubService {
     rpc GetVKBelegV1(GetVKBelegV1Request) returns (GetVKBelegV1Response);
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
+    rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
     rpc EmitVKBelegEvents(EmitVKBelegEventsRequest) returns (EmitVKBelegEventsResponse);
     rpc ListVKBelegEvents(ListVKBelegEventsRequest) returns (ListVKBelegEventsResponse);
     rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
@@ -151,6 +152,16 @@ enum VKBelegart {
     VK_BELEGART_FILIAL_AUFTRAGSBESTAETIGUNG = 22;
     VK_BELEGART_SAMMELRECHNUNG = 23;
     VK_BELEGART_MUSTERBELEG = 24;
+}
+
+message BatchEmitVKBelegEventsRequest {
+    int32 mandant = 1;
+    repeated int64 bel_ids = 2;
+}
+
+message BatchEmitVKBelegEventsResponse {
+    int64 success_total = 1;
+    repeated string bel_ids_with_error = 2;
 }
 
 message GetVKBelegPulseRequest {
