@@ -90,6 +90,30 @@ message Event {
     google.protobuf.Timestamp created_at = 6;
 }
 
+message Feed {
+    string id = 1;
+    string supplier = 2;
+    string name = 3;
+    string source = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp update_at = 6;
+
+    message HttpSource {
+        string endpoint = 1;
+        string username = 2;
+        string password = 3;
+        string remote_path = 4;
+    }
+    
+    message FtpSource {
+        string host = 1;
+        int32 port = 2;
+        string username = 3;
+        string password = 4;
+        string remote_path = 5;
+    }
+}
+
 service SageHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
@@ -124,6 +148,93 @@ service SageHubService {
     rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
+
+    // Feeds
+    rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
+    rpc ListFeeds(ListFeedsRequest) returns (ListFeedsResponse);
+    rpc ListFeedFiles(ListFeedFilesRequest) returns (ListFeedFilesResponse);
+    rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
+    rpc CreateFeedFile(CreateFeedFileRequest) returns (CreateFeedFileResponse);
+    rpc DeleteFeed(DeleteFeedRequest) returns (DeleteFeedResponse);
+}
+
+message CreateFeedFileRequest {
+    string feed = 1;
+    string filename = 2;
+    bytes content = 3;
+}
+
+message CreateFeedFileResponse {
+    string uri = 1;
+}
+
+message GetFeedRequest {
+    string id = 1;
+}
+
+message GetFeedResponse {
+    Feed feed = 1;
+}
+
+message ListFeedsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_CREATED_AT = 2;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListFeedsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListFeedsFilter filters = 6;
+}
+
+message ListFeedsResponse {
+    repeated Feed feeds = 1;
+    string page_token = 2;
+}
+
+message ListFeedFilesRequest {
+    string id = 1;
+    string date_suffix = 2;
+}
+
+message ListFeedFilesResponse {
+    repeated string uris = 1;
+}
+
+message CreateFeedRequest {
+    string supplier = 1;
+    string name = 2;
+    oneof source {
+        Feed.HttpSource http = 3;
+        Feed.FtpSource ftp = 4;
+    }
+}
+
+message CreateFeedResponse {
+    Feed feed = 1;
+}
+
+message DeleteFeedRequest {
+    string id = 1;
+}
+
+message DeleteFeedResponse {
+    Feed feed = 1;
 }
 
 enum VKBelegart {
@@ -234,6 +345,7 @@ enum EventTopic {
     // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_3 = 7;
     EVENT_TOPIC_VK_BELEG_CANCELD = 8;
     EVENT_TOPIC_VK_BELEG_FULFILLED = 9;
+    EVENT_TOPIC_FEED_FILE_CREATED = 10;
 }
 
 message EventItemVkBeleg {
@@ -341,6 +453,16 @@ message EventVkBelegCanceled {
     string user_kopftext = 10;
     repeated string user_tags = 11;
     google.protobuf.Timestamp created_at = 12;
+}
+
+// EVENT_TOPIC_FEED_FILE_CREATED
+message EventFeedFileCreated {
+    EventTopic topic = 1;
+    string feed = 2;
+    string supplier = 3;
+    string name = 4;
+    string uri = 5;
+    google.protobuf.Timestamp created_at = 6;
 }
 
 message GetVKBelegEventResponse {
