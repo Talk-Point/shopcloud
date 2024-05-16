@@ -118,12 +118,10 @@ message KpiGroup {
 
     string id = 1;
     string name = 2;
-    string code = 3;
-    string description = 4;
-    repeated string tags = 5;
-    string check = 6;
-    string check_value = 7;
-    int32 ttl_for_entries_in_days = 8;
+    string description = 5;
+    repeated string tags = 6;
+    string check = 7;
+    int32 ttl_entries = 8; // in days
     GroupStatus status = 9;
     string last_entry_id = 10;
     double last_entry_value = 11;
@@ -150,7 +148,6 @@ service HeartbeatHubService {
 
     // Gateways
     rpc Ping(PingRequest) returns (PingResponse);
-    rpc Kpi(KpiRequest) returns (KpiResponse);
 
     // Checks
     rpc GetCheck(GetCheckRequest) returns (GetCheckResponse);
@@ -169,12 +166,14 @@ service HeartbeatHubService {
     rpc ListPings(ListPingsRequest) returns (ListPingsResponse);
     rpc DeletePing(DeletePingRequest) returns (DeletePingResponse);
 
+    // Kpi
+    rpc BatchKpi(BatchKpiRequest) returns (BatchKpiResponse);
+
     // KPIGroup
     rpc GetKpiGroup(GetKpiGroupRequest) returns (GetKpiGroupResponse);
     rpc ListKpiGroups(ListKpiGroupsRequest) returns (ListKpiGroupsResponse);
     rpc CreateKpiGroup(CreateKpiGroupRequest) returns (CreateKpiGroupResponse);
     rpc DeleteKpiGroup(DeleteKpiGroupRequest) returns (DeleteKpiGroupResponse);
-    rpc GetKpiHistory(GetKpiHistoryRequest) returns (GetKpiHistoryResponse);
 
     // KPIEntry
     rpc GetKpiEntry(GetKpiEntryRequest) returns (GetKpiEntryResponse);
@@ -183,15 +182,20 @@ service HeartbeatHubService {
     rpc DeleteKpiEntry(DeleteKpiEntryRequest) returns (DeleteKpiEntryResponse);
 }
 
-message KpiRequest {
-    string code = 1;
-    string check = 2;
-    double value = 3;
-    string unit = 4;
+message Kpi {
+    string name = 1;
+    double value = 2;
+    string unit = 3;
 }
 
-message KpiResponse {
-    KpiEntry kpi_entry = 1;
+message BatchKpiRequest {
+    string check = 1;
+    string ping = 2;
+    repeated Kpi kpis = 3;
+}
+
+message BatchKpiResponse {
+    repeated string ids = 1;
 }
 
 message CreateKpiEntryRequest {
@@ -244,7 +248,7 @@ message ListKpiEntriesRequest {
 }
 
 message ListKpiEntriesResponse {
-    repeated Check checks = 1;
+    repeated KpiEntry entries = 1;
     string page_token = 2;
 }
 
@@ -254,16 +258,6 @@ message GetKpiEntryRequest {
 
 message GetKpiEntryResponse {
     KpiEntry entry = 1;
-}
-
-message GetKpiHistoryRequest {
-    string id = 1;
-    int32 page_size = 2;
-    string page_next = 3;
-}
-
-message GetKpiHistoryResponse {
-    repeated KpiEntry entries = 1;
 }
 
 message DeleteKpiGroupRequest {
@@ -318,7 +312,7 @@ message ListKpiGroupsRequest {
 }
 
 message ListKpiGroupsResponse {
-    repeated Check checks = 1;
+    repeated KpiGroup groups = 1;
     string page_token = 2;
 }
 
