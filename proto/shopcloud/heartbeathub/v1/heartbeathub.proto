@@ -90,6 +90,7 @@ message Ping {
     google.protobuf.Timestamp updated_at = 10;
 }
 
+/*
 message KPIRule {
     message TimeRange {
         int32 start_hour = 1;  // Startstunde (0-23)
@@ -102,7 +103,8 @@ message KPIRule {
     repeated int32 applicable_days = 5;   // Anwendbare Tage (0 = Sonntag, 1 = Montag, ..., 6 = Samstag)
     optional TimeRange time_tange = 6;    // Optionaler Zeitbereich, in dem die Regel gilt
     string message = 7;                  // Nachricht, die ausgegeben wird, wenn die Regel verletzt wird
-  }
+}
+*/
 
 message KpiGroup {
     enum GroupStatus {
@@ -112,7 +114,7 @@ message KpiGroup {
         GROUP_STATUS_ARCHIVED = 3;
         GROUP_STATUS_ERROR = 4;
         GROUP_STATUS_UNDER_REVIEW = 5;
-      }
+    }
 
     string id = 1;
     string name = 2;
@@ -136,8 +138,10 @@ message KpiEntry {
     string group = 2;
     double value = 3;
     string unit = 4;
-    google.protobuf.Timestamp ttl = 5;
-    google.protobuf.Timestamp created_at = 6;
+    string check = 5;
+    string ping = 6;
+    google.protobuf.Timestamp ttl = 7;
+    google.protobuf.Timestamp created_at = 8;
 }
 
 service HeartbeatHubService {
@@ -213,8 +217,10 @@ message ListKpiEntriesFilter {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_GROUP = 1;
         FIELD_VALUE = 2;
-        FIELD_CREATED_AT = 3;
-        FIELD_UPDATED_AT = 4;
+        FIELD_CHECK = 3;
+        FIELD_PING = 4;
+        FIELD_CREATED_AT = 5;
+        FIELD_UPDATED_AT = 6;
     }
 
     Field field = 1;
@@ -427,6 +433,7 @@ message ListChecksRequest {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
         ORDER_BY_UPDATED_AT = 2;
+        ORDER_BY_LAST_PING_AT = 3;
     }
 
     int32 page_size = 1;
