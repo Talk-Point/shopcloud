@@ -65,8 +65,8 @@ message Article {
     // last_invoice_at
     // abc_turnover_class
     // abc_profit_class
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp update_at = 6;
+    google.protobuf.Timestamp created_at = 21;
+    google.protobuf.Timestamp update_at = 22;
 }
 
 message SetArticleSellAlgorithmnRequest {
