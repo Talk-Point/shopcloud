@@ -1,0 +1,104 @@
+// WarehouseBrainHub API
+// This is the API for the WarehouseBrainHub service
+
+syntax = "proto3";
+
+package proto.shopcloud.warehousebrain.v2;
+
+import "google/protobuf/timestamp.proto";
+
+service WarehouseBrainHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // articles
+    rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
+    rpc GetArticle(GetArticleRequest) returns (GetArticleResponse);
+    rpc SetArticleSellAlgorithmn(SetArticleSellAlgorithmnRequest) returns (SetArticleSellAlgorithmnResponse);
+}
+
+enum EventType {
+    EVENT_TYPE_UNKNOWN_UNSPECIFIED = 0;
+    EVENT_TYPE_PRICE_DOWN = 1;
+    EVENT_TYPE_PRICE_UP = 2;
+    EVENT_TYPE_SELL_ALGORITHMN_CHANGE = 3;
+}
+
+message Event {
+    EventType type = 1;
+    string sku = 2;
+}
+
+message Article {
+    string sku = 1;
+    int32 mandant = 2;
+    string artikelnummer = 3;
+    int32 auspraegung_id = 4;
+    string matchcode = 5;
+    string variant = 6;
+    string variant_auspraegung_1 = 7;
+    string variant_auspraegung_2 = 8;
+    string hersteller = 9;
+    float lagerbestand = 10;
+    string steuerklasse = 11;
+    float lagerbestand_ohne_dispo = 12;
+    float lagerbestand_verfuegbar = 13;
+    string artikel_gruppenummer = 14;
+    float ek_letzter = 15;
+    float ek_mittlerer = 16;
+    float ek_kalkulatorischer = 17;
+    bool is_preisberechnung = 18;
+    float preisberechnung_zuschlag = 19;
+    string artikel_gruppe = 20;
+    // p_first_add
+    // last_add
+    // last_move
+    // last_out
+    // is_on_amz
+    // is_on_webshop
+    // is_on_ebay
+    // price_list2
+    // price_list3
+    // price_list6
+    // sell_algorithm
+    // last_order_at
+    // last_invoice_at
+    // abc_turnover_class
+    // abc_profit_class
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp update_at = 6;
+}
+
+message SetArticleSellAlgorithmnRequest {
+    string sku = 1;
+    string algorithmn = 2;
+}
+
+message SetArticleSellAlgorithmnResponse {
+    Article article = 1;
+}
+
+message ListArticlesRequest {
+    int32 page_size = 1;
+    int32 page = 2;
+}
+
+message ListArticlesResponse {
+    int32 page = 1;
+    int32 total = 2;
+    repeated Article articles = 3;
+}
+
+message GetArticleRequest {
+    string sku = 1;
+}
+
+message GetArticleResponse {
+    Article article = 1;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
