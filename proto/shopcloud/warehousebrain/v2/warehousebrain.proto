@@ -15,6 +15,7 @@ service WarehouseBrainHubService {
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     rpc GetArticle(GetArticleRequest) returns (GetArticleResponse);
     rpc SetArticleSellAlgorithmn(SetArticleSellAlgorithmnRequest) returns (SetArticleSellAlgorithmnResponse);
+    rpc BatchSetArticleSellAlgorithmn(BatchSetArticleSellAlgorithmnRequest) returns (BatchSetArticleSellAlgorithmnResponse);
 }
 
 enum EventType {
@@ -34,22 +35,22 @@ message Article {
     int32 mandant = 2;
     string artikelnummer = 3;
     int32 auspraegung_id = 4;
-    string matchcode = 5;
-    string variant = 6;
-    string variant_auspraegung_1 = 7;
-    string variant_auspraegung_2 = 8;
-    string hersteller = 9;
-    float lagerbestand = 10;
-    string steuerklasse = 11;
-    float lagerbestand_ohne_dispo = 12;
-    float lagerbestand_verfuegbar = 13;
-    string artikel_gruppenummer = 14;
-    float ek_letzter = 15;
-    float ek_mittlerer = 16;
-    float ek_kalkulatorischer = 17;
-    bool is_preisberechnung = 18;
-    float preisberechnung_zuschlag = 19;
-    string artikel_gruppe = 20;
+    // string matchcode = 5;
+    // string variant = 6;
+    // string variant_auspraegung_1 = 7;
+    // string variant_auspraegung_2 = 8;
+    // string hersteller = 9;
+    // float lagerbestand = 10;
+    // string steuerklasse = 11;
+    // float lagerbestand_ohne_dispo = 12;
+    // float lagerbestand_verfuegbar = 13;
+    // string artikel_gruppenummer = 14;
+    // float ek_letzter = 15;
+    // float ek_mittlerer = 16;
+    // float ek_kalkulatorischer = 17;
+    // bool is_preisberechnung = 18;
+    // float preisberechnung_zuschlag = 19;
+    // string artikel_gruppe = 20;
     // p_first_add
     // last_add
     // last_move
@@ -76,6 +77,14 @@ message SetArticleSellAlgorithmnRequest {
 
 message SetArticleSellAlgorithmnResponse {
     Article article = 1;
+}
+
+message BatchSetArticleSellAlgorithmnRequest {
+    repeated SetArticleSellAlgorithmnRequest articles = 1;
+}
+
+message BatchSetArticleSellAlgorithmnResponse {
+    repeated Article articles = 1;
 }
 
 message ListArticlesRequest {
