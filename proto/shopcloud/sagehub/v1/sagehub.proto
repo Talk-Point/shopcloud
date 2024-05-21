@@ -99,10 +99,7 @@ message Feed {
     google.protobuf.Timestamp update_at = 6;
 
     message HttpSource {
-        string endpoint = 1;
-        string username = 2;
-        string password = 3;
-        string remote_path = 4;
+        string url = 1;
     }
     
     message FtpSource {
@@ -139,7 +136,7 @@ service SageHubService {
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
     // VKBelege
-    rpc GetVKBelegV1(GetVKBelegV1Request) returns (GetVKBelegV1Response);
+    rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
@@ -156,7 +153,63 @@ service SageHubService {
     rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
     rpc CreateFeedFile(CreateFeedFileRequest) returns (CreateFeedFileResponse);
     rpc DeleteFeed(DeleteFeedRequest) returns (DeleteFeedResponse);
+
+    // Articles
+    // Articles Prices
+    rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
+    rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
+    rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
 }
+
+message PriceList {
+    int32 mandant = 1;
+    int64 id = 2;
+    string name = 3;
+    string currency = 4;
+    bool is_brutto_price = 5;
+}
+
+message ListArticlesPriceListsRequest {
+    int32 mandant = 1;
+    int32 page_size = 2;
+    int32 page = 3;
+}
+
+message ListArticlesPriceListsResponse {
+    repeated PriceList price_lists = 1;
+}
+
+message GetArticlePricesRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message ArticlePrice {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    int64 list = 4;
+    string list_name = 5;
+    double price = 6;
+    string currency = 7;
+}
+
+message GetArticlePricesResponse {
+    repeated ArticlePrice prices = 1;
+}
+
+message UpdateArticlePriceRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    int64 list = 4;
+    double price = 5;
+    string by_user_id = 6;
+    string by_user_name = 7;
+}
+
+message UpdateArticlePriceResponse {}
 
 message CreateFeedFileRequest {
     string feed = 1;
@@ -376,8 +429,8 @@ message GetVKBelegEventRequest {
 // EVENT_VK_BELEG_TOPIC_CREATED
 message EventVkBelegCreated {
     EventTopic topic = 1;
-    VKBelegV1 beleg = 2;
-    repeated VKBelegePositionenV1 positions = 3;
+    VKBelegV2 beleg = 2;
+    repeated VKBelegePositionenV2 positions = 3;
     repeated VKBelegeWarehousePositionV1 warehouse_positions = 4;
     google.protobuf.Timestamp beleg_created_at = 5;
     google.protobuf.Timestamp created_at = 6;
@@ -462,7 +515,9 @@ message EventFeedFileCreated {
     string supplier = 3;
     string name = 4;
     string uri = 5;
-    google.protobuf.Timestamp created_at = 6;
+    int64 size = 6;
+    string size_humanized = 7;
+    google.protobuf.Timestamp created_at = 8;
 }
 
 message GetVKBelegEventResponse {
@@ -518,7 +573,7 @@ enum MahnstufeStatus {
     MAHNSTUFE_STATUS_3 = 4;
 }
 
-message VKBelegV1 {
+message VKBelegV2 {
     int32 mandant = 1;
     int64 vor_id = 2;
     int64 bel_id = 3;
@@ -548,9 +603,10 @@ message VKBelegV1 {
     repeated string tags = 27;
     MahnstufeStatus user_mahnstufe = 28;
     double roherloes = 29;
+    repeated string suppliers = 30;
 }
 
-message VKBelegePositionenV1 {
+message VKBelegePositionenV2 {
     int64 bel_pos_id = 1;
     int64 vor_pos_id = 2;
     string position = 3;
@@ -572,12 +628,9 @@ message VKBelegePositionenV1 {
     google.protobuf.Timestamp user_ep_bestellt_markiert_datum = 19;
     string user_versandklasse = 20;
     string user_sonepar_artikel = 21;
-    double user_bestand_sonepar = 22;
-    string user_ep_artikel = 23;
-    double user_bestand_ep = 24;
-    string user_zulieferer_code = 25;
-    string user_zulieferer_artikelnummer = 26;
-    double user_zulieferer_bestand = 27;
+    string user_zulieferer_code = 22;
+    string user_zulieferer_artikelnummer = 23;
+    double user_zulieferer_bestand = 24;
 }
 
 message VKBelegeWarehousePositionV1 {
@@ -592,14 +645,14 @@ message VKBelegeWarehousePositionV1 {
     double dispobestand = 9;
 }
 
-message GetVKBelegV1Request {
+message GetVKBelegV2Request {
     int32 mandant = 1;
     int64 bel_id = 2;
 }
 
-message GetVKBelegV1Response {
-    VKBelegV1 beleg = 1;
-    repeated VKBelegePositionenV1 positions = 2;
+message GetVKBelegV2Response {
+    VKBelegV2 beleg = 1;
+    repeated VKBelegePositionenV2 positions = 2;
     repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
 }
 
