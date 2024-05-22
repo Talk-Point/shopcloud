@@ -604,6 +604,7 @@ message VKBelegV2 {
     MahnstufeStatus user_mahnstufe = 28;
     double roherloes = 29;
     repeated string suppliers = 30;
+    string wkz = 31;
 }
 
 message VKBelegePositionenV2 {
