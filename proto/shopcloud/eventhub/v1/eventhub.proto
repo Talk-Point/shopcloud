@@ -65,6 +65,12 @@ message Event {
     google.protobuf.Timestamp updated_at = 12;
 }
 
+message SubscriptionMetric {
+    string id = 1;
+    int32 count = 2;
+    string status = 3;
+}
+
 message Subscription {
     enum Type {
         TYPE_HTTP_UNSPECIFIED = 0;
@@ -188,6 +194,7 @@ service EventHubDispatcherService {
     rpc SetDelaySubscription(SetDelaySubscriptionRequest) returns (SetDelaySubscriptionResponse);
     rpc SetTransformerSubscription(SetTransformerSubscriptionRequest) returns (SetTransformerSubscriptionResponse);
     rpc SetSubscriptionFilter(SetSubscriptionFilterRequest) returns (SetSubscriptionFilterResponse);
+    rpc ListSubscriptionMetrics(ListSubscriptionMetricsRequest) returns (ListSubscriptionMetricsResponse);
 
     // Delivery
     rpc GetDelivery(GetDeliveryRequest) returns (GetDeliveryResponse);
@@ -212,6 +219,25 @@ service EventHubDispatcherService {
     rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+}
+
+message TimeRange {
+    string start_at = 1; // ISO 8601 format
+    string end_at = 2; // ISO 8601 format
+}
+
+message ListSubscriptionMetricsRequest {
+    string id = 1;
+    oneof time_frame {
+        TimeRange range = 2;
+        google.protobuf.Duration duration = 3;
+    }
+}
+
+message ListSubscriptionMetricsResponse {
+    repeated SubscriptionMetric metrics = 1;
+    google.protobuf.Timestamp start_at = 2;
+    google.protobuf.Timestamp end_at = 3;
 }
 
 message FilterRequest {
