@@ -148,6 +148,7 @@ service SageHubService {
 
     // Feeds
     rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
+    rpc GetFeedByName(GetFeedByNameRequest) returns (GetFeedByNameResponse);
     rpc ListFeeds(ListFeedsRequest) returns (ListFeedsResponse);
     rpc ListFeedFiles(ListFeedFilesRequest) returns (ListFeedFilesResponse);
     rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
@@ -219,6 +220,15 @@ message CreateFeedFileRequest {
 
 message CreateFeedFileResponse {
     string uri = 1;
+}
+
+message GetFeedByNameRequest {
+    string name = 1;
+    string supplier = 2;
+}
+
+message GetFeedByNameResponse {
+    Feed feed = 1;
 }
 
 message GetFeedRequest {
@@ -338,11 +348,12 @@ message GetVKBelegPulseRequest {
 message VKBelegPulseV1 {
     int32 mandant = 1;
     string kundengruppe = 2;
-    int32 orders = 3;
-    double turnover = 4;
-    double product_qty = 5;
-    double product_turnover = 6;
-    double product_profit = 7;
+    string kundengruppe_name = 3;
+    int32 orders = 4;
+    double turnover = 5;
+    double product_qty = 6;
+    double product_turnover = 7;
+    double product_profit = 8;
 
     message Metrics {
         int32 orders = 1;
