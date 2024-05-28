@@ -136,8 +136,10 @@ service SageHubService {
     rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
+
     // VKBelege
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
+    rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
@@ -146,6 +148,7 @@ service SageHubService {
     rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
+    rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
 
     // Feeds
     rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
@@ -354,6 +357,63 @@ message BatchEmitVKBelegEventsResponse {
 message TimeRange {
     string start_at = 1; // ISO 8601 format
     string end_at = 2; // ISO 8601 format
+}
+
+message ListVKBelegSalechannelsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+}
+
+message SalechannelItem {
+    int32 mandant = 1;
+    string code = 2;
+    string name = 3;
+}
+
+message ListVKBelegSalechannelsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated SalechannelItem items = 3;
+}
+
+message ListVKBelegPositionsPulseRequest {
+    oneof time_frame {
+        TimeRange range = 1;
+        google.protobuf.Duration duration = 2;
+        TimeFramePreset range_shortcut = 3;
+    }
+    int32 page_size = 4;
+    int32 page = 5;
+    int32 mandant = 6;
+    repeated VKBelegart belegart_items = 7;
+    string kundengruppe = 8;
+    string supplier = 9;
+    string artikelnummer = 10;
+    string search = 11;
+}
+
+message VKBelegProductPulseItem {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string sku = 4;
+    string bezeichnung = 5;
+    string variante = 6;
+    string supplier = 7;
+    string versandklasse = 8; 
+    int32 bestellungen = 9;
+    double menge = 10;
+    double mittlerer_ek = 11; 
+    double umsatz = 12;
+    double roherloes = 13;
+}
+
+message ListVKBelegPositionsPulseResponse {
+    int32 page_size = 1;
+    int32 page = 2;
+    repeated VKBelegProductPulseItem items = 3;
 }
 
 message GetVKBelegPulseRequest {
