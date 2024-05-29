@@ -1,0 +1,338 @@
+// ContentHub API
+// To access the erp
+
+syntax = "proto3";
+
+package proto.shopcloud.contenthub.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+// Scopes
+enum Scope {
+    SCOPE_UNSPECIFIED = 0;
+    SCOPE_READ = 1;
+    SCOPE_WRITE = 2;
+    SCOPE_ADMIN = 3;
+}
+
+// Models
+message ApiKey {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    repeated Scope scopes = 4;
+    string secret = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+message Attribute {
+
+    string id = 1;
+    repeated string keys = 2;
+    string group = 3;
+    string group_value = 4;
+    repeated string languages = 5;
+    string value = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+service ContentHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // APIKeys
+    rpc GetApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
+    rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse);
+    rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
+    rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
+    rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+
+    // AttributeGroup
+    rpc GetAttributeGroup(GetAttributeGroupRequest) returns (GetAttributeGroupResponse);
+    rpc ListAttributeGroups(ListAttributeGroupsRequest) returns (ListAttributeGroupsResponse);
+    rpc CreateAttributeGroup(CreateAttributeGroupRequest) returns (CreateAttributeGroupResponse);
+    rpc DeleteAttributeGroup(DeleteAttributeGroupRequest) returns (DeleteAttributeGroupResponse);
+    // Attribute
+    rpc GetAttribute(GetAttributeRequest) returns (GetAttributeResponse);
+    rpc ListAttributes(ListAttributesRequest) returns (ListAttributesResponse);
+    rpc CreateAttribute(CreateAttributeRequest) returns (CreateAttributeResponse);
+    rpc DeleteAttribute(DeleteAttributeRequest) returns (DeleteAttributeResponse);
+    
+    // Icecat
+    rpc GetIcecatProductXml(GetIcecatProductXmlRequest) returns (GetIcecatProductXmlResponse);
+    rpc ListIcecatProductDocuments(ListIcecatProductDocumentsRequest) returns (ListIcecatProductDocumentsResponse);
+    rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
+}
+
+message ListAttributeGroupsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_GROUP = 1;
+        FIELD_NAME = 2;
+        FIELD_CREATED_AT = 3;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListAttributeGroupsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListAttributeGroupsFilter filters = 6;
+}
+
+message ListAttributeGroupsResponse {
+    repeated AttributeGroup groups = 1;
+    string page_token = 2;
+}
+
+message GetAttributeGroupRequest {
+    string id = 1;
+}
+
+message GetAttributeGroupResponse {
+    AttributeGroup attribute_group = 1;
+}
+
+message AttributeGroup {
+    string id = 1;
+    string group = 2;
+    string name = 3;
+    repeated string allowed_values = 4;
+    repeated string example_values = 5;
+    int32 relevance = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateAttributeGroupRequest {
+    string group = 1;
+    string name = 2;
+    repeated string allowed_values = 3;
+    repeated string example_values = 4;
+    int32 relevance = 5;
+}
+
+message CreateAttributeGroupResponse {
+    AttributeGroup attribute_group = 1;
+}
+
+message DeleteAttributeGroupRequest {
+    string id = 1;
+}
+
+message DeleteAttributeGroupResponse {
+    AttributeGroup attribute_group = 1;
+}
+
+message GetIcecatDocumentRequest {
+    string src = 1;
+}
+
+message GetIcecatDocumentResponse {
+    string name = 1;
+    string type = 2;
+    bytes content = 3;
+}
+
+message IcecatDocument {
+    string name = 1;
+    string type = 2;
+    string src = 3;
+}
+
+message ListIcecatProductDocumentsRequest {
+    string gtin = 1;
+    string language = 2;
+}
+
+message ListIcecatProductDocumentsResponse {
+    repeated IcecatDocument documents = 1;
+}
+
+message GetIcecatProductXmlRequest {
+    string gtin = 1;
+    string language = 2;
+    bool not_use_cache = 3;
+}
+
+message GetIcecatProductXmlResponse {
+    string content = 1;
+}
+
+message GetAttributeRequest {
+    string id = 1;
+}
+
+message GetAttributeResponse {
+    Attribute attribute = 1;
+}
+
+message Document {
+    bytes content = 1;
+    string name = 2;
+}
+
+message CreateAttributeRequest {
+    string group = 1;
+    repeated string keys = 2;
+    repeated string languages = 4;
+    oneof value {
+        string content = 5;
+        Document document = 6;
+    }
+}
+
+message CreateAttributeResponse {
+    Attribute attribute = 1;
+}
+
+message ListAttributesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_KEYS = 1;
+        FIELD_GROUP = 2;
+        FIELD_CREATED_AT = 3;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListAttributesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListAttributesFilter filters = 6;
+}
+
+message ListAttributesResponse {
+    repeated Attribute attributes = 1;
+    string page_token = 2;
+}
+
+message DeleteAttributeRequest {
+    string id = 1;
+}
+
+message DeleteAttributeResponse {
+    Attribute attribute = 1;
+}
+
+message GetApiKeyRequest {
+    string id = 1;
+}
+
+message GetApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message ListApiKeysFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_USERNAME = 1;
+        FIELD_EMAIL = 2;
+        FIELD_SECRET = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListApiKeysRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListApiKeysFilter filters = 6;
+}
+
+message ListApiKeysResponse {
+    repeated ApiKey api_keys = 1;
+    string page_token = 2;
+}
+
+message CreateApiKeyRequest {
+    string username = 1;
+    string email = 2;
+    repeated Scope scopes = 3;
+}
+
+message CreateApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message DeleteApiKeyRequest {
+    string id = 1;
+}
+
+message DeleteApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message UpdateScopesByApiKeyRequest {
+    string id = 1;
+    repeated string scopes = 2;
+}
+
+message UpdateScopesByApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
