@@ -50,12 +50,22 @@ message ApiKey {
 }
 
 message Attribute {
-
     string id = 1;
     repeated string keys = 2;
     string group = 3;
     string group_value = 4;
     repeated string languages = 5;
+    string value = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+message AttributeFlat {
+    string id = 1;
+    string key = 2;
+    string group = 3;
+    string group_value = 4;
+    string language = 5;
     string value = 6;
     google.protobuf.Timestamp created_at = 7;
     google.protobuf.Timestamp updated_at = 8;
@@ -82,11 +92,33 @@ service ContentHubService {
     rpc ListAttributes(ListAttributesRequest) returns (ListAttributesResponse);
     rpc CreateAttribute(CreateAttributeRequest) returns (CreateAttributeResponse);
     rpc DeleteAttribute(DeleteAttributeRequest) returns (DeleteAttributeResponse);
+    rpc UpdateAttributeValue(UpdateAttributeValueRequest) returns (UpdateAttributeValueResponse);
+    rpc ExportAttributeToDb(ExportAttributeToDbRequest) returns (ExportAttributeToDbResponse);
     
     // Icecat
     rpc GetIcecatProductXml(GetIcecatProductXmlRequest) returns (GetIcecatProductXmlResponse);
     rpc ListIcecatProductDocuments(ListIcecatProductDocumentsRequest) returns (ListIcecatProductDocumentsResponse);
     rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
+}
+
+message ExportAttributeToDbRequest {
+    string id = 1;
+}
+
+message ExportAttributeToDbResponse {
+    repeated AttributeFlat attributes = 1;
+}
+
+message UpdateAttributeValueRequest {
+    string id = 1;
+    oneof value {
+        string content = 2;
+        Document document = 3;
+    }
+}
+
+message UpdateAttributeValueResponse {
+    Attribute attribute = 1;
 }
 
 message ListAttributeGroupsFilter {
