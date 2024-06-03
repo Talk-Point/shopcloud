@@ -54,7 +54,6 @@ message Attribute {
     repeated string keys = 2;
     string group = 3;
     string group_value = 4;
-    repeated string languages = 5;
     string value = 6;
     google.protobuf.Timestamp created_at = 7;
     google.protobuf.Timestamp updated_at = 8;
@@ -95,10 +94,50 @@ service ContentHubService {
     rpc UpdateAttributeValue(UpdateAttributeValueRequest) returns (UpdateAttributeValueResponse);
     rpc ExportAttributeToDb(ExportAttributeToDbRequest) returns (ExportAttributeToDbResponse);
     
+    // Content Section
+    rpc RenderContentSection(RenderContentSectionRequest) returns (RenderContentSectionResponse);
+
     // Icecat
     rpc GetIcecatProductXml(GetIcecatProductXmlRequest) returns (GetIcecatProductXmlResponse);
     rpc ListIcecatProductDocuments(ListIcecatProductDocumentsRequest) returns (ListIcecatProductDocumentsResponse);
     rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
+    rpc BatchImportIcecatDocuments(BatchImportIcecatDocumentsRequest) returns (BatchImportIcecatDocumentsResponse);
+    rpc ImportIcecatDocument(ImportIcecatDocumentRequest) returns (ImportIcecatDocumentResponse);
+}
+
+enum ContentSectionType {
+    CONTENT_SECTION_TYPE_UNSPECIFIED = 0;
+    CONTENT_SECTION_TYPE_DOCUMENTS_V1 = 1;
+}
+
+message RenderContentSectionRequest {
+    ContentSectionType section = 1;
+    string gtin = 2;
+    string language = 3;
+}
+
+message RenderContentSectionResponse {
+    string content = 1;
+    string cache_path = 2;
+}
+
+message ImportIcecatDocumentRequest {
+    string gtin = 1;
+    string language = 2;
+    IcecatDocument document = 3;
+}
+
+message ImportIcecatDocumentResponse {
+    Attribute attribute = 1;
+}
+
+message BatchImportIcecatDocumentsRequest {
+    string gtin = 1;
+    string language = 2;
+}
+
+message BatchImportIcecatDocumentsResponse {
+    repeated Attribute attributes = 1;
 }
 
 message ExportAttributeToDbRequest {
@@ -126,7 +165,8 @@ message ListAttributeGroupsFilter {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_GROUP = 1;
         FIELD_NAME = 2;
-        FIELD_CREATED_AT = 3;
+        FIELD_TAGS = 3;
+        FIELD_CREATED_AT = 4;
     }
 
     Field field = 1;
@@ -168,8 +208,9 @@ message AttributeGroup {
     repeated string allowed_values = 4;
     repeated string example_values = 5;
     int32 relevance = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
+    repeated string tags = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
 }
 
 message CreateAttributeGroupRequest {
