@@ -160,10 +160,46 @@ service SageHubService {
     rpc DeleteFeed(DeleteFeedRequest) returns (DeleteFeedResponse);
 
     // Articles
+    rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
+}
+
+message ListArticlesRequest {
+    int32 mandant = 1;
+    int32 page_size = 2;
+    int32 page = 3;
+}
+
+message ListArtikel {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string matchcode = 4;
+    string bezeichnung1 = 5;
+    string bezeichnung2 = 6;
+    string variante = 7;
+    string varianten_auspraegung = 8;
+    string hersteller = 9;
+    string versandklasse = 10;
+    double lagerbestand_verfuegbar = 11;
+    double letzter_ek = 12;
+    double mittlerer_ek = 13;
+    double kalkulatorischer_ek = 14;
+    bool scmp_aktiv = 15;
+    string zulieferer_code = 16;
+    string zulieferer_artikelnummer = 17;
+    double zulieferer_bestand = 18;
+    bool aktiv = 19;
+}
+
+message ListArticlesResponse {
+    int32 mandant = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+    repeated ListArtikel items = 4;
 }
 
 message PriceList {
