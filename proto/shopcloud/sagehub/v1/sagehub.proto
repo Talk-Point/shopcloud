@@ -161,16 +161,269 @@ service SageHubService {
 
     // Articles
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
+    rpc GetArticleCoreData(GetArticleCoreDataRequest) returns (GetArticleCoreDataResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
+    // Onlinbezeichner
+    rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+}
+
+message ArticleImage {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string bild_1 = 4;
+    string bild_2 = 5;
+    string bild_3 = 6;
+    string bild_4 = 7;
+    string bild_5 = 8;
+    string bild_6 = 9;
+    string bild_7 = 10;
+    string bild_8 = 11;
+    string bild_9 = 12;
+    string bild_10 = 13;
+    string bild_11 = 14;
+    string bild_12 = 15;
+    string bild_13 = 16;
+    string bild_14 = 17;
+    string bild_15 = 18;
+    string bild_16 = 19;
+    string bild_17 = 20;
+    string bild_18 = 21;
+    string bild_19 = 22;
+    string bild_20 = 23;
+    string bild_21 = 24;
+    string bild_22 = 25;
+    string bild_23 = 26;
+    string bild_24 = 27;
+}
+
+message GetArticleImageRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message GetArticleImageResponse {
+    ArticleImage article_image = 1;
+}
+
+message KhkArtikel {
+    string artikelnummer = 1;
+    int32 mandant = 2;
+    string bezeichnung1 = 3;
+    string bezeichnung2 = 4;
+    string matchcode = 5;
+    string langtext = 6;
+    string dimensionstext = 7;
+    string dimensionstexthtml = 8;
+    string dimensionstextrtf = 9;
+    string memo = 10;
+    string artikelgruppe = 11;
+    string ersatzartikelnummer = 12;
+    string hersteller = 13;
+    string hartikelnummer = 14;
+    string steuerklasse = 15;
+    string erloescode = 16;
+    string wareneingangscode = 17;
+    string wareneinsatzcode = 18;
+    string warenbestandcode = 19;
+    string sachkontovk = 20;
+    string sachkontoek = 21;
+    string sachkontowz = 22;
+    string sachkontowb = 23;
+    int32 isteinmalartikel = 24;
+    int32 istprovisionierbar = 25;
+    int32 nachweispflicht = 26;
+    string verkaufsmengeneinheit = 27;
+    string mengenberechnungvk = 28;
+    int32 dezimalstellenvk = 29;
+    double umrechnungsfaktorvk = 30;
+    string verpackungseinheitvk = 31;
+    double umrechnungsfaktorvpvk = 32;
+    string preiseinheitvk = 33;
+    string basismengeneinheit = 34;
+    int32 dezimalstellenbasis = 35;
+    string lagermengeneinheit = 36;
+    int32 dezimalstellenlager = 37;
+    double umrechnungsfaktorlme = 38;
+    int32 lagerfuehrung = 39;
+    int32 lagerplatzzuordnung = 40;
+    string gewichtseinheit = 41;
+    int32 preispflegeek = 42;
+    int32 istbestellartikel = 43;
+    int32 istverkaufsartikel = 44;
+    int32 stuecklistentyp = 45;
+    int32 istkundenkartei = 46;
+    int32 istlieferantenkartei = 47;
+    int32 istrabattfaehig = 48;
+    double gemeinkostenzuschlag = 49;
+    double bezugskostenzuschlag = 50;
+    double gewinnzuschlag = 51;
+    int32 bewertungssatz = 52;
+    string kostenstelle = 53;
+    string kostentraeger = 54;
+    int32 istfavorit = 55;
+    int32 istvorlage = 56;
+    int32 chargenpflicht = 57;
+    string warennummer = 58;
+    string ursprungsregion = 59;
+    string bestimmungsregion = 60;
+    string rabattgruppe = 61;
+    double laenge = 62;
+    double breite = 63;
+    double hoehe = 64;
+    string intrastatmengeneinheit = 65;
+    double umrechnungsfaktorintrame = 66;
+    int32 dezimalstellenintrame = 67;
+    string hauptartikelgruppe = 68;
+    string vaterartikelgruppe = 69;
+    string grundpreiseinheit = 70;
+    double umrechnungsfaktorgp = 71;
+    double grundpreisbasis = 72;
+    int32 platzid = 73;
+    string entnahmeverfahren = 74;
+    string variante = 75;
+    int32 inventurmethode = 76;
+    int32 aktiv = 77;
+    int32 artikelart = 78;
+    string ressourcenref = 79;
+    string zeichnungsnummer = 80;
+    string gemeinkostenid = 81;
+    double minimalelosgroesse = 82;
+    double maximalelosgroesse = 83;
+    int32 istfertigungsartikel = 84;
+    int32 istunterbaugruppe = 85;
+    int32 istersatzteil = 86;
+    int32 istverschleissteil = 87;
+    string schwundart = 88;
+    double schwund = 89;
+    int32 pkonfigistkonfigartikel = 90;
+    string pkonfiganwendung = 91;
+    int32 istfremdleistung = 92;
+    double kalkulationslosgroesse = 93;
+    string ursprungsland = 94;
+    string statwerteingang = 95;
+    string statwertversendung = 96;
+    string eigenmasse = 97;
+    string statverfahren = 98;
+    int32 dezimalstellenpreis = 99;
+    int32 verbrauchsteuer = 100;
+    int32 besteuerungsart = 101;
+    bytes timestamp = 102;
+    string user_versandklasse = 103;
+    string user_soneparartikel = 104;
+    string user_exportb2b = 105;
+    string user_topnew = 106;
+    int32 user_preisberechnung = 107;
+    double user_preisermittlungszuschlag = 108;
+    double user_preislistenfaktor = 109;
+    string user_importid = 110;
+    string user_zentraldispo = 111;
+    string user_bestandsonepar = 112;
+    string user_energieeffizienzklasse = 113;
+    string user_meinpaketmarketplacecategorie = 114;
+    string user_meinpaketvariantconfiguration = 115;
+    string user_accessorieincart = 116;
+    string user_360grad = 117;
+    string user_schutzklickcategory = 118;
+    bool user_bware = 119;
+    string user_epartikel = 120;
+    double user_bestandep = 121;
+    string user_bwarelabel = 122;
+    string langtexthtml = 123;
+    string langtextrtf = 124;
+    int32 herkunft = 125;
+    int32 istskontierfaehig = 126;
+    string user_autovergabesn = 127;
+    string user_zulieferercode = 128;
+    string user_zuliefererartikelnummer = 129;
+    double user_zuliefererbestand = 130;
+}
+
+message KhkArtikelVariante {
+    string artikelnummer = 1;
+    int32 mandant = 2;
+    int32 auspraegungid = 3;
+    string eannummer = 4;
+    string abcklasse = 5;
+    double lagerbestand = 6;
+    double lagerbestandohnedisp = 7;
+    double lagerbestandverfuegbar = 8;
+    double gewicht = 9;
+    double gewichtlme = 10;
+    double letzterek = 11;
+    double mittlererek = 12;
+    double kalkulatorischerek = 13;
+    double letzterfek = 14;
+    int32 hatzubehoer = 15;
+    int32 earmeldepflicht = 16;
+    string earregnr = 17;
+    string earmarke = 18;
+    string earkategorie = 19;
+    string eargeraeteart = 20;
+    string earproduktgruppe = 21;
+    double eargewicht = 22;
+    string user_hattekeinenlagerbestandvorwe = 23;
+    string formelid = 24;
+    string dispoformel = 25;
+    double dispofaktor = 26;
+    double bestellmenge = 27;
+    int32 bestellzeitpunkt = 28;
+    double meldebestand = 29;
+    string hauptlieferant = 30;
+    string letzterlieferant = 31;
+    int32 wiederbeschaffungszeit = 32;
+    int32 wsistwebshopartikel = 33;
+    int32 wsistverkaufsartikel = 34;
+    string wsterminverkaufab = 35;
+    int32 wsistsichtbar = 36;
+    int32 wsistneu = 37;
+    string wsterminneubis = 38;
+    int32 wslageranzeige = 39;
+    int32 wszeigehersteller = 40;
+    string wsguid = 41;
+    int32 wsistgeaendert = 42;
+    int32 wsisthauptbildgeaendert = 43;
+    int32 wsistgaleriegeaendert = 44;
+    string wsaktuelleshauptbild = 45;
+    string wsaktuellegaleriebilder = 46;
+    int32 wsiststandardvariante = 47;
+    string wsterminverkaufbis = 48;
+    double wsmindestbestellmenge = 49;
+    double wsstaffelung = 50;
+    int32 user_scmpaktiv = 51;
+    string lagermodulekbme = 52;
+    string lagermodulvkbme = 53;
+}
+
+message KhkVariantenAuspraegungen {
+    int32 mandant = 1;
+    int32 auspraegung_id = 2;
+    string variante = 3;
+    string auspraegung1 = 4;
+    string auspraegung2 = 5;
+}
+
+message GetArticleCoreDataRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message GetArticleCoreDataResponse {
+    KhkArtikel khk_artikel = 1;
+    KhkArtikelVariante khk_artikel_variante = 2;
+    KhkVariantenAuspraegungen khk_varianten_auspraegungen = 3;
 }
 
 message ListArticlesRequest {
     int32 mandant = 1;
     int32 page_size = 2;
     int32 page = 3;
+    string search = 4;
 }
 
 message ListArtikel {
@@ -193,6 +446,7 @@ message ListArtikel {
     string zulieferer_artikelnummer = 17;
     double zulieferer_bestand = 18;
     bool aktiv = 19;
+    string ean = 20;
 }
 
 message ListArticlesResponse {
