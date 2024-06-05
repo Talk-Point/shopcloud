@@ -103,11 +103,22 @@ service ContentHubService {
     rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
     rpc BatchImportIcecatDocuments(BatchImportIcecatDocumentsRequest) returns (BatchImportIcecatDocumentsResponse);
     rpc ImportIcecatDocument(ImportIcecatDocumentRequest) returns (ImportIcecatDocumentResponse);
+    rpc ImportIcecatEnergyData(ImportIcecatEnergyDataRequest) returns (ImportIcecatEnergyDataResponse);
+}
+
+message ImportIcecatEnergyDataRequest {
+    string gtin = 1;
+    string language = 2;
+}
+
+message ImportIcecatEnergyDataResponse {
+    repeated Attribute attributes = 1;
 }
 
 enum ContentSectionType {
     CONTENT_SECTION_TYPE_UNSPECIFIED = 0;
     CONTENT_SECTION_TYPE_DOCUMENTS_V1 = 1;
+    CONTENT_SECTION_TYPE_EU_ENERGIE_LABEL_V1 = 2;
 }
 
 message RenderContentSectionRequest {
