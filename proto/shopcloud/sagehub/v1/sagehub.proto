@@ -273,7 +273,7 @@ message KhkArtikel {
     double gemeinkostenzuschlag = 49;
     double bezugskostenzuschlag = 50;
     double gewinnzuschlag = 51;
-    int32 bewertungssatz = 52;
+    double bewertungssatz = 52;
     string kostenstelle = 53;
     string kostentraeger = 54;
     int32 istfavorit = 55;
@@ -298,7 +298,7 @@ message KhkArtikel {
     string entnahmeverfahren = 74;
     string variante = 75;
     int32 inventurmethode = 76;
-    int32 aktiv = 77;
+    bool aktiv = 77;
     int32 artikelart = 78;
     string ressourcenref = 79;
     string zeichnungsnummer = 80;
@@ -328,7 +328,7 @@ message KhkArtikel {
     string user_soneparartikel = 104;
     string user_exportb2b = 105;
     string user_topnew = 106;
-    int32 user_preisberechnung = 107;
+    bool user_preisberechnung = 107;
     double user_preisermittlungszuschlag = 108;
     double user_preislistenfaktor = 109;
     string user_importid = 110;
@@ -405,7 +405,7 @@ message KhkArtikelVariante {
     string wsterminverkaufbis = 48;
     double wsmindestbestellmenge = 49;
     double wsstaffelung = 50;
-    int32 user_scmpaktiv = 51;
+    bool user_scmpaktiv = 51;
     string lagermodulekbme = 52;
     string lagermodulvkbme = 53;
 }
