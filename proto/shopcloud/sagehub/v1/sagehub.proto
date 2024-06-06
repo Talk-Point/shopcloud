@@ -162,12 +162,23 @@ service SageHubService {
     // Articles
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     rpc GetArticleCoreData(GetArticleCoreDataRequest) returns (GetArticleCoreDataResponse);
+    rpc GetArticleGtin(GetArticleGtinRequest) returns (GetArticleGtinResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+}
+
+message GetArticleGtinRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message GetArticleGtinResponse {
+    string gtin = 1;
 }
 
 message ArticleImage {
