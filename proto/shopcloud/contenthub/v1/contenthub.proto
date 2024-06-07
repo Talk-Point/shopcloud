@@ -113,8 +113,9 @@ message Tag {
     Color color = 7;
     repeated string search_keys = 8;
     string memo = 9;
-    google.protobuf.Timestamp created_at = 10;
-    google.protobuf.Timestamp updated_at = 11;
+    string src = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
 }
 
 service ContentHubService {
@@ -320,6 +321,7 @@ message CreateTagRequest {
     Tag.Color color = 6;
     repeated string search_keys = 7;
     string memo = 8;
+    string src = 9;
 }
 
 message CreateTagResponse {
