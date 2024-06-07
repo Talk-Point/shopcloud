@@ -70,15 +70,50 @@ message AttributeFlat {
     google.protobuf.Timestamp updated_at = 8;
 }
 
+message Log {
+    enum Action {
+        ACTION_UNSPECIFIED = 0;
+        ACTION_CREATE = 1;
+        ACTION_UPDATE = 2;
+        ACTION_DELETE = 3;
+    }
+
+    string id = 1;
+    string for = 2;
+    string reference = 3;
+    Action action = 4;
+    string by_user = 5;
+    string by_username = 6;
+    map<string, string> payload = 7;
+    google.protobuf.Timestamp ttl = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
 message Tag {
+    enum Relevance {
+        RELEVANCE_UNSPECIFIED = 0;
+        RELEVANCE_LOW = 1;
+        RELEVANCE_MEDIUM = 2;
+        RELEVANCE_HIGH = 3;
+        RELEVANCE_STATUS = 4;
+    }
+    enum Color {
+        COLOR_UNSPECIFIED = 0;
+        COLOR_YELLOW = 1;
+        COLOR_RED = 2;
+        COLOR_GREEN = 3;
+        COLOR_BLUE = 4;
+    }
+
     string id = 1;
     string type = 2;
     string name = 3;
     string reference = 4;
     string created_by = 5;
-    int32 relevance = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
+    Relevance relevance = 6;
+    Color color = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
 }
 
 service ContentHubService {
@@ -121,7 +156,113 @@ service ContentHubService {
     rpc GetTag(GetTagRequest) returns (GetTagResponse);
     rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
     rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
+    rpc BatchCreateTags(BatchCreateTagsRequest) returns (BatchCreateTagsResponse);
     rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
+    rpc DeleteTagByReference(DeleteTagByReferenceRequest) returns (DeleteTagByReferenceResponse);
+    rpc ExportTagToDb(ExportTagToDbRequest) returns (ExportTagToDbResponse);
+
+    // Logs
+    rpc GetLog(GetLogRequest) returns (GetLogResponse);
+    rpc ListLogs(ListLogsRequest) returns (ListLogsResponse);
+    rpc DeleteLog(DeleteLogRequest) returns (DeleteLogResponse);
+}
+
+message GetLogRequest {
+    string id = 1;
+}
+
+message GetLogResponse {
+    Log log = 1;
+}
+
+message ListLogsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_FOR = 1;
+        FIELD_ACTION = 2;
+        FIELD_BY_USER = 3;
+        FIELD_CREATED_AT = 4;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListLogsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListLogsFilter filters = 6;
+}
+
+message ListLogsResponse {
+    repeated Log logs = 1;
+    string page_token = 2;
+}
+
+message DeleteLogRequest {
+    string id = 1;
+}
+
+message DeleteLogResponse {
+    Log log = 1;
+}
+
+message ExportTagToDbRequest {
+    string id = 1;
+}
+
+message ExportTagToDbResponse {}
+
+message DeleteTagByReferenceRequest {
+    string type = 1;
+    string name = 2;
+    string reference = 3;
+}
+
+message DeleteTagByReferenceResponse {
+    Tag tag = 1;
+}
+
+message BatchCreateTagsRequest {
+    repeated CreateTagRequest tags = 1;
+}
+
+message TagStatusCreated {
+    string id = 1;
+}
+
+message TagStatusExists {
+    string type = 1;
+    string name = 2;
+    string reference = 3;
+}
+
+message TagStatusFailure {
+    string type = 1;
+    string name = 2;
+    string reference = 3;
+    string message = 4;
+}
+
+message TagCreateInfo {
+    oneof status {
+        TagStatusCreated created = 1;
+        TagStatusExists exists = 2;
+        TagStatusFailure failure = 3;
+    }
+}
+
+message BatchCreateTagsResponse {
+    repeated TagCreateInfo tags = 1;
 }
 
 message GetTagRequest {
@@ -172,7 +313,8 @@ message CreateTagRequest {
     string name = 2;
     string reference = 3;
     string created_by = 4;
-    int32 relevance = 5;
+    Tag.Relevance relevance = 5;
+    Tag.Color color = 6;
 }
 
 message CreateTagResponse {
