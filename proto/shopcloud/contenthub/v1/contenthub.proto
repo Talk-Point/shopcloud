@@ -83,10 +83,9 @@ message Log {
     string reference = 3;
     Action action = 4;
     string by_user = 5;
-    string by_username = 6;
-    map<string, string> payload = 7;
-    google.protobuf.Timestamp ttl = 8;
-    google.protobuf.Timestamp created_at = 9;
+    map<string, string> payload = 6;
+    google.protobuf.Timestamp ttl = 7;
+    google.protobuf.Timestamp created_at = 8;
 }
 
 message Tag {
@@ -112,8 +111,10 @@ message Tag {
     string created_by = 5;
     Relevance relevance = 6;
     Color color = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
+    repeated string search_keys = 8;
+    string memo = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
 }
 
 service ContentHubService {
@@ -280,8 +281,9 @@ message ListTagsFilter {
         FIELD_NAME = 2;
         FIELD_REFERENCE = 3;
         FIELD_RELEVANCE = 4;
-        FIELD_CREATED_BY = 5;
-        FIELD_CREATED_AT = 6;
+        FIELD_SEARCH_KEYS = 5;
+        FIELD_CREATED_BY = 6;
+        FIELD_CREATED_AT = 7;
     }
 
     Field field = 1;
@@ -293,6 +295,7 @@ message ListTagsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_RELEVANCE = 2;
     }
 
     int32 page_size = 1;
@@ -315,6 +318,8 @@ message CreateTagRequest {
     string created_by = 4;
     Tag.Relevance relevance = 5;
     Tag.Color color = 6;
+    repeated string search_keys = 7;
+    string memo = 8;
 }
 
 message CreateTagResponse {
