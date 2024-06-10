@@ -142,6 +142,28 @@ message TagFlat {
     Tag.Status status = 12;
 }
 
+message Check {
+    enum Group {
+        GROUP_UNSPECIFIED = 0;
+        GROUP_ARTICLE = 1;
+    }
+
+    enum Type {
+        TYPE_UNSPECIFIED = 0;
+        TYPE_ARTICLE_EU_ENERGY_V1 = 1;
+    }
+
+    string id = 1;
+    string code = 2;
+    string name = 3;
+    Group group = 4;
+    Type type = 5;
+    bool is_active = 6;
+    string description = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
 service ContentHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
@@ -193,6 +215,13 @@ service ContentHubService {
     rpc ListLogs(ListLogsRequest) returns (ListLogsResponse);
     rpc DeleteLog(DeleteLogRequest) returns (DeleteLogResponse);
 
+    // Checks
+    rpc GetCheck(GetCheckRequest) returns (GetCheckResponse);
+    rpc ListChecks(ListChecksRequest) returns (ListChecksResponse);
+    rpc CreateCheck(CreateCheckRequest) returns (CreateCheckResponse);
+    rpc DeleteCheck(DeleteCheckRequest) returns (DeleteCheckResponse);
+    rpc RunCheck(RunCheckRequest) returns (RunCheckResponse);
+
     // Events
     rpc EventHubFire(EventHubFireRequest) returns (EventHubFireResponse);
 
@@ -200,9 +229,81 @@ service ContentHubService {
     rpc CategorizeMainV1(CategorizeMainV1Request) returns (CategorizeMainV1Response);
 }
 
+message GetCheckRequest {
+    string id = 1;
+}
+
+message GetCheckResponse {
+    Check check = 1;
+}
+
+message ListChecksFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_GROUP = 2;
+        FIELD_TYPE = 3;
+        FIELD_IS_ACTIVE = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListChecksRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListChecksFilter filters = 6;
+}
+
+message ListChecksResponse {
+    repeated Check checks = 1;
+    string page_token = 2;
+}
+
+message CreateCheckRequest {
+    string code = 1;
+    string name = 2;
+    Check.Type type = 3;
+    bool is_active = 4;
+    string description = 5;
+}
+
+message CreateCheckResponse {
+    Check check = 1;
+}
+
+message DeleteCheckRequest {
+    string id = 1;
+}
+
+message DeleteCheckResponse {
+    Check check = 1;
+}
+
+message RunCheckRequest {
+    string id = 1;
+    string reference = 2;
+}
+
+message RunCheckResponse {
+    Tag tag = 1;
+}
+
 message SetTagStatusRequest {
     string id = 1;
     Tag.Status status = 2;
+    string memo = 3;
 }
 
 message SetTagStatusResponse {
@@ -247,6 +348,7 @@ message TagCreatedEvent {
     string reference = 6;
     string created_by = 7;
     Tag.Relevance relevance = 8;
+    Tag.Status status = 9;
 }
 
 message TagDeletedEvent {
@@ -256,6 +358,20 @@ message TagDeletedEvent {
     string type = 4;
     string name = 5;
     string reference = 6;
+    Tag.Status status = 7;
+}
+
+message TagUpdatedEvent {
+    string topic = 1;
+    string id = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp updated_at = 4;
+    string type = 5;
+    string name = 6;
+    string reference = 7;
+    string created_by = 8;
+    Tag.Relevance relevance = 9;
+    Tag.Status status = 10;
 }
 
 message EventHubFireRequest {
