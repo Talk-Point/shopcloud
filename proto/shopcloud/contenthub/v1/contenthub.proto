@@ -104,6 +104,14 @@ message Tag {
         COLOR_BLUE = 4;
     }
 
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_FILTERED = 1;
+        STATUS_SUCCESS = 2;
+        STATUS_FAILED = 3;
+        STATUS_OFFLINE_REQUIRED_MISSING = 4;
+    }
+
     string id = 1;
     string type = 2;
     string name = 3;
@@ -116,6 +124,7 @@ message Tag {
     string src = 10;
     google.protobuf.Timestamp created_at = 11;
     google.protobuf.Timestamp updated_at = 12;
+    Status status = 13;
 }
 
 message TagFlat {
@@ -130,6 +139,7 @@ message TagFlat {
     string src = 9;
     google.protobuf.Timestamp created_at = 10;
     google.protobuf.Timestamp updated_at = 11;
+    Tag.Status status = 12;
 }
 
 service ContentHubService {
@@ -176,6 +186,7 @@ service ContentHubService {
     rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
     rpc DeleteTagByReference(DeleteTagByReferenceRequest) returns (DeleteTagByReferenceResponse);
     rpc ExportTagToDb(ExportTagToDbRequest) returns (ExportTagToDbResponse);
+    rpc SetTagStatus(SetTagStatusRequest) returns (SetTagStatusResponse);
 
     // Logs
     rpc GetLog(GetLogRequest) returns (GetLogResponse);
@@ -184,6 +195,27 @@ service ContentHubService {
 
     // Events
     rpc EventHubFire(EventHubFireRequest) returns (EventHubFireResponse);
+
+    // Categorisation
+    rpc CategorizeMainV1(CategorizeMainV1Request) returns (CategorizeMainV1Response);
+}
+
+message SetTagStatusRequest {
+    string id = 1;
+    Tag.Status status = 2;
+}
+
+message SetTagStatusResponse {
+    Tag tag = 1;
+}
+
+message CategorizeMainV1Request {
+    string title = 1;
+}
+
+message CategorizeMainV1Response {
+    string category = 1;
+    string prompt = 2;
 }
 
 message AttributeCreatedEvent {
@@ -353,6 +385,7 @@ message ListTagsFilter {
         FIELD_SEARCH_KEYS = 5;
         FIELD_CREATED_BY = 6;
         FIELD_CREATED_AT = 7;
+        FIELD_STATUS = 8;
     }
 
     Field field = 1;
