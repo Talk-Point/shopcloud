@@ -136,7 +136,6 @@ service SageHubService {
     rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
-
     // VKBelege
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
@@ -163,6 +162,8 @@ service SageHubService {
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     rpc GetArticleCoreData(GetArticleCoreDataRequest) returns (GetArticleCoreDataResponse);
     rpc GetArticleGtin(GetArticleGtinRequest) returns (GetArticleGtinResponse);
+    rpc EnableShopArticle(EnableShopArticleRequest) returns (EnableShopArticleResponse);
+    rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
@@ -170,6 +171,22 @@ service SageHubService {
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
 }
+
+message EnableShopArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message EnableShopArticleResponse {}
+
+message DisableShopArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message DisableShopArticleResponse {}
 
 message GetArticleGtinRequest {
     int32 mandant = 1;
