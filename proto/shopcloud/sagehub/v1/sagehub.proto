@@ -175,7 +175,8 @@ service SageHubService {
 message EnableShopArticleRequest {
     int32 mandant = 1;
     string artikelnummer = 2;
-    int32 auspraegung_id = 3;
+    int32 auspraegung_id = 3;   
+    string by_user = 4;
 }
 
 message EnableShopArticleResponse {}
@@ -184,6 +185,7 @@ message DisableShopArticleRequest {
     int32 mandant = 1;
     string artikelnummer = 2;
     int32 auspraegung_id = 3;
+    string by_user = 4;
 }
 
 message DisableShopArticleResponse {}
