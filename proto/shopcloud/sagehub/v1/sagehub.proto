@@ -162,6 +162,8 @@ service SageHubService {
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     rpc GetArticleCoreData(GetArticleCoreDataRequest) returns (GetArticleCoreDataResponse);
     rpc GetArticleGtin(GetArticleGtinRequest) returns (GetArticleGtinResponse);
+    rpc EnableArticle(EnableArticleRequest) returns (EnableArticleResponse);
+    rpc DisableArticle(DisableArticleRequest) returns (DisableArticleResponse);
     rpc EnableShopArticle(EnableShopArticleRequest) returns (EnableShopArticleResponse);
     rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
     // Articles Prices
@@ -171,6 +173,22 @@ service SageHubService {
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
 }
+
+message EnableArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    string by_user = 3;
+}
+
+message EnableArticleResponse {}
+
+message DisableArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    string by_user = 3;
+}
+
+message DisableArticleResponse {}
 
 message EnableShopArticleRequest {
     int32 mandant = 1;
