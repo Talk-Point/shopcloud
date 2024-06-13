@@ -8,6 +8,10 @@ package proto.shopcloud.sagehub.v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
+message UpdateMask {
+    repeated string paths = 1;
+}
+
 // Generic
 enum Operator {
     OPERATOR_EQUAL_UNSPECIFIED = 0;
@@ -166,12 +170,49 @@ service SageHubService {
     rpc DisableArticle(DisableArticleRequest) returns (DisableArticleResponse);
     rpc EnableShopArticle(EnableShopArticleRequest) returns (EnableShopArticleResponse);
     rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
+    rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+}
+
+message UpdateArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;   
+    string by_user = 4;
+
+    // khkartikel
+    string bezeichnung1 = 5;
+    string bezeichnung2 = 6;
+    string hersteller = 7;
+    int32 nachweispflicht = 8;
+    string user_soneparartikel = 9;
+    double user_bestandsonepar = 10;
+    string user_epartikel = 11;
+    double user_bestandep = 12;
+    string user_energieeffizienzklasse = 13;
+    string user_versandklasse = 14;
+    double user_preisermittlungszuschlag = 15;
+    string user_zulieferercode = 16;
+    string user_zuliefererartikelnummer = 17;
+    double user_zuliefererbestand = 18;
+    double laenge = 19;
+    double breite = 20;
+    double hoehe = 21;
+    double umrechnungsfaktorgp = 22;
+    string grundpreiseinheit = 23;
+    double grundpreisbasis = 24;
+    bool istfavorit = 25;
+    UpdateMask update_mask = 26;
+}
+
+message UpdateArticleResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
 }
 
 message EnableArticleRequest {
@@ -313,7 +354,7 @@ message KhkArtikel {
     double bewertungssatz = 52;
     string kostenstelle = 53;
     string kostentraeger = 54;
-    int32 istfavorit = 55;
+    bool istfavorit = 55;
     int32 istvorlage = 56;
     int32 chargenpflicht = 57;
     string warennummer = 58;
@@ -370,7 +411,7 @@ message KhkArtikel {
     double user_preislistenfaktor = 109;
     string user_importid = 110;
     string user_zentraldispo = 111;
-    string user_bestandsonepar = 112;
+    double user_bestandsonepar = 112;
     string user_energieeffizienzklasse = 113;
     string user_meinpaketmarketplacecategorie = 114;
     string user_meinpaketvariantconfiguration = 115;
