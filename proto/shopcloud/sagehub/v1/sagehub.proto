@@ -207,7 +207,15 @@ message UpdateArticleRequest {
     string grundpreiseinheit = 23;
     double grundpreisbasis = 24;
     bool istfavorit = 25;
-    UpdateMask update_mask = 26;
+
+    // khkartikelvariante
+    double gewicht = 26;
+    double letzterek = 27;
+    double mittlererek = 28;
+    double kalkulatorischerek = 29;
+    string eannummer = 30;
+
+    UpdateMask update_mask = 31;
 }
 
 message UpdateArticleResponse {
