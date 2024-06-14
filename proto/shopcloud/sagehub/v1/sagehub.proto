@@ -207,6 +207,7 @@ message ListArticleRanksRequest {
     
     Section section = 6;
     bool debug = 7;
+    string sku = 8;
 }
 
 message ListArticleRanksResponse {
