@@ -171,12 +171,49 @@ service SageHubService {
     rpc EnableShopArticle(EnableShopArticleRequest) returns (EnableShopArticleResponse);
     rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
     rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
+    rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+}
+
+message ArticleRank {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double total_belegs = 4;
+    double total_positions = 5;
+    string title = 6;
+    double turnover = 7;
+    double profit = 8;
+    int32 rank = 9;
+}
+
+message ListArticleRanksRequest {
+    enum Section {
+        SECTION_UNSPECIFIED = 0;
+        SECTION_NEUWARE = 1;
+        SECTION_B_WARE = 2;
+    }
+
+    int32 page_size = 1;
+    int32 page = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    
+    Section section = 6;
+    bool debug = 7;
+}
+
+message ListArticleRanksResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleRank items = 3;
+    repeated string queries = 4;
 }
 
 message UpdateArticleRequest {
@@ -575,6 +612,7 @@ message GetArticlePricesRequest {
     int32 mandant = 1;
     string artikelnummer = 2;
     int32 auspraegung_id = 3;
+    repeated int64 price_list_ids = 4;
 }
 
 message ArticlePrice {
@@ -778,7 +816,10 @@ message ListVKBelegPositionsPulseRequest {
     string kundengruppe = 8;
     string supplier = 9;
     string artikelnummer = 10;
-    string search = 11;
+    string versandklasse = 11;
+    string search = 12;
+    bool fraud = 13;
+    bool debug = 14;
 }
 
 message VKBelegProductPulseItem {
@@ -801,6 +842,7 @@ message ListVKBelegPositionsPulseResponse {
     int32 page_size = 1;
     int32 page = 2;
     repeated VKBelegProductPulseItem items = 3;
+    repeated string queries = 4;
 }
 
 message GetVKBelegPulseRequest {
