@@ -141,6 +141,7 @@ service SageHubService {
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
     // VKBelege
+    rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
     rpc ListVKBelegVersandarts(ListVKBelegVersandartsRequest) returns (ListVKBelegVersandartsResponse);
@@ -181,6 +182,49 @@ service SageHubService {
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+
+    // Meta
+    rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message GetTableSchemaRequest {
+    string table = 1;
+}
+
+message GetTableSchemaResponse {
+    string query = 1;
+    string go_struct = 2;
+    string go_convert = 3;
+    string proto_message = 4;
+}
+
+message ListVKBelegsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+    repeated VKBelegart belegarts = 5;
+    string versand = 6;
+    bool debug = 7;
+}
+
+message VKBelegListItem {
+    int64 bel_id = 1;
+    int64 vor_id = 2;
+    string kundengruppe = 3;
+    string user_belegjahrbelegnummer = 4;
+    string referenznummer = 5;
+    string user_zahlungsreferenz = 6;
+    string belegart = 7;
+    string a0_empfaenger = 8;
+    google.protobuf.Timestamp user_cd = 9;
+}
+
+message ListVKBelegsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated VKBelegListItem items = 3;
+    repeated string queries = 4;
 }
 
 message BatchSetVersandOnVKBelegRequest {
