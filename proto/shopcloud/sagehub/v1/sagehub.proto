@@ -143,6 +143,9 @@ service SageHubService {
     // VKBelege
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
+    rpc ListVKBelegVersandarts(ListVKBelegVersandartsRequest) returns (ListVKBelegVersandartsResponse);
+    rpc SetVersandOnVKBeleg(SetVersandOnVKBelegRequest) returns (SetVersandOnVKBelegResponse);
+    rpc BatchSetVersandOnVKBeleg(BatchSetVersandOnVKBelegRequest) returns (BatchSetVersandOnVKBelegResponse);
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
@@ -178,6 +181,50 @@ service SageHubService {
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+}
+
+message BatchSetVersandOnVKBelegRequest {
+    int32 mandant = 1;
+    repeated int64 bel_ids = 2;
+    string versand = 3;
+    string by_user = 4;
+    bool debug = 5;
+}
+
+message BatchSetVersandOnVKBelegResponse {
+    string query = 1;
+}
+
+message SetVersandOnVKBelegRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string versand = 3;
+    string by_user = 4;
+    bool debug = 5;
+}
+
+message SetVersandOnVKBelegResponse {
+    string query = 1;
+}
+
+message ListVKBelegVersandartsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+    bool debug = 5;
+}
+
+message VersandartItem {
+    int32 mandant = 1;
+    string code = 2;
+}
+
+message ListVKBelegVersandartsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated VersandartItem items = 3;
+    repeated string queries = 4;
 }
 
 message ArticleRank {
@@ -558,7 +605,13 @@ message ListArticlesRequest {
     int32 mandant = 1;
     int32 page_size = 2;
     int32 page = 3;
-    string search = 4;
+    string artikelnummer = 4;
+    string sku = 5;
+    string gtin = 6;
+    string versandklasse = 7;
+    string hersteller = 8;
+    string search = 9;
+    bool debug = 10;
 }
 
 message ListArtikel {
@@ -589,6 +642,7 @@ message ListArticlesResponse {
     int32 page = 2;
     int32 page_size = 3;
     repeated ListArtikel items = 4;
+    repeated string queries = 5;
 }
 
 message PriceList {
@@ -790,6 +844,7 @@ message ListVKBelegSalechannelsRequest {
     int32 page_size = 2;
     int32 mandant = 3;
     string search = 4;
+    bool debug = 5;
 }
 
 message SalechannelItem {
@@ -802,6 +857,7 @@ message ListVKBelegSalechannelsResponse {
     int32 page = 1;
     int32 page_size = 2;
     repeated SalechannelItem items = 3;
+    repeated string queries = 4;
 }
 
 message ListVKBelegPositionsPulseRequest {
