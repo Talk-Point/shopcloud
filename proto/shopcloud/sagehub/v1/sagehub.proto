@@ -558,7 +558,13 @@ message ListArticlesRequest {
     int32 mandant = 1;
     int32 page_size = 2;
     int32 page = 3;
-    string search = 4;
+    string artikelnummer = 4;
+    string sku = 5;
+    string gtin = 6;
+    string versandklasse = 7;
+    string hersteller = 8;
+    string search = 9;
+    bool debug = 10;
 }
 
 message ListArtikel {
@@ -589,6 +595,7 @@ message ListArticlesResponse {
     int32 page = 2;
     int32 page_size = 3;
     repeated ListArtikel items = 4;
+    repeated string queries = 5;
 }
 
 message PriceList {
