@@ -103,7 +103,6 @@ message Tag {
         COLOR_GREEN = 3;
         COLOR_BLUE = 4;
     }
-
     enum Status {
         STATUS_UNSPECIFIED = 0;
         STATUS_FILTERED = 1;
@@ -226,7 +225,7 @@ service ContentHubService {
     rpc EventHubFire(EventHubFireRequest) returns (EventHubFireResponse);
 
     // Categorisation
-    rpc CategorizeMainV1(CategorizeMainV1Request) returns (CategorizeMainV1Response);
+    rpc CategorizeV1(CategorizeV1Request) returns (CategorizeV1Response);
 }
 
 message GetCheckRequest {
@@ -310,13 +309,19 @@ message SetTagStatusResponse {
     Tag tag = 1;
 }
 
-message CategorizeMainV1Request {
+message CategorizeV1Request {
     string title = 1;
+    bool not_use_cache = 2;
+    bool debug = 3;
 }
 
-message CategorizeMainV1Response {
-    string category = 1;
-    string prompt = 2;
+message CategorizeV1Response {
+    bool is_success = 1;
+    string main_category = 2;
+    string category = 3;
+    string product_type = 4;
+    string prompt = 5;
+    string raw_result = 6;
 }
 
 message AttributeCreatedEvent {
