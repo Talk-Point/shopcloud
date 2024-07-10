@@ -160,6 +160,7 @@ service SageHubService {
     // Feeds
     rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
     rpc GetFeedByName(GetFeedByNameRequest) returns (GetFeedByNameResponse);
+    rpc GetFeedFileContent(GetFeedFileContentRequest) returns (GetFeedFileContentResponse);
     rpc ListFeeds(ListFeedsRequest) returns (ListFeedsResponse);
     rpc ListFeedFiles(ListFeedFilesRequest) returns (ListFeedFilesResponse);
     rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
@@ -761,6 +762,15 @@ message GetFeedByNameResponse {
 
 message GetFeedRequest {
     string id = 1;
+}
+
+message GetFeedFileContentRequest {
+    string id = 1;
+    string uri = 2;
+}
+
+message GetFeedFileContentResponse {
+    bytes content = 1;
 }
 
 message GetFeedResponse {
