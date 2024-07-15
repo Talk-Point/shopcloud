@@ -1,0 +1,337 @@
+// NotificationHub API
+// To access the erp
+
+syntax = "proto3";
+
+package proto.shopcloud.notificationhub.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+// Scopes
+enum Scope {
+    SCOPE_UNSPECIFIED = 0;
+    SCOPE_READ = 1;
+    SCOPE_WRITE = 2;
+    SCOPE_ADMIN = 3;
+}
+
+// Models
+message ApiKey {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    repeated Scope scopes = 4;
+    string secret = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+message Group {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    repeated string recipients = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+message Section {
+    string title = 1;
+    string content = 2;
+    string link = 3;
+    string link_title = 4;
+}
+
+message Notification {
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_OPEN = 1;
+        STATUS_PROCEEDED = 2;
+    }
+
+    string id = 1;
+    string group = 2;
+    string group_value = 3;
+    string reference = 4;
+    string title = 5;
+    repeated string recipients = 6;
+    Status status = 7;
+    string proceed_by_user = 8;
+    google.protobuf.Timestamp proceed_at = 9;
+    repeated Section sections = 10;
+    google.protobuf.Timestamp ttl = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+}
+
+service NotificationHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // APIKeys
+    rpc GetApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
+    rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse);
+    rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
+    rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
+    rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+
+    // Group
+    rpc GetGroup(GetGroupRequest) returns (GetGroupResponse);
+    rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse);
+    rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+    rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
+    rpc AddRecipientToGroup(AddRecipientToGroupRequest) returns (AddRecipientToGroupResponse);
+    rpc RemoveRecipientFromGroup(RemoveRecipientFromGroupRequest) returns (RemoveRecipientFromGroupResponse);
+    // Notification
+    rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
+    rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
+    rpc CreateNotification(CreateNotificationRequest) returns (CreateNotificationResponse);
+    rpc MarkNotificationAsProceeded(MarkNotificationAsProceededRequest) returns (MarkNotificationAsProceededResponse);
+    rpc StreamNoitificationGateway(StreamNoitificationGatewayRequest) returns (StreamNoitificationGatewayResponse);
+
+}
+
+message StreamNoitificationGatewayRequest {
+    string content = 1;
+}
+
+message StreamNoitificationGatewayResponse {
+    Notification notification = 1;
+}
+
+message GetGroupRequest {
+    string id = 1;
+}
+
+message GetGroupResponse {
+    Group group = 1;
+}
+
+message ListGroupsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_DESCRIPTION = 2;
+        FIELD_RECIPIENTS = 3;
+        FIELD_CREATED_AT = 4;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListGroupsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListGroupsFilter filters = 6;
+}
+
+message ListGroupsResponse {
+    repeated Group groups = 1;
+    string page_token = 2;
+}
+
+message CreateGroupRequest {
+    string name = 1;
+    string description = 2;
+    repeated string recipients = 3;
+}
+
+message CreateGroupResponse {
+    Group group = 1;
+}
+
+message DeleteGroupRequest {
+    string id = 1;
+}
+
+message DeleteGroupResponse {
+    Group group = 1;
+}
+
+message AddRecipientToGroupRequest {
+    string id = 1;
+    repeated string recipients = 2;
+}
+
+message AddRecipientToGroupResponse {
+    Group group = 1;
+}
+
+message RemoveRecipientFromGroupRequest {
+    string id = 1;
+    repeated string recipients = 2;
+}
+
+message RemoveRecipientFromGroupResponse {
+    Group group = 1;
+}
+
+message GetNotificationRequest {
+    string id = 1;
+}
+
+message GetNotificationResponse {
+    Notification notification = 1;
+}
+
+message ListNotificationsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_GROUP = 1;
+        FIELD_REFERENCE = 2;
+        FIELD_RECIPIENTS = 3;
+        FIELD_STATUS = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListNotificationsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListNotificationsFilter filters = 6;
+}
+
+message ListNotificationsResponse {
+    repeated Notification notifications = 1;
+    string page_token = 2;
+}
+
+message CreateNotificationRequest {
+    string group = 1;
+    string reference = 2;
+    string title = 3;
+    repeated Section sections = 4;
+}
+
+message CreateNotificationResponse {
+    Notification notification = 1;
+}
+
+message MarkNotificationAsProceededRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message MarkNotificationAsProceededResponse {
+    Notification notification = 1;
+}
+
+message GetApiKeyRequest {
+    string id = 1;
+}
+
+message GetApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message ListApiKeysFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_USERNAME = 1;
+        FIELD_EMAIL = 2;
+        FIELD_SECRET = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListApiKeysRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListApiKeysFilter filters = 6;
+}
+
+message ListApiKeysResponse {
+    repeated ApiKey api_keys = 1;
+    string page_token = 2;
+}
+
+message CreateApiKeyRequest {
+    string username = 1;
+    string email = 2;
+    repeated Scope scopes = 3;
+}
+
+message CreateApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message DeleteApiKeyRequest {
+    string id = 1;
+}
+
+message DeleteApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message UpdateScopesByApiKeyRequest {
+    string id = 1;
+    repeated string scopes = 2;
+}
+
+message UpdateScopesByApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
