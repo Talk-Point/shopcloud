@@ -771,6 +771,7 @@ message GetFeedFileContentRequest {
 
 message GetFeedFileContentResponse {
     bytes content = 1;
+    string content_type = 2;
 }
 
 message GetFeedResponse {
