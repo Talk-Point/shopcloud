@@ -300,6 +300,11 @@ message ListArticleRanksRequest {
     Section section = 6;
     bool debug = 7;
     string sku = 8;
+    oneof time_frame {
+        TimeRange range = 9;
+        google.protobuf.Duration duration = 10;
+        TimeFramePreset range_shortcut = 11;
+    }
 }
 
 message ListArticleRanksResponse {
@@ -307,6 +312,8 @@ message ListArticleRanksResponse {
     int32 page_size = 2;
     repeated ArticleRank items = 3;
     repeated string queries = 4;
+    google.protobuf.Timestamp start_at = 5;
+    google.protobuf.Timestamp end_at = 6;
 }
 
 message UpdateArticleRequest {
