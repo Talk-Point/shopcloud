@@ -109,9 +109,27 @@ service NotificationHubService {
     rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
     rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
     rpc CreateNotification(CreateNotificationRequest) returns (CreateNotificationResponse);
+    rpc DeleteNotification(DeleteNotificationRequest) returns (DeleteNotificationResponse);
     rpc MarkNotificationAsProceeded(MarkNotificationAsProceededRequest) returns (MarkNotificationAsProceededResponse);
+    rpc MarkNotificationAsUnProceeded(MarkNotificationAsUnProceededRequest) returns (MarkNotificationAsUnProceededResponse);
     rpc StreamNoitificationGateway(StreamNoitificationGatewayRequest) returns (StreamNoitificationGatewayResponse);
+}
 
+message MarkNotificationAsUnProceededRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message MarkNotificationAsUnProceededResponse {
+    Notification notification = 1;
+}
+
+message DeleteNotificationRequest {
+    string id = 1;
+}
+
+message DeleteNotificationResponse {
+    Notification notification = 1;
 }
 
 message StreamNoitificationGatewayRequest {
