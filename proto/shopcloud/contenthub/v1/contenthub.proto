@@ -150,6 +150,7 @@ message Check {
     enum Type {
         TYPE_UNSPECIFIED = 0;
         TYPE_ARTICLE_EU_ENERGY_V1 = 1;
+        TYPE_ARTICLE_IMAGE_EXISTS = 2;
     }
 
     string id = 1;
