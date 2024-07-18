@@ -30,6 +30,10 @@ enum Direction {
     DIRECTION_DESC = 1;
 }
 
+message UpdateMask {
+    repeated string paths = 1;
+}
+
 // Scopes
 enum Scope {
     SCOPE_UNSPECIFIED = 0;
@@ -50,12 +54,27 @@ message ApiKey {
 }
 
 message Group {
+    enum ProcessingType {
+        PROCESSING_TYPE_UNSPECIFIED = 0;
+        PROCESSING_TYPE_STATE = 1;
+        PROCESSING_TYPE_INFO = 2;
+    }
+    enum Visibility {
+        VISIBILITY_UNSPECIFIED = 0;
+        VISIBILITY_PUBLIC = 1;
+        VISIBILITY_PRIVATE = 2;
+        VISIBILITY_ARCHIVED = 3;
+    }
+
     string id = 1;
     string name = 2;
     string description = 3;
     repeated string recipients = 4;
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp updated_at = 6;
+    ProcessingType processing_type = 5;
+    repeated string tags = 6;
+    Visibility visibility = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
 }
 
 message Section {
@@ -70,6 +89,7 @@ message Notification {
         STATUS_UNSPECIFIED = 0;
         STATUS_OPEN = 1;
         STATUS_PROCEEDED = 2;
+        STATUS_INFO = 3;
     }
 
     string id = 1;
@@ -82,9 +102,10 @@ message Notification {
     string proceed_by_user = 8;
     google.protobuf.Timestamp proceed_at = 9;
     repeated Section sections = 10;
-    google.protobuf.Timestamp ttl = 11;
-    google.protobuf.Timestamp created_at = 12;
-    google.protobuf.Timestamp updated_at = 13;
+    repeated string tags = 11;
+    google.protobuf.Timestamp ttl = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
 }
 
 service NotificationHubService {
@@ -103,16 +124,60 @@ service NotificationHubService {
     rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse);
     rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
     rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
+    rpc DeleteGroupsByTag(DeleteGroupsByTagRequest) returns (DeleteGroupsByTagResponse);
     rpc AddRecipientToGroup(AddRecipientToGroupRequest) returns (AddRecipientToGroupResponse);
     rpc RemoveRecipientFromGroup(RemoveRecipientFromGroupRequest) returns (RemoveRecipientFromGroupResponse);
+    rpc UpdateGroup(UpdateGroupRequest) returns (UpdateGroupResponse);
     // Notification
     rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse);
     rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse);
     rpc CreateNotification(CreateNotificationRequest) returns (CreateNotificationResponse);
     rpc DeleteNotification(DeleteNotificationRequest) returns (DeleteNotificationResponse);
+    rpc DeleteNotificationByTag(DeleteNotificationByTagRequest) returns (DeleteNotificationByTagResponse);
     rpc MarkNotificationAsProceeded(MarkNotificationAsProceededRequest) returns (MarkNotificationAsProceededResponse);
     rpc MarkNotificationAsUnProceeded(MarkNotificationAsUnProceededRequest) returns (MarkNotificationAsUnProceededResponse);
     rpc StreamNoitificationGateway(StreamNoitificationGatewayRequest) returns (StreamNoitificationGatewayResponse);
+    rpc GetTotalOpenNotificationsForReceipt(GetTotalOpenNotificationsForReceiptRequest) returns (GetTotalOpenNotificationsForReceiptResponse); // the count with caching
+}
+
+message GetTotalOpenNotificationsForReceiptRequest {
+    string recipient = 1;
+}
+
+message GetTotalOpenNotificationsForReceiptResponse {
+    int64 total = 1;
+}
+
+message UpdateGroupRequest {
+    string id = 1;
+    string description = 2;
+    repeated string recipients = 3;
+    Group.ProcessingType processing_type = 4;
+    repeated string tags = 5;
+    Group.Visibility visibility = 6;
+    UpdateMask update_mask = 7;
+}
+
+message UpdateGroupResponse {
+    Group group = 1;
+}
+
+message DeleteNotificationByTagRequest {
+    string tag = 1;
+}
+
+message DeleteNotificationByTagResponse {
+    repeated Notification success_deleted_notifications = 1;
+    repeated Notification failed_deleted_notifications = 2;
+}
+
+message DeleteGroupsByTagRequest {
+    string tag = 1;
+}
+
+message DeleteGroupsByTagResponse {
+    repeated Group success_deleted_groups = 1;
+    repeated Group failed_deleted_groups = 2;
 }
 
 message MarkNotificationAsUnProceededRequest {
@@ -155,6 +220,8 @@ message ListGroupsFilter {
         FIELD_DESCRIPTION = 2;
         FIELD_RECIPIENTS = 3;
         FIELD_CREATED_AT = 4;
+        FIELD_VISIBILITY = 5;
+        FIELD_TAGS = 6;
     }
 
     Field field = 1;
@@ -185,6 +252,9 @@ message CreateGroupRequest {
     string name = 1;
     string description = 2;
     repeated string recipients = 3;
+    Group.ProcessingType processing_type = 4;
+    repeated string tags = 5;
+    Group.Visibility visibility = 6;
 }
 
 message CreateGroupResponse {
