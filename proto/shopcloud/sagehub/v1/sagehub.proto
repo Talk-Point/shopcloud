@@ -182,10 +182,80 @@ service SageHubService {
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
+    rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ArticleOnlinebezeichner {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string bezeichnung_1 = 4;
+    string bezeichnung_2 = 5;
+    string bezeichnung_3 = 6;
+    string bezeichnung_4 = 7;
+    string bezeichnung_5 = 8;
+    string bezeichnung_6 = 9;
+    string bezeichnung_7 = 10;
+    string bezeichnung_8 = 11;
+    string bezeichnung_9 = 12;
+    string bezeichnung_10 = 13;
+    string bezeichnung_11 = 14;
+    string bezeichnung_12 = 15;
+    string bezeichnung_13 = 16;
+    string bezeichnung_14 = 17;
+    string bezeichnung_15 = 18;
+    string bezeichnung_16 = 19;
+    string bezeichnung_17 = 20;
+    string bezeichnung_18 = 21;
+    string bezeichnung_19 = 22;
+    string bezeichnung_20 = 23;
+    string bezeichnung_21 = 24;
+    string bezeichnung_22 = 25;
+    string bezeichnung_23 = 26;
+    string bezeichnung_24 = 27;
+    string bild_1 = 28;    
+    string bild_2 = 29;
+    string bild_3 = 30;
+    string bild_4 = 31;
+    string bild_5 = 32;
+    string bild_6 = 33;
+    string bild_7 = 34; 
+    string bild_8 = 35;
+    string bild_9 = 36;
+    string bild_10 = 37;
+    string bild_11 = 38;
+    string bild_12 = 39;
+    string bild_13 = 40;
+    string bild_14 = 41;
+    string bild_15 = 42;
+    string bild_16 = 43;
+    string bild_17 = 44;
+    string bild_18 = 45;
+    string bild_19 = 46;
+    string bild_20 = 47;
+    string bild_21 = 48;
+    string bild_22 = 49;
+    string bild_23 = 50;
+    string bild_24 = 51;
+    string sprache = 52;
+}
+
+message GetArticleOnlinebezeichnerRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string sprache = 4;
+    bool debug = 5;
+}
+
+message GetArticleOnlinebezeichnerResponse {
+    ArticleOnlinebezeichner onlinebezeichner = 1;
+    string image_pool_base_url = 2;
+    repeated string queries = 3;
 }
 
 message GetTableSchemaRequest {
