@@ -177,6 +177,7 @@ service SageHubService {
     rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
     rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
     rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
+    rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
@@ -187,6 +188,32 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ArticleWarehouseStock {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string lagerkennung = 4;
+    double bestand = 5;
+    string eingangsdatum_min = 6;
+    string eingangsdatum_max = 7;
+}
+
+message ListArticleWarehouseStocksRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    bool debug = 6;
+}
+
+message ListArticleWarehouseStocksResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleWarehouseStock items = 3;
+    repeated string queries = 4;
 }
 
 message ArticleOnlinebezeichner {
