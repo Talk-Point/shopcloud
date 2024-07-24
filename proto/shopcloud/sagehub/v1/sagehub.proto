@@ -138,6 +138,7 @@ service SageHubService {
 
     // Amazon
     rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
+    rpc ListAmazonItems(ListAmazonItemsRequest) returns (ListAmazonItemsResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
     // VKBelege
@@ -156,6 +157,8 @@ service SageHubService {
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
+    // Report API
+    rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
 
     // Feeds
     rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
@@ -188,6 +191,66 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ListAmazonItemsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
+}
+
+message ListAmazonItemsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated LBAmazonItem items = 3;
+    repeated string queries = 4;
+}
+
+enum TimeSeriesGrouper {
+    TIME_SERIES_GROUPER_DAILY_UNSPECIFIED = 0;
+    TIME_SERIES_GROUPER_MONTHLY = 1;
+    TIME_SERIES_GROUPER_YEARLY = 2;
+}
+
+message SalechannelReportFilter {
+    int32 mandant = 1;
+    string start_date = 2; // iso-format
+    string end_date = 3; // iso-format
+    repeated string customer_group_ids = 4;
+    repeated VKBelegart belegart_items = 5;
+}
+
+message SalechannelReportGroupBy {
+    TimeSeriesGrouper time_series_grouper = 1;
+}
+
+message GetSalechannelReportRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    SalechannelReportFilter filter = 3;
+    SalechannelReportGroupBy group_by = 4;
+    bool debug = 6;
+}
+
+message SalechannelReportDataPoint {
+    string grouper = 1;
+    map<string, string> group_by = 2;
+    int32 orders = 3;
+    double turnover = 4;
+    double product_qty = 5;
+    double product_turnover = 6;
+    double product_profit = 7;
+    string customer_group_id = 8;
+}
+
+message GetSalechannelReportResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated SalechannelReportDataPoint data_points = 3;
+    repeated string queries = 4;
+    string start_at = 5;
+    string end_at = 6;
 }
 
 message ArticleWarehouseStock {
@@ -1470,10 +1533,12 @@ message UpdateAmazonItemLeadTimeToShipItem {
 
 message UpdateAmazonLeadTimesRequest {
     repeated UpdateAmazonItemLeadTimeToShipItem items = 1;
+    bool debug = 2;
 }
 
 message UpdateAmazonLeadTimesResponse {
     bool is_success = 1;
+    repeated string queries = 2;
 }
 
 message GetAmazonItemRequest {

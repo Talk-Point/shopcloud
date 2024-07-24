@@ -194,6 +194,7 @@ service ContentHubService {
     // Icecat
     rpc GetIcecatProductXml(GetIcecatProductXmlRequest) returns (GetIcecatProductXmlResponse);
     rpc GetIcecatProductDataV2(GetIcecatProductDataV2Request) returns (GetIcecatProductDataV2Response);
+    rpc GetIcecatFile(GetIcecatFileRequest) returns (GetIcecatFileResponse);
     rpc ListIcecatProductDocuments(ListIcecatProductDocumentsRequest) returns (ListIcecatProductDocumentsResponse);
     rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
     rpc BatchImportIcecatDocuments(BatchImportIcecatDocumentsRequest) returns (BatchImportIcecatDocumentsResponse);
@@ -227,6 +228,34 @@ service ContentHubService {
 
     // Categorisation
     rpc CategorizeV1(CategorizeV1Request) returns (CategorizeV1Response);
+
+    // Misc
+    rpc ConvertHtmlToMarkdown(ConvertHtmlToMarkdownRequest) returns (ConvertHtmlToMarkdownResponse);
+    rpc ConvertMarkdownToHtml(ConvertMarkdownToHtmlRequest) returns (ConvertMarkdownToHtmlResponse);
+}
+
+message GetIcecatFileRequest {
+    string src = 1;
+}
+
+message GetIcecatFileResponse {
+    bytes content = 1;
+}
+
+message ConvertHtmlToMarkdownRequest {
+    string content = 1;
+}
+
+message ConvertHtmlToMarkdownResponse {
+    string content = 1;
+}
+
+message ConvertMarkdownToHtmlRequest {
+    string content = 1;
+}
+
+message ConvertMarkdownToHtmlResponse {
+    string content = 1;
 }
 
 message GetCheckRequest {
@@ -735,6 +764,8 @@ message DeleteAttributeGroupRequest {
 
 message DeleteAttributeGroupResponse {
     AttributeGroup attribute_group = 1;
+    repeated Attribute attributes_success = 2;
+    repeated string attributes_failed = 3;
 }
 
 message GetIcecatDocumentRequest {
