@@ -1,11 +1,16 @@
-// ContentHub API
+// SageHub API
 // To access the erp
 
 syntax = "proto3";
 
-package proto.shopcloud.contenthub.v1;
+package proto.shopcloud.sagehub.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message UpdateMask {
+    repeated string paths = 1;
+}
 
 // Generic
 enum Operator {
@@ -39,6 +44,26 @@ enum Scope {
 }
 
 // Models
+message ActionItem {
+    string reference = 1;
+    string value = 2;
+}
+
+message Action {
+    enum Type {
+        TYPE_ADD_UNSPECIFIED = 0;
+        TYPE_UPDATE = 1;
+        TYPE_DELETE = 2;
+    }
+
+    string id = 1;
+    Type type = 2;
+    string table = 3;
+    repeated ActionItem items = 4;
+    string by_user = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
 message ApiKey {
     string id = 1;
     string username = 2;
@@ -49,124 +74,55 @@ message ApiKey {
     google.protobuf.Timestamp updated_at = 7;
 }
 
-message Attribute {
-    string id = 1;
-    repeated string keys = 2;
-    string group = 3;
-    string group_value = 4;
-    string value = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
+message LBAmazonItem {
+    int64 item_id = 1;
+    int32 mandant = 2;
+    string artikelnummer = 3;
+    int64 auspraegung_id = 4;
+    string title = 5;
+    string sku = 6;
+    string asin = 7;
+    string marketplace_id = 8;
+    int32 leadtime_to_ship = 9;
 }
 
-message AttributeFlat {
+message Event {
     string id = 1;
-    string key = 2;
-    string group = 3;
-    string group_value = 4;
-    string language = 5;
-    string value = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
-}
-
-message Log {
-    enum Action {
-        ACTION_UNSPECIFIED = 0;
-        ACTION_CREATE = 1;
-        ACTION_UPDATE = 2;
-        ACTION_DELETE = 3;
-    }
-
-    string id = 1;
-    string for = 2;
+    string ressource = 2;
     string reference = 3;
-    Action action = 4;
-    string by_user = 5;
-    map<string, string> payload = 6;
-    google.protobuf.Timestamp ttl = 7;
-    google.protobuf.Timestamp created_at = 8;
+    string topic = 4;
+    google.protobuf.Timestamp ttl = 5;
+    google.protobuf.Timestamp created_at = 6;
 }
 
-message Tag {
-    enum Relevance {
-        RELEVANCE_UNSPECIFIED = 0;
-        RELEVANCE_LOW = 1;
-        RELEVANCE_MEDIUM = 2;
-        RELEVANCE_HIGH = 3;
-        RELEVANCE_STATUS = 4;
-    }
-    enum Color {
-        COLOR_UNSPECIFIED = 0;
-        COLOR_YELLOW = 1;
-        COLOR_RED = 2;
-        COLOR_GREEN = 3;
-        COLOR_BLUE = 4;
-    }
-    enum Status {
-        STATUS_UNSPECIFIED = 0;
-        STATUS_FILTERED = 1;
-        STATUS_SUCCESS = 2;
-        STATUS_FAILED = 3;
-        STATUS_OFFLINE_REQUIRED_MISSING = 4;
-    }
-
+message Feed {
     string id = 1;
-    string type = 2;
+    string supplier = 2;
     string name = 3;
-    string reference = 4;
-    string created_by = 5;
-    Relevance relevance = 6;
-    Color color = 7;
-    repeated string search_keys = 8;
-    string memo = 9;
-    string src = 10;
-    google.protobuf.Timestamp created_at = 11;
-    google.protobuf.Timestamp updated_at = 12;
-    Status status = 13;
-}
+    string source = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp update_at = 6;
 
-message TagFlat {
-    string id = 1;
-    string type = 2;
-    string name = 3;
-    string reference = 4;
-    string created_by = 5;
-    Tag.Relevance relevance = 6;
-    Tag.Color color = 7;
-    string memo = 8;
-    string src = 9;
-    google.protobuf.Timestamp created_at = 10;
-    google.protobuf.Timestamp updated_at = 11;
-    Tag.Status status = 12;
-}
-
-message Check {
-    enum Group {
-        GROUP_UNSPECIFIED = 0;
-        GROUP_ARTICLE = 1;
+    message HttpSource {
+        string url = 1;
     }
-
-    enum Type {
-        TYPE_UNSPECIFIED = 0;
-        TYPE_ARTICLE_EU_ENERGY_V1 = 1;
-        TYPE_ARTICLE_IMAGE_EXISTS = 2;
+    
+    message FtpSource {
+        string host = 1;
+        int32 port = 2;
+        string username = 3;
+        string password = 4;
+        string remote_path = 5;
     }
-
-    string id = 1;
-    string code = 2;
-    string name = 3;
-    Group group = 4;
-    Type type = 5;
-    bool is_active = 6;
-    string description = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
 }
 
-service ContentHubService {
+service SageHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
+
+    // Actions
+    rpc GetAction(GetActionRequest) returns (GetActionResponse);
+    rpc ListActions(ListActionsRequest) returns (ListActionsResponse);
 
     // APIKeys
     rpc GetApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
@@ -175,658 +131,825 @@ service ContentHubService {
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
-    // AttributeGroup
-    rpc GetAttributeGroup(GetAttributeGroupRequest) returns (GetAttributeGroupResponse);
-    rpc ListAttributeGroups(ListAttributeGroupsRequest) returns (ListAttributeGroupsResponse);
-    rpc CreateAttributeGroup(CreateAttributeGroupRequest) returns (CreateAttributeGroupResponse);
-    rpc DeleteAttributeGroup(DeleteAttributeGroupRequest) returns (DeleteAttributeGroupResponse);
-    // Attribute
-    rpc GetAttribute(GetAttributeRequest) returns (GetAttributeResponse);
-    rpc ListAttributes(ListAttributesRequest) returns (ListAttributesResponse);
-    rpc CreateAttribute(CreateAttributeRequest) returns (CreateAttributeResponse);
-    rpc DeleteAttribute(DeleteAttributeRequest) returns (DeleteAttributeResponse);
-    rpc UpdateAttributeValue(UpdateAttributeValueRequest) returns (UpdateAttributeValueResponse);
-    rpc ExportAttributeToDb(ExportAttributeToDbRequest) returns (ExportAttributeToDbResponse);
-    
-    // Content Section
-    rpc RenderContentSection(RenderContentSectionRequest) returns (RenderContentSectionResponse);
-
-    // Icecat
-    rpc GetIcecatProductXml(GetIcecatProductXmlRequest) returns (GetIcecatProductXmlResponse);
-    rpc GetIcecatProductDataV2(GetIcecatProductDataV2Request) returns (GetIcecatProductDataV2Response);
-    rpc ListIcecatProductDocuments(ListIcecatProductDocumentsRequest) returns (ListIcecatProductDocumentsResponse);
-    rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
-    rpc BatchImportIcecatDocuments(BatchImportIcecatDocumentsRequest) returns (BatchImportIcecatDocumentsResponse);
-    rpc ImportIcecatDocument(ImportIcecatDocumentRequest) returns (ImportIcecatDocumentResponse);
-    rpc ImportIcecatEnergyData(ImportIcecatEnergyDataRequest) returns (ImportIcecatEnergyDataResponse);
-
-    // Tags
-    rpc GetTag(GetTagRequest) returns (GetTagResponse);
-    rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
-    rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
-    rpc BatchCreateTags(BatchCreateTagsRequest) returns (BatchCreateTagsResponse);
-    rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
-    rpc DeleteTagByReference(DeleteTagByReferenceRequest) returns (DeleteTagByReferenceResponse);
-    rpc ExportTagToDb(ExportTagToDbRequest) returns (ExportTagToDbResponse);
-    rpc SetTagStatus(SetTagStatusRequest) returns (SetTagStatusResponse);
-
-    // Logs
-    rpc GetLog(GetLogRequest) returns (GetLogResponse);
-    rpc ListLogs(ListLogsRequest) returns (ListLogsResponse);
-    rpc DeleteLog(DeleteLogRequest) returns (DeleteLogResponse);
-
-    // Checks
-    rpc GetCheck(GetCheckRequest) returns (GetCheckResponse);
-    rpc ListChecks(ListChecksRequest) returns (ListChecksResponse);
-    rpc CreateCheck(CreateCheckRequest) returns (CreateCheckResponse);
-    rpc DeleteCheck(DeleteCheckRequest) returns (DeleteCheckResponse);
-    rpc RunCheck(RunCheckRequest) returns (RunCheckResponse);
-
     // Events
-    rpc EventHubFire(EventHubFireRequest) returns (EventHubFireResponse);
+    rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+    rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
+    rpc PushEvent(PushEventRequest) returns (PushEventResponse);
 
-    // Categorisation
-    rpc CategorizeV1(CategorizeV1Request) returns (CategorizeV1Response);
+    // Amazon
+    rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
+    rpc ListAmazonItems(ListAmazonItemsRequest) returns (ListAmazonItemsResponse);
+    rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
-    // Misc
-    rpc ConvertHtmlToMarkdown(ConvertHtmlToMarkdownRequest) returns (ConvertHtmlToMarkdownResponse);
-    rpc ConvertMarkdownToHtml(ConvertMarkdownToHtmlRequest) returns (ConvertMarkdownToHtmlResponse);
+    // VKBelege
+    rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
+    rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
+    rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
+    rpc ListVKBelegVersandarts(ListVKBelegVersandartsRequest) returns (ListVKBelegVersandartsResponse);
+    rpc SetVersandOnVKBeleg(SetVersandOnVKBelegRequest) returns (SetVersandOnVKBelegResponse);
+    rpc BatchSetVersandOnVKBeleg(BatchSetVersandOnVKBelegRequest) returns (BatchSetVersandOnVKBelegResponse);
+    // VKBelegEvents
+    rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
+    rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
+    rpc EmitVKBelegEvents(EmitVKBelegEventsRequest) returns (EmitVKBelegEventsResponse);
+    rpc ListVKBelegEvents(ListVKBelegEventsRequest) returns (ListVKBelegEventsResponse);
+    rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
+    // VKBelegPulse
+    rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
+    rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
+    // Report API
+    rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
+
+    // Feeds
+    rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
+    rpc GetFeedByName(GetFeedByNameRequest) returns (GetFeedByNameResponse);
+    rpc GetFeedFileContent(GetFeedFileContentRequest) returns (GetFeedFileContentResponse);
+    rpc ListFeeds(ListFeedsRequest) returns (ListFeedsResponse);
+    rpc ListFeedFiles(ListFeedFilesRequest) returns (ListFeedFilesResponse);
+    rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
+    rpc CreateFeedFile(CreateFeedFileRequest) returns (CreateFeedFileResponse);
+    rpc DeleteFeed(DeleteFeedRequest) returns (DeleteFeedResponse);
+
+    // Articles
+    rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
+    rpc GetArticleCoreData(GetArticleCoreDataRequest) returns (GetArticleCoreDataResponse);
+    rpc GetArticleGtin(GetArticleGtinRequest) returns (GetArticleGtinResponse);
+    rpc EnableArticle(EnableArticleRequest) returns (EnableArticleResponse);
+    rpc DisableArticle(DisableArticleRequest) returns (DisableArticleResponse);
+    rpc EnableShopArticle(EnableShopArticleRequest) returns (EnableShopArticleResponse);
+    rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
+    rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
+    rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
+    rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
+    // Articles Prices
+    rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
+    rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
+    rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
+    // Onlinbezeichner
+    rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
+    rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+
+    // Meta
+    rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
 }
 
-message ConvertHtmlToMarkdownRequest {
-    string content = 1;
+message ListAmazonItemsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
 }
 
-message ConvertHtmlToMarkdownResponse {
-    string content = 1;
+message ListAmazonItemsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated LBAmazonItem items = 3;
+    repeated string queries = 4;
 }
 
-message ConvertMarkdownToHtmlRequest {
-    string content = 1;
+enum TimeSeriesGrouper {
+    TIME_SERIES_GROUPER_DAILY_UNSPECIFIED = 0;
+    TIME_SERIES_GROUPER_MONTHLY = 1;
+    TIME_SERIES_GROUPER_YEARLY = 2;
 }
 
-message ConvertMarkdownToHtmlResponse {
-    string content = 1;
+message SalechannelReportFilter {
+    int32 mandant = 1;
+    string start_date = 2; // iso-format
+    string end_date = 3; // iso-format
+    repeated string customer_group_ids = 4;
+    repeated VKBelegart belegart_items = 5;
 }
 
-message GetCheckRequest {
-    string id = 1;
+message SalechannelReportGroupBy {
+    TimeSeriesGrouper time_series_grouper = 1;
 }
 
-message GetCheckResponse {
-    Check check = 1;
+message GetSalechannelReportRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    SalechannelReportFilter filter = 3;
+    SalechannelReportGroupBy group_by = 4;
+    bool debug = 6;
 }
 
-message ListChecksFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_NAME = 1;
-        FIELD_GROUP = 2;
-        FIELD_TYPE = 3;
-        FIELD_IS_ACTIVE = 4;
-        FIELD_CREATED_AT = 5;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
+message SalechannelReportDataPoint {
+    string grouper = 1;
+    map<string, string> group_by = 2;
+    int32 orders = 3;
+    double turnover = 4;
+    double product_qty = 5;
+    double product_turnover = 6;
+    double product_profit = 7;
+    string customer_group_id = 8;
 }
 
-message ListChecksRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
+message GetSalechannelReportResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated SalechannelReportDataPoint data_points = 3;
+    repeated string queries = 4;
+    string start_at = 5;
+    string end_at = 6;
+}
+
+message ArticleWarehouseStock {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string lagerkennung = 4;
+    double bestand = 5;
+    string eingangsdatum_min = 6;
+    string eingangsdatum_max = 7;
+}
+
+message ListArticleWarehouseStocksRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    bool debug = 6;
+}
+
+message ListArticleWarehouseStocksResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleWarehouseStock items = 3;
+    repeated string queries = 4;
+}
+
+message ArticleOnlinebezeichner {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string bezeichnung_1 = 4;
+    string bezeichnung_2 = 5;
+    string bezeichnung_3 = 6;
+    string bezeichnung_4 = 7;
+    string bezeichnung_5 = 8;
+    string bezeichnung_6 = 9;
+    string bezeichnung_7 = 10;
+    string bezeichnung_8 = 11;
+    string bezeichnung_9 = 12;
+    string bezeichnung_10 = 13;
+    string bezeichnung_11 = 14;
+    string bezeichnung_12 = 15;
+    string bezeichnung_13 = 16;
+    string bezeichnung_14 = 17;
+    string bezeichnung_15 = 18;
+    string bezeichnung_16 = 19;
+    string bezeichnung_17 = 20;
+    string bezeichnung_18 = 21;
+    string bezeichnung_19 = 22;
+    string bezeichnung_20 = 23;
+    string bezeichnung_21 = 24;
+    string bezeichnung_22 = 25;
+    string bezeichnung_23 = 26;
+    string bezeichnung_24 = 27;
+    string bild_1 = 28;    
+    string bild_2 = 29;
+    string bild_3 = 30;
+    string bild_4 = 31;
+    string bild_5 = 32;
+    string bild_6 = 33;
+    string bild_7 = 34; 
+    string bild_8 = 35;
+    string bild_9 = 36;
+    string bild_10 = 37;
+    string bild_11 = 38;
+    string bild_12 = 39;
+    string bild_13 = 40;
+    string bild_14 = 41;
+    string bild_15 = 42;
+    string bild_16 = 43;
+    string bild_17 = 44;
+    string bild_18 = 45;
+    string bild_19 = 46;
+    string bild_20 = 47;
+    string bild_21 = 48;
+    string bild_22 = 49;
+    string bild_23 = 50;
+    string bild_24 = 51;
+    string sprache = 52;
+}
+
+message GetArticleOnlinebezeichnerRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string sprache = 4;
+    bool debug = 5;
+}
+
+message GetArticleOnlinebezeichnerResponse {
+    ArticleOnlinebezeichner onlinebezeichner = 1;
+    string image_pool_base_url = 2;
+    repeated string queries = 3;
+}
+
+message GetTableSchemaRequest {
+    string table = 1;
+}
+
+message GetTableSchemaResponse {
+    string query = 1;
+    string go_struct = 2;
+    string go_convert = 3;
+    string proto_message = 4;
+}
+
+message ListVKBelegsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+    repeated VKBelegart belegarts = 5;
+    string versand = 6;
+    bool debug = 7;
+}
+
+message VKBelegListItem {
+    int64 bel_id = 1;
+    int64 vor_id = 2;
+    string kundengruppe = 3;
+    string user_belegjahrbelegnummer = 4;
+    string referenznummer = 5;
+    string user_zahlungsreferenz = 6;
+    string belegart = 7;
+    string a0_empfaenger = 8;
+    google.protobuf.Timestamp user_cd = 9;
+}
+
+message ListVKBelegsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated VKBelegListItem items = 3;
+    repeated string queries = 4;
+}
+
+message BatchSetVersandOnVKBelegRequest {
+    int32 mandant = 1;
+    repeated int64 bel_ids = 2;
+    string versand = 3;
+    string by_user = 4;
+    bool debug = 5;
+}
+
+message BatchSetVersandOnVKBelegResponse {
+    string query = 1;
+}
+
+message SetVersandOnVKBelegRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string versand = 3;
+    string by_user = 4;
+    bool debug = 5;
+}
+
+message SetVersandOnVKBelegResponse {
+    string query = 1;
+}
+
+message ListVKBelegVersandartsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+    bool debug = 5;
+}
+
+message VersandartItem {
+    int32 mandant = 1;
+    string code = 2;
+}
+
+message ListVKBelegVersandartsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated VersandartItem items = 3;
+    repeated string queries = 4;
+}
+
+message ArticleRank {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double total_belegs = 4;
+    double total_positions = 5;
+    string title = 6;
+    double turnover = 7;
+    double profit = 8;
+    int32 rank = 9;
+}
+
+message ListArticleRanksRequest {
+    enum Section {
+        SECTION_UNSPECIFIED = 0;
+        SECTION_NEUWARE = 1;
+        SECTION_B_WARE = 2;
     }
 
     int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListChecksFilter filters = 6;
+    int32 page = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    
+    Section section = 6;
+    bool debug = 7;
+    string sku = 8;
+    oneof time_frame {
+        TimeRange range = 9;
+        google.protobuf.Duration duration = 10;
+        TimeFramePreset range_shortcut = 11;
+    }
 }
 
-message ListChecksResponse {
-    repeated Check checks = 1;
-    string page_token = 2;
+message ListArticleRanksResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleRank items = 3;
+    repeated string queries = 4;
+    google.protobuf.Timestamp start_at = 5;
+    google.protobuf.Timestamp end_at = 6;
 }
 
-message CreateCheckRequest {
-    string code = 1;
-    string name = 2;
-    Check.Type type = 3;
-    bool is_active = 4;
-    string description = 5;
+message UpdateArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;   
+    string by_user = 4;
+
+    // khkartikel
+    string bezeichnung1 = 5;
+    string bezeichnung2 = 6;
+    string hersteller = 7;
+    int32 nachweispflicht = 8;
+    string user_soneparartikel = 9;
+    double user_bestandsonepar = 10;
+    string user_epartikel = 11;
+    double user_bestandep = 12;
+    string user_energieeffizienzklasse = 13;
+    string user_versandklasse = 14;
+    double user_preisermittlungszuschlag = 15;
+    string user_zulieferercode = 16;
+    string user_zuliefererartikelnummer = 17;
+    double user_zuliefererbestand = 18;
+    double laenge = 19;
+    double breite = 20;
+    double hoehe = 21;
+    double umrechnungsfaktorgp = 22;
+    string grundpreiseinheit = 23;
+    double grundpreisbasis = 24;
+    bool istfavorit = 25;
+
+    // khkartikelvariante
+    double gewicht = 26;
+    double letzterek = 27;
+    double mittlererek = 28;
+    double kalkulatorischerek = 29;
+    string eannummer = 30;
+
+    UpdateMask update_mask = 31;
 }
 
-message CreateCheckResponse {
-    Check check = 1;
-}
-
-message DeleteCheckRequest {
-    string id = 1;
-}
-
-message DeleteCheckResponse {
-    Check check = 1;
-}
-
-message RunCheckRequest {
-    string id = 1;
-    string reference = 2;
-}
-
-message RunCheckResponse {
-    Tag tag = 1;
-}
-
-message SetTagStatusRequest {
-    string id = 1;
-    Tag.Status status = 2;
-    string memo = 3;
-}
-
-message SetTagStatusResponse {
-    Tag tag = 1;
-}
-
-message CategorizeV1Request {
-    string title = 1;
-    bool not_use_cache = 2;
-    bool debug = 3;
-}
-
-message CategorizeV1Response {
+message UpdateArticleResponse {
     bool is_success = 1;
-    string main_category = 2;
-    string category = 3;
-    string product_type = 4;
-    string prompt = 5;
-    string raw_result = 6;
+    repeated string queries = 2;
 }
 
-message AttributeCreatedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string group = 4;
-    string group_value = 5;
-    repeated string keys = 6;
-    string value = 7;
+message EnableArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    string by_user = 3;
 }
 
-message AttributeDeletedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string group = 4;
-    string group_value = 5;
-    repeated string keys = 6;
-    string value = 7;
+message EnableArticleResponse {}
+
+message DisableArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    string by_user = 3;
 }
 
-message TagCreatedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string type = 4;
-    string name = 5;
-    string reference = 6;
-    string created_by = 7;
-    Tag.Relevance relevance = 8;
-    Tag.Status status = 9;
+message DisableArticleResponse {}
+
+message EnableShopArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;   
+    string by_user = 4;
 }
 
-message TagDeletedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string type = 4;
-    string name = 5;
-    string reference = 6;
-    Tag.Status status = 7;
+message EnableShopArticleResponse {}
+
+message DisableShopArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string by_user = 4;
 }
 
-message TagUpdatedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    google.protobuf.Timestamp updated_at = 4;
-    string type = 5;
-    string name = 6;
-    string reference = 7;
-    string created_by = 8;
-    Tag.Relevance relevance = 9;
-    Tag.Status status = 10;
+message DisableShopArticleResponse {}
+
+message GetArticleGtinRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
 }
 
-message EventHubFireRequest {
-    string topic = 1;
-    string payload = 2;
-}
-
-message EventHubFireResponse {
-    string id = 1;   
-}
-
-message GetLogRequest {
-    string id = 1;
-}
-
-message GetLogResponse {
-    Log log = 1;
-}
-
-message ListLogsFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_FOR = 1;
-        FIELD_ACTION = 2;
-        FIELD_BY_USER = 3;
-        FIELD_CREATED_AT = 4;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
-message ListLogsRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-    }
-
-    int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListLogsFilter filters = 6;
-}
-
-message ListLogsResponse {
-    repeated Log logs = 1;
-    string page_token = 2;
-}
-
-message DeleteLogRequest {
-    string id = 1;
-}
-
-message DeleteLogResponse {
-    Log log = 1;
-}
-
-message ExportTagToDbRequest {
-    string id = 1;
-}
-
-message ExportTagToDbResponse {
-    repeated TagFlat tags = 1;
-}
-
-message DeleteTagByReferenceRequest {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-}
-
-message DeleteTagByReferenceResponse {
-    Tag tag = 1;
-}
-
-message BatchCreateTagsRequest {
-    repeated CreateTagRequest tags = 1;
-}
-
-message TagStatusCreated {
-    string id = 1;
-}
-
-message TagStatusExists {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-}
-
-message TagStatusFailure {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-    string message = 4;
-}
-
-message TagCreateInfo {
-    oneof status {
-        TagStatusCreated created = 1;
-        TagStatusExists exists = 2;
-        TagStatusFailure failure = 3;
-    }
-}
-
-message BatchCreateTagsResponse {
-    repeated TagCreateInfo tags = 1;
-}
-
-message GetTagRequest {
-    string id = 1;
-}
-
-message GetTagResponse {
-    Tag tag = 1;
-}
-
-message ListTagsFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_TYPE = 1;
-        FIELD_NAME = 2;
-        FIELD_REFERENCE = 3;
-        FIELD_RELEVANCE = 4;
-        FIELD_SEARCH_KEYS = 5;
-        FIELD_CREATED_BY = 6;
-        FIELD_CREATED_AT = 7;
-        FIELD_STATUS = 8;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
-message ListTagsRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-        ORDER_BY_RELEVANCE = 2;
-    }
-
-    int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListTagsFilter filters = 6;
-}
-
-message ListTagsResponse {
-    repeated Tag tags = 1;
-    string page_token = 2;
-}
-
-message CreateTagRequest {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-    string created_by = 4;
-    Tag.Relevance relevance = 5;
-    Tag.Color color = 6;
-    repeated string search_keys = 7;
-    string memo = 8;
-    string src = 9;
-}
-
-message CreateTagResponse {
-    Tag tag = 1;
-}
-
-message DeleteTagRequest {
-    string id = 1;
-}
-
-message DeleteTagResponse {
-    Tag tag = 1;
-}
-
-message IcecatProductDataV2Enery {
-    string eprel = 1;
-    string class = 2;
-    string scala = 3;
-}
-
-message IcecatProductDataV2AttributeItem {
-    string name = 1;
-    string value = 2;
-}
-
-message IcecatProductDataV2AttributeGroup {
-    string name = 1;
-    repeated IcecatProductDataV2AttributeItem items = 2;
-}
-
-message IcecatProductDataV2 {
-    string name = 1;
-    string brand = 2;
-    string description = 3;
-    string category = 4;
-    string gtin = 5;
-    string serie = 6;
-    string basename = 7;
-    IcecatProductDataV2Enery energy = 8;
-    string release_date = 9;
-    string end_of_life_date = 10;
-    repeated IcecatProductDataV2AttributeGroup attributes = 11;
-    repeated string images = 12;
-}
-
-message GetIcecatProductDataV2Request {
+message GetArticleGtinResponse {
     string gtin = 1;
-    string language = 2;
 }
 
-message GetIcecatProductDataV2Response {
-    IcecatProductDataV2 data = 1;
+message ArticleImage {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string bild_1 = 4;
+    string bild_2 = 5;
+    string bild_3 = 6;
+    string bild_4 = 7;
+    string bild_5 = 8;
+    string bild_6 = 9;
+    string bild_7 = 10;
+    string bild_8 = 11;
+    string bild_9 = 12;
+    string bild_10 = 13;
+    string bild_11 = 14;
+    string bild_12 = 15;
+    string bild_13 = 16;
+    string bild_14 = 17;
+    string bild_15 = 18;
+    string bild_16 = 19;
+    string bild_17 = 20;
+    string bild_18 = 21;
+    string bild_19 = 22;
+    string bild_20 = 23;
+    string bild_21 = 24;
+    string bild_22 = 25;
+    string bild_23 = 26;
+    string bild_24 = 27;
 }
 
-message ImportIcecatEnergyDataRequest {
-    string gtin = 1;
-    string language = 2;
+message GetArticleImageRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
 }
 
-message ImportIcecatEnergyDataResponse {
-    repeated Attribute attributes = 1;
+message GetArticleImageResponse {
+    ArticleImage article_image = 1;
 }
 
-enum ContentSectionType {
-    CONTENT_SECTION_TYPE_UNSPECIFIED = 0;
-    CONTENT_SECTION_TYPE_DOCUMENTS_V1 = 1;
-    CONTENT_SECTION_TYPE_EU_ENERGIE_LABEL_V1 = 2;
+message KhkArtikel {
+    string artikelnummer = 1;
+    int32 mandant = 2;
+    string bezeichnung1 = 3;
+    string bezeichnung2 = 4;
+    string matchcode = 5;
+    string langtext = 6;
+    string dimensionstext = 7;
+    string dimensionstexthtml = 8;
+    string dimensionstextrtf = 9;
+    string memo = 10;
+    string artikelgruppe = 11;
+    string ersatzartikelnummer = 12;
+    string hersteller = 13;
+    string hartikelnummer = 14;
+    string steuerklasse = 15;
+    string erloescode = 16;
+    string wareneingangscode = 17;
+    string wareneinsatzcode = 18;
+    string warenbestandcode = 19;
+    string sachkontovk = 20;
+    string sachkontoek = 21;
+    string sachkontowz = 22;
+    string sachkontowb = 23;
+    int32 isteinmalartikel = 24;
+    int32 istprovisionierbar = 25;
+    int32 nachweispflicht = 26;
+    string verkaufsmengeneinheit = 27;
+    string mengenberechnungvk = 28;
+    int32 dezimalstellenvk = 29;
+    double umrechnungsfaktorvk = 30;
+    string verpackungseinheitvk = 31;
+    double umrechnungsfaktorvpvk = 32;
+    string preiseinheitvk = 33;
+    string basismengeneinheit = 34;
+    int32 dezimalstellenbasis = 35;
+    string lagermengeneinheit = 36;
+    int32 dezimalstellenlager = 37;
+    double umrechnungsfaktorlme = 38;
+    int32 lagerfuehrung = 39;
+    int32 lagerplatzzuordnung = 40;
+    string gewichtseinheit = 41;
+    int32 preispflegeek = 42;
+    int32 istbestellartikel = 43;
+    int32 istverkaufsartikel = 44;
+    int32 stuecklistentyp = 45;
+    int32 istkundenkartei = 46;
+    int32 istlieferantenkartei = 47;
+    int32 istrabattfaehig = 48;
+    double gemeinkostenzuschlag = 49;
+    double bezugskostenzuschlag = 50;
+    double gewinnzuschlag = 51;
+    double bewertungssatz = 52;
+    string kostenstelle = 53;
+    string kostentraeger = 54;
+    bool istfavorit = 55;
+    int32 istvorlage = 56;
+    int32 chargenpflicht = 57;
+    string warennummer = 58;
+    string ursprungsregion = 59;
+    string bestimmungsregion = 60;
+    string rabattgruppe = 61;
+    double laenge = 62;
+    double breite = 63;
+    double hoehe = 64;
+    string intrastatmengeneinheit = 65;
+    double umrechnungsfaktorintrame = 66;
+    int32 dezimalstellenintrame = 67;
+    string hauptartikelgruppe = 68;
+    string vaterartikelgruppe = 69;
+    string grundpreiseinheit = 70;
+    double umrechnungsfaktorgp = 71;
+    double grundpreisbasis = 72;
+    int32 platzid = 73;
+    string entnahmeverfahren = 74;
+    string variante = 75;
+    int32 inventurmethode = 76;
+    bool aktiv = 77;
+    int32 artikelart = 78;
+    string ressourcenref = 79;
+    string zeichnungsnummer = 80;
+    string gemeinkostenid = 81;
+    double minimalelosgroesse = 82;
+    double maximalelosgroesse = 83;
+    int32 istfertigungsartikel = 84;
+    int32 istunterbaugruppe = 85;
+    int32 istersatzteil = 86;
+    int32 istverschleissteil = 87;
+    string schwundart = 88;
+    double schwund = 89;
+    int32 pkonfigistkonfigartikel = 90;
+    string pkonfiganwendung = 91;
+    int32 istfremdleistung = 92;
+    double kalkulationslosgroesse = 93;
+    string ursprungsland = 94;
+    string statwerteingang = 95;
+    string statwertversendung = 96;
+    string eigenmasse = 97;
+    string statverfahren = 98;
+    int32 dezimalstellenpreis = 99;
+    int32 verbrauchsteuer = 100;
+    int32 besteuerungsart = 101;
+    bytes timestamp = 102;
+    string user_versandklasse = 103;
+    string user_soneparartikel = 104;
+    string user_exportb2b = 105;
+    string user_topnew = 106;
+    bool user_preisberechnung = 107;
+    double user_preisermittlungszuschlag = 108;
+    double user_preislistenfaktor = 109;
+    string user_importid = 110;
+    string user_zentraldispo = 111;
+    double user_bestandsonepar = 112;
+    string user_energieeffizienzklasse = 113;
+    string user_meinpaketmarketplacecategorie = 114;
+    string user_meinpaketvariantconfiguration = 115;
+    string user_accessorieincart = 116;
+    string user_360grad = 117;
+    string user_schutzklickcategory = 118;
+    bool user_bware = 119;
+    string user_epartikel = 120;
+    double user_bestandep = 121;
+    string user_bwarelabel = 122;
+    string langtexthtml = 123;
+    string langtextrtf = 124;
+    int32 herkunft = 125;
+    int32 istskontierfaehig = 126;
+    string user_autovergabesn = 127;
+    string user_zulieferercode = 128;
+    string user_zuliefererartikelnummer = 129;
+    double user_zuliefererbestand = 130;
 }
 
-message RenderContentSectionRequest {
-    ContentSectionType section = 1;
-    string gtin = 2;
-    string language = 3;
+message KhkArtikelVariante {
+    string artikelnummer = 1;
+    int32 mandant = 2;
+    int32 auspraegungid = 3;
+    string eannummer = 4;
+    string abcklasse = 5;
+    double lagerbestand = 6;
+    double lagerbestandohnedisp = 7;
+    double lagerbestandverfuegbar = 8;
+    double gewicht = 9;
+    double gewichtlme = 10;
+    double letzterek = 11;
+    double mittlererek = 12;
+    double kalkulatorischerek = 13;
+    double letzterfek = 14;
+    int32 hatzubehoer = 15;
+    int32 earmeldepflicht = 16;
+    string earregnr = 17;
+    string earmarke = 18;
+    string earkategorie = 19;
+    string eargeraeteart = 20;
+    string earproduktgruppe = 21;
+    double eargewicht = 22;
+    string user_hattekeinenlagerbestandvorwe = 23;
+    string formelid = 24;
+    string dispoformel = 25;
+    double dispofaktor = 26;
+    double bestellmenge = 27;
+    int32 bestellzeitpunkt = 28;
+    double meldebestand = 29;
+    string hauptlieferant = 30;
+    string letzterlieferant = 31;
+    int32 wiederbeschaffungszeit = 32;
+    int32 wsistwebshopartikel = 33;
+    int32 wsistverkaufsartikel = 34;
+    string wsterminverkaufab = 35;
+    int32 wsistsichtbar = 36;
+    int32 wsistneu = 37;
+    string wsterminneubis = 38;
+    int32 wslageranzeige = 39;
+    int32 wszeigehersteller = 40;
+    string wsguid = 41;
+    int32 wsistgeaendert = 42;
+    int32 wsisthauptbildgeaendert = 43;
+    int32 wsistgaleriegeaendert = 44;
+    string wsaktuelleshauptbild = 45;
+    string wsaktuellegaleriebilder = 46;
+    int32 wsiststandardvariante = 47;
+    string wsterminverkaufbis = 48;
+    double wsmindestbestellmenge = 49;
+    double wsstaffelung = 50;
+    bool user_scmpaktiv = 51;
+    string lagermodulekbme = 52;
+    string lagermodulvkbme = 53;
 }
 
-message RenderContentSectionResponse {
-    string content = 1;
-    string cache_path = 2;
+message KhkVariantenAuspraegungen {
+    int32 mandant = 1;
+    int32 auspraegung_id = 2;
+    string variante = 3;
+    string auspraegung1 = 4;
+    string auspraegung2 = 5;
 }
 
-message ImportIcecatDocumentRequest {
-    string gtin = 1;
-    string language = 2;
-    IcecatDocument document = 3;
+message GetArticleCoreDataRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
 }
 
-message ImportIcecatDocumentResponse {
-    Attribute attribute = 1;
+message GetArticleCoreDataResponse {
+    KhkArtikel khk_artikel = 1;
+    KhkArtikelVariante khk_artikel_variante = 2;
+    KhkVariantenAuspraegungen khk_varianten_auspraegungen = 3;
 }
 
-message BatchImportIcecatDocumentsRequest {
-    string gtin = 1;
-    string language = 2;
+message ListArticlesRequest {
+    int32 mandant = 1;
+    int32 page_size = 2;
+    int32 page = 3;
+    string artikelnummer = 4;
+    string sku = 5;
+    string gtin = 6;
+    string versandklasse = 7;
+    string hersteller = 8;
+    string search = 9;
+    bool debug = 10;
 }
 
-message BatchImportIcecatDocumentsResponse {
-    repeated Attribute attributes = 1;
+message ListArtikel {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string matchcode = 4;
+    string bezeichnung1 = 5;
+    string bezeichnung2 = 6;
+    string variante = 7;
+    string varianten_auspraegung = 8;
+    string hersteller = 9;
+    string versandklasse = 10;
+    double lagerbestand_verfuegbar = 11;
+    double letzter_ek = 12;
+    double mittlerer_ek = 13;
+    double kalkulatorischer_ek = 14;
+    bool scmp_aktiv = 15;
+    string zulieferer_code = 16;
+    string zulieferer_artikelnummer = 17;
+    double zulieferer_bestand = 18;
+    bool aktiv = 19;
+    string ean = 20;
 }
 
-message ExportAttributeToDbRequest {
-    string id = 1;
+message ListArticlesResponse {
+    int32 mandant = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+    repeated ListArtikel items = 4;
+    repeated string queries = 5;
 }
 
-message ExportAttributeToDbResponse {
-    repeated AttributeFlat attributes = 1;
-}
-
-message UpdateAttributeValueRequest {
-    string id = 1;
-    oneof value {
-        string content = 2;
-        Document document = 3;
-    }
-}
-
-message UpdateAttributeValueResponse {
-    Attribute attribute = 1;
-}
-
-message ListAttributeGroupsFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_GROUP = 1;
-        FIELD_NAME = 2;
-        FIELD_TAGS = 3;
-        FIELD_CREATED_AT = 4;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
-message ListAttributeGroupsRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-    }
-
-    int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListAttributeGroupsFilter filters = 6;
-}
-
-message ListAttributeGroupsResponse {
-    repeated AttributeGroup groups = 1;
-    string page_token = 2;
-}
-
-message GetAttributeGroupRequest {
-    string id = 1;
-}
-
-message GetAttributeGroupResponse {
-    AttributeGroup attribute_group = 1;
-}
-
-message AttributeGroup {
-    string id = 1;
-    string group = 2;
+message PriceList {
+    int32 mandant = 1;
+    int64 id = 2;
     string name = 3;
-    repeated string allowed_values = 4;
-    repeated string example_values = 5;
-    int32 relevance = 6;
-    repeated string tags = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
+    string currency = 4;
+    bool is_brutto_price = 5;
 }
 
-message CreateAttributeGroupRequest {
-    string group = 1;
-    string name = 2;
-    repeated string allowed_values = 3;
-    repeated string example_values = 4;
-    int32 relevance = 5;
+message ListArticlesPriceListsRequest {
+    int32 mandant = 1;
+    int32 page_size = 2;
+    int32 page = 3;
 }
 
-message CreateAttributeGroupResponse {
-    AttributeGroup attribute_group = 1;
+message ListArticlesPriceListsResponse {
+    repeated PriceList price_lists = 1;
 }
 
-message DeleteAttributeGroupRequest {
-    string id = 1;
+message GetArticlePricesRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    repeated int64 price_list_ids = 4;
 }
 
-message DeleteAttributeGroupResponse {
-    AttributeGroup attribute_group = 1;
-    repeated Attribute attributes_success = 2;
-    repeated string attributes_failed = 3;
+message ArticlePrice {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    int64 list = 4;
+    string list_name = 5;
+    double price = 6;
+    string currency = 7;
 }
 
-message GetIcecatDocumentRequest {
-    string src = 1;
+message GetArticlePricesResponse {
+    repeated ArticlePrice prices = 1;
 }
 
-message GetIcecatDocumentResponse {
-    string name = 1;
-    string type = 2;
+message UpdateArticlePriceRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    int64 list = 4;
+    double price = 5;
+    string by_user_id = 6;
+    string by_user_name = 7;
+}
+
+message UpdateArticlePriceResponse {}
+
+message CreateFeedFileRequest {
+    string feed = 1;
+    string filename = 2;
     bytes content = 3;
 }
 
-message IcecatDocument {
+message CreateFeedFileResponse {
+    string uri = 1;
+}
+
+message GetFeedByNameRequest {
     string name = 1;
-    string type = 2;
-    string src = 3;
+    string supplier = 2;
 }
 
-message ListIcecatProductDocumentsRequest {
-    string gtin = 1;
-    string language = 2;
+message GetFeedByNameResponse {
+    Feed feed = 1;
 }
 
-message ListIcecatProductDocumentsResponse {
-    repeated IcecatDocument documents = 1;
-}
-
-message GetIcecatProductXmlRequest {
-    string gtin = 1;
-    string language = 2;
-    bool not_use_cache = 3;
-}
-
-message GetIcecatProductXmlResponse {
-    string content = 1;
-}
-
-message GetAttributeRequest {
+message GetFeedRequest {
     string id = 1;
 }
 
-message GetAttributeResponse {
-    Attribute attribute = 1;
+message GetFeedFileContentRequest {
+    string id = 1;
+    string uri = 2;
 }
 
-message Document {
+message GetFeedFileContentResponse {
     bytes content = 1;
-    string name = 2;
+    string content_type = 2;
 }
 
-message CreateAttributeRequest {
-    string group = 1;
-    repeated string keys = 2;
-    repeated string languages = 4;
-    oneof value {
-        string content = 5;
-        Document document = 6;
-    }
+message GetFeedResponse {
+    Feed feed = 1;
 }
 
-message CreateAttributeResponse {
-    Attribute attribute = 1;
-}
-
-message ListAttributesFilter {
+message ListFeedsFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
-        FIELD_KEYS = 1;
-        FIELD_GROUP = 2;
-        FIELD_CREATED_AT = 3;
+        FIELD_NAME = 1;
+        FIELD_CREATED_AT = 2;
     }
 
     Field field = 1;
@@ -834,7 +957,7 @@ message ListAttributesFilter {
     Operator operator = 3;
 }
 
-message ListAttributesRequest {
+message ListFeedsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
@@ -845,20 +968,492 @@ message ListAttributesRequest {
     string page_previous = 3;
     OrderBy order_by = 4;
     Direction direction = 5;
-    repeated ListAttributesFilter filters = 6;
+    repeated ListFeedsFilter filters = 6;
 }
 
-message ListAttributesResponse {
-    repeated Attribute attributes = 1;
+message ListFeedsResponse {
+    repeated Feed feeds = 1;
     string page_token = 2;
 }
 
-message DeleteAttributeRequest {
+message ListFeedFilesRequest {
+    string id = 1;
+    string date_suffix = 2;
+}
+
+message ListFeedFilesResponse {
+    repeated string uris = 1;
+}
+
+message CreateFeedRequest {
+    string supplier = 1;
+    string name = 2;
+    oneof source {
+        Feed.HttpSource http = 3;
+        Feed.FtpSource ftp = 4;
+    }
+}
+
+message CreateFeedResponse {
+    Feed feed = 1;
+}
+
+message DeleteFeedRequest {
     string id = 1;
 }
 
-message DeleteAttributeResponse {
-    Attribute attribute = 1;
+message DeleteFeedResponse {
+    Feed feed = 1;
+}
+
+enum VKBelegart {
+    VK_BELEGART_UNSPECIFIED = 0;
+    VK_BELEGART_AUFTRAGSBESTAETIGUNG = 1;
+    VK_BELEGART_KOMMISSIONIERAUFTRAG = 2;
+    VK_BELEGART_KOMMISSIONIERRECHNUNG = 3;
+    VK_BELEGART_SOFORTRECHNUNG = 4;
+    VK_BELEGART_RECHNUNG = 5;
+    VK_BELEGART_SOFORTSTORNORECHNUNG = 6;
+    VK_BELEGART_LIEFERSCHEIN = 7;
+    VK_BELEGART_KOMMISSIONIERLIEFERSCHEIN = 8;
+    VK_BELEGART_STORNORECHNUNG = 9;
+    VK_BELEGART_GUTSCHRIFT = 10;
+    VK_BELEGART_RUECKLIEFERSCHEIN = 11;
+    VK_BELEGART_KOMMISSIONIERABSCHLUSSLIEFERSCHEIN = 12;
+    VK_BELEGART_STRECKENLIEFERSCHEIN = 13;
+    VK_BELEGART_ANGEBOT = 14;
+    VK_BELEGART_STRECKENRUECKLIEFERSCHEIN = 15;
+    VK_BELEGART_DIREKTRECHNUNG = 16;
+    VK_BELEGART_PROFORMARECHNUNG = 17;
+    VK_BELEGART_STRECKENSOFORTRECHNUNG = 18;
+    VK_BELEGART_FILIAL_LIEFERSCHEIN = 19;
+    VK_BELEGART_STRECKENSOFORTSTORNORECHNUNG = 20;
+    VK_BELEGART_SOFORTAUFTRAG = 21;
+    VK_BELEGART_FILIAL_AUFTRAGSBESTAETIGUNG = 22;
+    VK_BELEGART_SAMMELRECHNUNG = 23;
+    VK_BELEGART_MUSTERBELEG = 24;
+}
+
+enum TimeFramePreset {
+    TIME_FRAME_PRESET_TODAY_UNSPECIFIED = 0;
+    TIME_FRAME_PRESET_YESTERDAY = 1;
+    TIME_FRAME_PRESET_THIS_MONTH = 2;
+    TIME_FRAME_PRESET_LAST_MONTH = 3;
+    TIME_FRAME_PRESET_LAST_7_DAYS = 4;
+    TIME_FRAME_PRESET_LAST_14_DAYS = 5;
+    TIME_FRAME_PRESET_LAST_30_DAYS = 6;
+    TIME_FRAME_PRESET_LAST_90_DAYS = 7;
+    TIME_FRAME_PRESET_LAST_365_DAYS = 8;
+}
+
+message BatchEmitVKBelegEventsRequest {
+    int32 mandant = 1;
+    repeated int64 bel_ids = 2;
+}
+
+message BatchEmitVKBelegEventsResponse {
+    int64 success_total = 1;
+    repeated string bel_ids_with_error = 2;
+}
+
+message TimeRange {
+    string start_at = 1; // ISO 8601 format
+    string end_at = 2; // ISO 8601 format
+}
+
+message ListVKBelegSalechannelsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+    bool debug = 5;
+}
+
+message SalechannelItem {
+    int32 mandant = 1;
+    string code = 2;
+    string name = 3;
+}
+
+message ListVKBelegSalechannelsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated SalechannelItem items = 3;
+    repeated string queries = 4;
+}
+
+message ListVKBelegPositionsPulseRequest {
+    oneof time_frame {
+        TimeRange range = 1;
+        google.protobuf.Duration duration = 2;
+        TimeFramePreset range_shortcut = 3;
+    }
+    int32 page_size = 4;
+    int32 page = 5;
+    int32 mandant = 6;
+    repeated VKBelegart belegart_items = 7;
+    string kundengruppe = 8;
+    string supplier = 9;
+    string artikelnummer = 10;
+    string versandklasse = 11;
+    string search = 12;
+    bool fraud = 13;
+    bool debug = 14;
+}
+
+message VKBelegProductPulseItem {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string sku = 4;
+    string bezeichnung = 5;
+    string variante = 6;
+    string supplier = 7;
+    string versandklasse = 8; 
+    int32 bestellungen = 9;
+    double menge = 10;
+    double mittlerer_ek = 11; 
+    double umsatz = 12;
+    double roherloes = 13;
+}
+
+message ListVKBelegPositionsPulseResponse {
+    int32 page_size = 1;
+    int32 page = 2;
+    repeated VKBelegProductPulseItem items = 3;
+    repeated string queries = 4;
+}
+
+message GetVKBelegPulseRequest {
+    int32 mandant = 1;
+    oneof time_frame {
+        TimeRange range = 2;
+        google.protobuf.Duration duration = 3;
+        TimeFramePreset range_shortcut = 4;
+    }
+    repeated VKBelegart belegart_items = 5;
+}
+
+message VKBelegPulseV1 {
+    int32 mandant = 1;
+    string kundengruppe = 2;
+    string kundengruppe_name = 3;
+    int32 orders = 4;
+    double turnover = 5;
+    double product_qty = 6;
+    double product_turnover = 7;
+    double product_profit = 8;
+
+    message Metrics {
+        int32 orders = 1;
+        double turnover = 2;
+        double product_qty = 3;
+        double product_turnover = 4;
+        double product_profit = 5;
+    }
+
+    message Filters {
+        int32 mandant = 1;
+        TimeRange range = 2;
+        repeated string belegart_items = 3;
+    }
+}
+
+message GetVKBelegPulseResponse {
+    int32 page_size = 1;
+    int32 page = 2;
+    int32 mandant = 3;
+    repeated VKBelegPulseV1 items = 4;
+    VKBelegPulseV1.Metrics metrics = 5;
+    VKBelegPulseV1.Filters filters = 6;
+}
+
+message FetchNewestVKBelegEventsRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+}
+
+message FetchNewestVKBelegEventsResponse {
+    repeated int64 bel_ids = 1;
+}
+
+message EmitVKBelegEventsRequest {
+    int32 mandant = 3;
+    int64 bel_id = 4;
+}
+
+message EmitVKBelegEventsResponse {
+    repeated EventItemVkBeleg events = 1;
+}
+
+enum EventTopic {
+    EVENT_TOPIC_UNKNOW_UNSPECIFIED = 0;
+    EVENT_TOPIC_VK_BELEG_CREATED = 1;
+    EVENT_TOPIC_VK_BELEG_PAYED = 2;
+    EVENT_TOPIC_VK_BELEG_OVER_PAYED = 3;
+    EVENT_TOPIC_VK_BELEG_UNDER_PAYED = 4;
+    EVENT_TOPIC_VK_BELEG_MAHNSTUFE_1 = 5;
+    // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_2 = 6;
+    // EVENT_VK_BELEG_TOPIC_MAHNSTUFE_3 = 7;
+    EVENT_TOPIC_VK_BELEG_CANCELD = 8;
+    EVENT_TOPIC_VK_BELEG_FULFILLED = 9;
+    EVENT_TOPIC_FEED_FILE_CREATED = 10;
+}
+
+message EventItemVkBeleg {
+    string id = 1;
+    EventTopic topic = 2;
+    int32 mandant = 3;
+    int64 bel_id = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+message ListVKBelegEventsRequest{
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string page_token = 3;
+}
+
+message ListVKBelegEventsResponse {
+    repeated EventItemVkBeleg events = 1;
+    string page_token = 2;
+}
+
+message GetVKBelegEventRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    EventTopic topic = 3;
+}
+
+// EVENT_VK_BELEG_TOPIC_CREATED
+message EventVkBelegCreated {
+    EventTopic topic = 1;
+    VKBelegV2 beleg = 2;
+    repeated VKBelegePositionenV2 positions = 3;
+    repeated VKBelegeWarehousePositionV1 warehouse_positions = 4;
+    google.protobuf.Timestamp beleg_created_at = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+// EVENT_VK_BELEG_TOPIC_PAYED
+message EventVkBelegPayed {
+    EventTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
+}
+
+// EVENT_VK_BELEG_TOPIC_OVER_PAYED
+message EventVkBelegOverPayed {
+    EventTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
+}
+
+// EVENT_VK_BELEG_TOPIC_UNDER_PAYED
+message EventVkBelegUnderPayed {
+    EventTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
+}
+
+// EVENT_VK_BELEG_MAHNSTUFE_1
+message EventVkBelegMahnstufe1 {
+    EventTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    google.protobuf.Timestamp created_at = 10;
+}
+
+// EVENT_TOPIC_VK_BELEG_CANCELD
+message EventVkBelegCanceled {
+    EventTopic topic = 1;
+    int32 mandant = 2;
+    int64 bel_id = 3;
+    int64 vor_id = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string referenznummer = 7;
+    string zahlungskond = 8;
+    string user_zahlungsreferenz = 9;
+    string user_kopftext = 10;
+    repeated string user_tags = 11;
+    google.protobuf.Timestamp created_at = 12;
+}
+
+// EVENT_TOPIC_FEED_FILE_CREATED
+message EventFeedFileCreated {
+    EventTopic topic = 1;
+    string feed = 2;
+    string supplier = 3;
+    string name = 4;
+    string uri = 5;
+    int64 size = 6;
+    string size_humanized = 7;
+    google.protobuf.Timestamp created_at = 8;
+}
+
+message GetVKBelegEventResponse {
+    oneof event {
+        EventVkBelegCreated created = 1;
+        EventVkBelegPayed payed = 2;
+        EventVkBelegOverPayed over_payed = 3;
+        EventVkBelegUnderPayed under_payed = 4;
+        EventVkBelegMahnstufe1 mahnstufe_1 = 5;
+        // EventVkBelegMahnstufe1 mahnstufe_2 = 6;
+        // EventVkBelegMahnstufe1 mahnstufe_3 = 7;
+        EventVkBelegCanceled canceled = 8;
+    }
+}
+
+message PushEventRequest {
+    string id = 1;
+}
+
+message PushEventResponse {
+    Event event = 1;
+}
+
+message GetEventRequest {
+    string id = 1;
+}
+
+message GetEventResponse {
+    Event event = 1;
+}
+
+message DeleteEventRequest {
+    string id = 1;
+}
+
+message DeleteEventResponse {
+    Event event = 1;
+}
+
+enum PayedStatus {
+    PAYED_STATUS_UNKNOW_UNSPECIFIED = 0;
+    PAYED_STATUS_NOT_PAID = 1;
+    PAYED_STATUS_PAID = 2;
+    PAYED_STATUS_UNDERPAID = 3;
+    PAYED_STATUS_OVERPAID = 4;
+}
+
+enum MahnstufeStatus {
+    MAHNSTUFE_STATUS_UNKNOW_UNSPECIFIED = 0;
+    MAHNSTUFE_STATUS_0 = 1;
+    MAHNSTUFE_STATUS_1 = 2;
+    MAHNSTUFE_STATUS_2 = 3;
+    MAHNSTUFE_STATUS_3 = 4;
+}
+
+message VKBelegV2 {
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    int64 bel_id = 3;
+    string belegkennzeichen = 4;
+    string belegart = 5;
+    string kundengruppe = 6;
+    string kopftext = 7;
+    string referenznummer = 8;
+    string lieferbedingung = 9;
+    string user_kom_bearbeiter = 10;
+    google.protobuf.Timestamp user_kom_zeit = 11;
+    string user_zahlungsreferenz = 12;
+    google.protobuf.Timestamp user_cd = 13;
+    string user_belegjahr_belegnummer = 14;
+    double nettobetrag_ew = 15;
+    double bruttobetrag_ew = 16;
+    string versand = 17;
+    PayedStatus user_bezahlt = 18;
+    string zahlungskond = 19;
+    string inkassoart = 20;
+    double betrag = 21;
+    string email = 22;
+    string telefon = 23;
+    string a0_land = 24;
+    string a1_land = 25;
+    string memo = 26;
+    repeated string tags = 27;
+    MahnstufeStatus user_mahnstufe = 28;
+    double roherloes = 29;
+    repeated string suppliers = 30;
+    string wkz = 31;
+}
+
+message VKBelegePositionenV2 {
+    int64 bel_pos_id = 1;
+    int64 vor_pos_id = 2;
+    string position = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    string bezeichnung_1 = 6;
+    string bezeichnung_2 = 7;
+    double gesamtpreis_intern_ew = 8;
+    double einzelpreis = 9;
+    double mittlerer_ek = 10;
+    double roherloes = 11;
+    double menge = 12;
+    bool ist_erledigt = 13;
+    string mengeneinheit = 14;
+    string menge_vp_einheit = 15;
+    bool user_sonepar_bestellt = 16;
+    google.protobuf.Timestamp user_sonepar_bestellt_markiert_datum = 17;
+    bool user_ep_bestellt = 18;
+    google.protobuf.Timestamp user_ep_bestellt_markiert_datum = 19;
+    string user_versandklasse = 20;
+    string user_sonepar_artikel = 21;
+    string user_zulieferer_code = 22;
+    string user_zulieferer_artikelnummer = 23;
+    double user_zulieferer_bestand = 24;
+}
+
+message VKBelegeWarehousePositionV1 {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double menge = 4;
+    string mengeneinheit = 5;
+    string menge_vp_einheit = 6;
+    double menge_vp_umrechnung = 7;
+    double lagerbestand = 8;
+    double dispobestand = 9;
+}
+
+message GetVKBelegV2Request {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+}
+
+message GetVKBelegV2Response {
+    VKBelegV2 beleg = 1;
+    repeated VKBelegePositionenV2 positions = 2;
+    repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
 }
 
 message GetApiKeyRequest {
@@ -928,6 +1523,73 @@ message UpdateScopesByApiKeyRequest {
 
 message UpdateScopesByApiKeyResponse {
     ApiKey api_key = 1;
+}
+
+message UpdateAmazonItemLeadTimeToShipItem {
+    int32 mandant = 1;
+    int64 item_id = 2;
+    int32 lead_time_to_ship = 3;
+}
+
+message UpdateAmazonLeadTimesRequest {
+    repeated UpdateAmazonItemLeadTimeToShipItem items = 1;
+    bool debug = 2;
+}
+
+message UpdateAmazonLeadTimesResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message GetAmazonItemRequest {
+    int32 mandant = 1;
+    int64 item_id = 2;
+}
+
+message GetAmazonItemResponse {
+    LBAmazonItem item = 1;
+}
+
+message GetActionRequest {
+    string id = 1;
+}
+
+message GetActionResponse {
+    Action action = 1;
+}
+
+message ListActionsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_TYPE = 1;
+        FIELD_TABLE = 2;
+        FIELD_BY_USER_ID = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListActionsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListActionsFilter filters = 6;
+}
+
+message ListActionsResponse {
+    repeated Action actions = 1;
+    string page_token = 2;
 }
 
 message InfoRequest {}
