@@ -151,6 +151,7 @@ message Check {
         TYPE_UNSPECIFIED = 0;
         TYPE_ARTICLE_EU_ENERGY_V1 = 1;
         TYPE_ARTICLE_IMAGE_EXISTS = 2;
+        TYPE_ARTICLE_EAN_VALID = 3;
     }
 
     string id = 1;
