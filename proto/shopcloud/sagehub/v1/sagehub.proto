@@ -188,9 +188,41 @@ service SageHubService {
     // Onlinbezeichner
     rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
+    rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ArticleContentError {
+    enum ContentErrorType {
+        CONTENT_ERROR_TYPE_UNSPECIFIED = 0;
+        CONTENT_ERROR_TYPE_EAN_INVALID = 1;
+    }
+
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string table = 4;
+    string field = 5;
+    string value = 6;
+    string reason = 7;
+    repeated string tags = 8;
+}
+
+message ListArticleContentErrorsRequest {
+    int32 mandant = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+    ArticleContentError.ContentErrorType type = 4;
+    bool debug = 5;
+}
+
+message ListArticleContentErrorsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleContentError items = 3;
+    repeated string queries = 4;
 }
 
 message ListAmazonItemsRequest {
