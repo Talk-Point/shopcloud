@@ -141,6 +141,11 @@ service SageHubService {
     rpc ListAmazonItems(ListAmazonItemsRequest) returns (ListAmazonItemsResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
+    // Ebay
+    rpc GetEbayItem(GetEbayItemRequest) returns (GetEbayItemResponse);
+    rpc ListEbayItems(ListEbayItemsRequest) returns (ListEbayItemsResponse);
+    rpc UpdateEbayItem(UpdateEbayItemRequest) returns (UpdateEbayItemResponse);
+
     // VKBelege
     rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
@@ -187,11 +192,184 @@ service SageHubService {
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
     rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
+    rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
     rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message UpdateArticleOnlinebezeichnerRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string by_user = 4;
+
+    string bezeichnung_1 = 5;
+    string bezeichnung_2 = 6;
+    string bezeichnung_3 = 7;
+    string bezeichnung_4 = 8;
+    string bezeichnung_5 = 9;
+    string bezeichnung_6 = 10;
+    string bezeichnung_7 = 11;
+    string bezeichnung_8 = 12;
+    string bezeichnung_9 = 13;
+    string bezeichnung_10 = 14;
+    string bezeichnung_11 = 15;
+    string bezeichnung_12 = 16;
+    string bezeichnung_13 = 17;
+    string bezeichnung_14 = 18;
+    string bezeichnung_15 = 19;
+    string bezeichnung_16 = 20;
+    string bezeichnung_17 = 21;
+    string bezeichnung_18 = 22;
+    string bezeichnung_19 = 23;
+    string bezeichnung_20 = 24;
+    string bezeichnung_21 = 25;
+    string bezeichnung_22 = 26;
+    string bezeichnung_23 = 27;
+    string bezeichnung_24 = 28;
+    string bild_1 = 29;
+    string bild_2 = 30;
+    string bild_3 = 31;
+    string bild_4 = 32;
+    string bild_5 = 33;
+    string bild_6 = 34;
+    string bild_7 = 35;
+    string bild_8 = 36;
+    string bild_9 = 37;
+    string bild_10 = 38;
+    string bild_11 = 39;
+    string bild_12 = 40;
+    string bild_13 = 41;
+    string bild_14 = 42;
+    string bild_15 = 43;
+    string bild_16 = 44;
+    string bild_17 = 45;
+    string bild_18 = 46;
+    string bild_19 = 47;
+    string bild_20 = 48;
+    string bild_21 = 49;
+    string bild_22 = 50;
+    string bild_23 = 51;
+    string bild_24 = 52;
+
+    UpdateMask update_mask = 53;
+    string sprache = 54;
+}
+
+message UpdateArticleOnlinebezeichnerResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message UpdateEbayItemRequest {
+    int32 mandant = 1;
+    string item_id = 2;
+    string by_user = 3;
+
+    bool aktiv = 4;
+    bool freigabe = 5;
+    string title = 6;
+    string sub_title = 7;
+    double quantity = 8;
+    string store_category_id = 9;
+    string category_id = 10;
+    string photo_url = 11;
+    string photo_url2 = 12;
+    string photo_url3 = 13;
+    string photo_url4 = 14;
+    string photo_url5 = 15;
+    string photo_url6 = 16;
+    string photo_url7 = 17;
+    string photo_url8 = 18;
+    string photo_url9 = 19;
+    string photo_url10 = 20;
+    string photo_url11 = 21;
+    string photo_url12 = 22;
+    string payment_profile_id = 23;
+    string shipping_profile_id = 24;
+    string return_profile_id = 25;
+    int32 condition_id = 26;
+    string repair_score = 27;
+    string condition_description = 28;
+    string description = 29;
+    bool check_dispo = 30;
+    bool relist = 31;
+    bool list_after_end = 32;
+
+    UpdateMask update_mask = 33;
+}
+
+message UpdateEbayItemResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message EbayItem {
+    string item_id = 1;
+    int32 mandant = 2;
+    string artikelnummer = 3;
+    int32 auspraegung_id = 4;
+    int32 seller_id = 5;
+    int32 type = 6;
+    int32 site_id = 7;
+    string title = 8;
+    string sub_title = 9;
+    double quantity = 10;
+    string store_category_id = 11;
+    string category_id = 12;
+    string photo_url = 13;
+    string photo_url2 = 14;
+    string photo_url3 = 15;
+    string photo_url4 = 16;
+    string photo_url5 = 17;
+    string photo_url6 = 18;
+    string photo_url7 = 19;
+    string photo_url8 = 20;
+    string photo_url9 = 21;
+    string photo_url10 = 22;
+    string photo_url11 = 23;
+    string photo_url12 = 24;
+    string payment_profile_id = 25;
+    string shipping_profile_id = 26;
+    string return_profile_id = 27;
+    int32 condition_id = 28;
+    string repair_score = 29;
+    string condition_description = 30;
+    string description = 31;
+    bool check_dispo = 32;
+    bool relist = 33;
+    bool list_after_end = 34;
+    bool aktiv = 35;
+    bool freigabe = 36;
+}
+
+message GetEbayItemRequest {
+    int32 mandant = 1;
+    string item_id = 2;
+    bool debug = 3;
+}
+
+message GetEbayItemResponse {
+    EbayItem item = 1;
+    repeated string queries = 2;
+}
+
+message ListEbayItemsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string item_id = 4;
+    bool debug = 5;
+}
+
+message ListEbayItemsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated EbayItem items = 3;
+    repeated string queries = 4;
 }
 
 message ArticleContentError {
