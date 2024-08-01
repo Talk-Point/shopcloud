@@ -1472,14 +1472,33 @@ message EventItemVkBeleg {
     }
 }
 
-message ListVKBelegEventsRequest{
-    int32 mandant = 1;
-    string topic = 2;
-    int64 bel_id = 3;
-    string tag = 4;
-    string processed_tag = 5;
-    int32 page_size = 6;
-    string page_token = 7;
+message ListVKBelegEventsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_RESSOURCE = 1;
+        FIELD_REFERENCE = 2;
+        FIELD_TAGS = 3;
+        FIELD_PROCESSED_TAGS = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListVKBelegEventsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListVKBelegEventsFilter filters = 6;
 }
 
 message ListVKBelegEventsResponse {
