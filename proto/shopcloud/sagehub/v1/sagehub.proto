@@ -157,8 +157,12 @@ service SageHubService {
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
     rpc EmitVKBelegEvents(EmitVKBelegEventsRequest) returns (EmitVKBelegEventsResponse);
-    rpc ListVKBelegEvents(ListVKBelegEventsRequest) returns (ListVKBelegEventsResponse);
     rpc GetVKBelegEvent(GetVKBelegEventRequest) returns (GetVKBelegEventResponse);
+    rpc ListVKBelegEvents(ListVKBelegEventsRequest) returns (ListVKBelegEventsResponse);
+    rpc AddTagToVKBelegEvent(AddTagToVKBelegEventRequest) returns (AddTagToVKBelegEventResponse);
+    rpc RemoveTagFromVKBelegEvent(RemoveTagFromVKBelegEventRequest) returns (RemoveTagFromVKBelegEventResponse);
+    rpc MarkTagDoneVKBelegEvent(MarkTagDoneVKBelegEventRequest) returns (MarkTagDoneVKBelegEventResponse);
+    rpc ClassifyVKBelegEventV1(ClassifyVKBelegEventV1Request) returns (ClassifyVKBelegEventV1Response);
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
@@ -198,6 +202,44 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ClassifyVKBelegEventV1Request {
+    string id = 1;
+    bool debug = 2; // when debug true ther tags are not saved in the event
+}
+
+message ClassifyVKBelegEventV1Response {
+    string id = 1;
+    repeated string tags = 2;
+}
+
+message AddTagToVKBelegEventRequest {
+    string id = 1;
+    repeated string tags = 2;
+}
+
+message AddTagToVKBelegEventResponse {
+    EventItemVkBeleg event = 1;
+}
+
+message RemoveTagFromVKBelegEventRequest {
+    string id = 1;
+    repeated string tags = 2;
+}
+
+message RemoveTagFromVKBelegEventResponse {
+    EventItemVkBeleg event = 1;
+}
+
+message MarkTagDoneVKBelegEventRequest {
+    string id = 1;
+    repeated string tags = 2;
+    string by_user = 3;
+}
+
+message MarkTagDoneVKBelegEventResponse {
+    EventItemVkBeleg event = 1;
 }
 
 message UpdateArticleOnlinebezeichnerRequest {
@@ -1415,13 +1457,29 @@ message EventItemVkBeleg {
     EventTopic topic = 2;
     int32 mandant = 3;
     int64 bel_id = 4;
-    google.protobuf.Timestamp created_at = 5;
+    repeated string tags = 5;
+    repeated string processed_tags = 6;
+    google.protobuf.Timestamp created_at = 7;
+    oneof event {
+        EventVkBelegCreated created = 8;
+        EventVkBelegPayed payed = 9;
+        EventVkBelegOverPayed over_payed = 10;
+        EventVkBelegUnderPayed under_payed = 11;
+        EventVkBelegMahnstufe1 mahnstufe_1 = 12;
+        // EventVkBelegMahnstufe1 mahnstufe_2 = 13;
+        // EventVkBelegMahnstufe1 mahnstufe_3 = 14;
+        EventVkBelegCanceled canceled = 15;
+    }
 }
 
 message ListVKBelegEventsRequest{
     int32 mandant = 1;
-    int64 bel_id = 2;
-    string page_token = 3;
+    string topic = 2;
+    int64 bel_id = 3;
+    string tag = 4;
+    string processed_tag = 5;
+    int32 page_size = 6;
+    string page_token = 7;
 }
 
 message ListVKBelegEventsResponse {
@@ -1641,6 +1699,7 @@ message VKBelegePositionenV2 {
     string user_zulieferer_code = 22;
     string user_zulieferer_artikelnummer = 23;
     double user_zulieferer_bestand = 24;
+    string artikelgruppe = 25;
 }
 
 message VKBelegeWarehousePositionV1 {
