@@ -163,6 +163,7 @@ service SageHubService {
     rpc RemoveTagFromVKBelegEvent(RemoveTagFromVKBelegEventRequest) returns (RemoveTagFromVKBelegEventResponse);
     rpc MarkTagDoneVKBelegEvent(MarkTagDoneVKBelegEventRequest) returns (MarkTagDoneVKBelegEventResponse);
     rpc ClassifyVKBelegEventV1(ClassifyVKBelegEventV1Request) returns (ClassifyVKBelegEventV1Response);
+    rpc ListVKBelegClassifiersV1(ListVKBelegClassifiersV1Request) returns (ListVKBelegClassifiersV1Response);
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
@@ -202,6 +203,19 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message VKBelegClassifierV1 {
+    string name = 1;
+    string description = 2;
+    repeated string for_events = 3;
+    string issue = 4;
+}
+
+message ListVKBelegClassifiersV1Request {}
+
+message ListVKBelegClassifiersV1Response {
+    repeated VKBelegClassifierV1 items = 3;
 }
 
 message ClassifyVKBelegEventV1Request {
