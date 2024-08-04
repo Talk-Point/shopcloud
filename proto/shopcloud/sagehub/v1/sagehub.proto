@@ -179,6 +179,7 @@ service SageHubService {
     rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
     rpc CreateFeedFile(CreateFeedFileRequest) returns (CreateFeedFileResponse);
     rpc DeleteFeed(DeleteFeedRequest) returns (DeleteFeedResponse);
+    rpc ParseFeedFileProductContent(ParseFeedFileProductContentRequest) returns (ParseFeedFileProductContentResponse); // only per cli
 
     // Articles
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
@@ -210,6 +211,8 @@ message VKBelegClassifierV1 {
     string description = 2;
     repeated string for_events = 3;
     string issue = 4;
+    repeated string tags = 5;
+    bool active = 6;
 }
 
 message ListVKBelegClassifiersV1Request {}
@@ -779,6 +782,31 @@ message UpdateArticleRequest {
     string eannummer = 30;
 
     UpdateMask update_mask = 31;
+
+    // khkartikelvariante
+    string user_content_status = 32;
+    string user_content_last_edit = 33;
+    string user_voelkner_id = 34;
+    string user_idealo_id = 35;
+    string user_eec_skala = 36;
+    string user_eprel_nr = 37;
+    string user_eprel_kategorie = 38;
+    string user_weee_nr = 39;
+    string user_weee_marke = 40;
+    string user_weee_kategorie = 41;
+    string user_herstellernummer = 42;
+    string user_groupKey = 43;
+    double user_uvp_price = 44;
+    string user_uvp_currency = 45;
+    string user_uvp_at = 46;
+    string user_hauptkategorie = 47;
+    string user_unterkategorie = 48;
+    string user_produkttyp = 49;
+    string user_serie = 50;
+    string user_basename = 51;
+    string user_keyword = 52;
+    string user_farbe = 53;
+
 }
 
 message UpdateArticleResponse {
@@ -1057,6 +1085,29 @@ message KhkArtikelVariante {
     bool user_scmpaktiv = 51;
     string lagermodulekbme = 52;
     string lagermodulvkbme = 53;
+    string user_content_status = 54;
+    string user_content_last_edit = 55;
+    string user_voelkner_id = 56;
+    string user_idealo_id = 57;
+    string user_eec_skala = 58;
+    string user_eprel_nr = 59;
+    string user_eprel_kategorie = 60;
+    string user_weee_nr = 61;
+    string user_weee_marke = 62;
+    string user_weee_kategorie = 63;
+    string user_herstellernummer = 64;
+    string user_groupKey = 65;
+    double user_uvp_price = 66;
+    string user_uvp_currency = 67;
+    string user_uvp_at = 68;
+    string user_hauptkategorie = 69;
+    string user_unterkategorie = 70;
+    string user_produkttyp = 71;
+    string user_serie = 72;
+    string user_basename = 73;
+    string user_keyword = 74;
+    string user_farbe = 75;
+
 }
 
 message KhkVariantenAuspraegungen {
@@ -1196,6 +1247,13 @@ message GetFeedByNameResponse {
 message GetFeedRequest {
     string id = 1;
 }
+
+message ParseFeedFileProductContentRequest {
+    string id = 1;
+    string uri = 2;
+}
+
+message ParseFeedFileProductContentResponse {}
 
 message GetFeedFileContentRequest {
     string id = 1;
