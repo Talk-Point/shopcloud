@@ -188,6 +188,7 @@ service ContentHubService {
     rpc DeleteAttribute(DeleteAttributeRequest) returns (DeleteAttributeResponse);
     rpc UpdateAttributeValue(UpdateAttributeValueRequest) returns (UpdateAttributeValueResponse);
     rpc ExportAttributeToDb(ExportAttributeToDbRequest) returns (ExportAttributeToDbResponse);
+    rpc RenameAttributeKey(RenameAttributeKeyRequest) returns (RenameAttributeKeyResponse);
     
     // Content Section
     rpc RenderContentSection(RenderContentSectionRequest) returns (RenderContentSectionResponse);
@@ -233,6 +234,17 @@ service ContentHubService {
     // Misc
     rpc ConvertHtmlToMarkdown(ConvertHtmlToMarkdownRequest) returns (ConvertHtmlToMarkdownResponse);
     rpc ConvertMarkdownToHtml(ConvertMarkdownToHtmlRequest) returns (ConvertMarkdownToHtmlResponse);
+}
+
+message RenameAttributeKeyRequest {
+    string key_old = 1;
+    string key_new = 2;
+}
+
+message RenameAttributeKeyResponse {
+    repeated string success_ids = 1;
+    repeated string failed_ids = 2;
+    bool success = 3;
 }
 
 message GetIcecatFileRequest {
