@@ -91,13 +91,17 @@ message VariantImage {
 
     string id = 1;
     string variant = 2;
-    string image = 3;
-    string url = 4;
-    Status status = 5;
-    string error = 6;
-    map<string, string> metadatas = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
+    string variant_name = 3;
+    string image = 4;
+    string url = 5;
+    Status status = 6;
+    string error = 7;
+    map<string, string> metadatas = 8;
+    int32 width = 9;
+    int32 height = 10;
+    string format = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
 }
 
 service ImageHubService {
@@ -161,7 +165,10 @@ message ListVariantImagesFilter {
         FIELD_VARIANT = 1;
         FIELD_IMAGE = 2;
         FIELD_STATUS = 3;
-        FIELD_CREATED_AT = 4;
+        FIELD_METADATAS__ARTIKELNUMMER = 4;
+        FIELD_METADATAS__AUSPRAEGUNG_ID = 5;
+        FIELD_METADATAS__POSITION = 6;
+        FIELD_CREATED_AT = 7;
     }
 
     Field field = 1;
@@ -217,8 +224,11 @@ message ListImagesFilter {
         FIELD_WIDTH = 3;
         FIELD_HEIGHT = 4;
         FIELD_FORMAT = 5;
-        FIELD_CREATED_BY = 6;
-        FIELD_CREATED_AT = 7;
+        FIELD_METADATAS__ARTIKELNUMMER = 6;
+        FIELD_METADATAS__AUSPRAEGUNG_ID = 7;
+        FIELD_METADATAS__POSITION = 8;
+        FIELD_CREATED_BY = 9;
+        FIELD_CREATED_AT = 10;
     }
 
     Field field = 1;
