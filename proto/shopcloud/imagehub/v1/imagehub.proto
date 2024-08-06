@@ -1,0 +1,421 @@
+// ImageHub API
+// To access the erp
+
+syntax = "proto3";
+
+package proto.shopcloud.imagehub.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Generic
+enum Operator {
+    OPERATOR_EQUAL_UNSPECIFIED = 0;
+    // OPERATOR_NOT_EQUAL = 1;
+    OPERATOR_GREATER_THAN = 2;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_LESS_THAN_OR_EQUAL = 5;
+    // OPERATOR_IN = 6;
+    // OPERATOR_NOT_IN = 7;
+    // OPERATOR_LIKE = 8;
+    // OPERATOR_NOT_LIKE = 9;
+    // OPERATOR_IS_NULL = 10;
+    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_CONTAINS = 12;
+    OPERATOR_ARRAY_CONTAINS = 13;
+}
+
+enum Direction {
+    DIRECTION_ASC_UNSPECIFIED = 0;
+    DIRECTION_DESC = 1;
+}
+
+message UpdateMask {
+    repeated string paths = 1;
+}
+
+// Scopes
+enum Scope {
+    SCOPE_UNSPECIFIED = 0;
+    SCOPE_READ = 1;
+    SCOPE_WRITE = 2;
+    SCOPE_ADMIN = 3;
+}
+
+// Models
+message ApiKey {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    repeated Scope scopes = 4;
+    string secret = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+message Image {
+    string id = 1;
+    string name = 2;
+    string hash = 3;
+    map<string, string> metadatas = 4;
+    repeated string tags = 5;
+    int32 width = 6;
+    int32 height = 7;
+    string format = 8;
+    string created_by = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message Variant {
+    string id = 1;
+    string name = 2;
+    int32 width = 3;
+    int32 height = 4;
+    string format = 5;
+    repeated string operations = 6;
+    string path_prefix = 7;
+    bool active = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+message VariantImage {
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_PENDING = 1;
+        STATUS_PROCESSING = 2;
+        STATUS_SUCCEEDED = 3;
+        STATUS_FAILED = 4;
+    }
+
+    string id = 1;
+    string variant = 2;
+    string image = 3;
+    string url = 4;
+    Status status = 5;
+    string error = 6;
+    map<string, string> metadatas = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+service ImageHubService {
+    // Info
+    rpc Info(InfoRequest) returns (InfoResponse);
+
+    // APIKeys
+    rpc GetApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
+    rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse);
+    rpc CreateApiKey(CreateApiKeyRequest) returns (CreateApiKeyResponse);
+    rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
+    rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
+
+    // Image
+    rpc GetImage(GetImageRequest) returns (GetImageResponse);
+    rpc GetImageContent(GetImageContentRequest) returns (GetImageContentResponse);
+    rpc ListImages(ListImagesRequest) returns (ListImagesResponse);
+    rpc CreateImageFromUrl(CreateImageFromUrlRequest) returns (CreateImageFromUrlResponse);
+    rpc CreateImageFromFile(CreateImageFromFileRequest) returns (CreateImageFromFileResponse);
+    rpc DeleteImage(DeleteImageRequest) returns (DeleteImageResponse);
+    rpc ProceedImage(ProceedImageRequest) returns (ProceedImageResponse);
+
+    // Variant
+    rpc GetVariant(GetVariantRequest) returns (GetVariantResponse);
+    rpc ListVariants(ListVariantsRequest) returns (ListVariantsResponse);
+    rpc CreateVariant(CreateVariantRequest) returns (CreateVariantResponse);
+    rpc DeleteVariant(DeleteVariantRequest) returns (DeleteVariantResponse);
+    rpc ProcessVariant(ProcessVariantRequest) returns (ProcessVariantResponse);
+
+    // Variant Image
+    rpc GetVariantImage(GetVariantImageRequest) returns (GetVariantImageResponse);
+    rpc ListVariantImages(ListVariantImagesRequest) returns (ListVariantImagesResponse);
+    rpc DeleteVariantImage(DeleteVariantImageRequest) returns (DeleteVariantImageResponse);
+}
+
+message ProceedImageRequest {
+    string id = 1;
+}
+
+message ProceedImageResponse {
+    repeated string variant_ids = 1;
+}
+
+message ListVariantImagesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListVariantImagesFilter filters = 6;
+}
+
+message ListVariantImagesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_VARIANT = 1;
+        FIELD_IMAGE = 2;
+        FIELD_STATUS = 3;
+        FIELD_CREATED_AT = 4;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListVariantImagesResponse {
+    repeated VariantImage variant_images = 1;
+    string page_token = 2;
+}
+
+message ListVariantsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListVariantsFilter filters = 6;
+}
+
+message ListVariantsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_WIDTH = 2;
+        FIELD_HEIGHT = 3;
+        FIELD_FORMAT = 4;
+        FIELD_ACTIVE = 5;
+        FIELD_CREATED_AT = 6;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListVariantsResponse {
+    repeated Variant variants = 1;
+    string page_token = 2;
+}
+
+message ListImagesFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_HASH = 2;
+        FIELD_WIDTH = 3;
+        FIELD_HEIGHT = 4;
+        FIELD_FORMAT = 5;
+        FIELD_CREATED_BY = 6;
+        FIELD_CREATED_AT = 7;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListImagesRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListImagesFilter filters = 6;
+}
+
+message ListImagesResponse {
+    repeated Image images = 1;
+    string page_token = 2;
+}
+
+message GetImageContentRequest {
+    string id = 1;
+}
+
+message GetImageContentResponse {
+    bytes content = 1;
+    string content_type = 2;
+}
+
+message GetVariantImageRequest {
+    string id = 1;
+}
+
+message GetVariantImageResponse {
+    VariantImage variant_image = 1;
+}
+
+message DeleteVariantImageRequest {
+    string id = 1;
+}
+
+message DeleteVariantImageResponse {
+    VariantImage variant_image = 1;
+}
+
+message ProcessVariantRequest {
+    string id = 1;
+    string image = 2;
+}
+
+message ProcessVariantResponse {
+    VariantImage variant_image = 1;
+}
+
+message CreateImageFromUrlRequest {
+    string url = 1;
+    string name = 2;
+    map<string, string> metadatas = 3;
+    repeated string tags = 4;
+    string created_by = 5;
+}
+
+message CreateImageFromUrlResponse {
+    Image image = 1;
+}
+
+message CreateImageFromFileRequest {
+    bytes file = 1;
+    string name = 2;
+}
+
+message CreateImageFromFileResponse {
+    Image image = 1;
+}
+
+message GetVariantRequest {
+    string id = 1;
+}
+
+message GetVariantResponse {
+    Variant variant = 1;
+}
+
+message CreateVariantRequest {
+    string name = 1;
+    int32 width = 2;
+    int32 height = 3;
+    string format = 4;
+    repeated string operations = 5;
+    string path_prefix = 6;
+}
+
+message CreateVariantResponse {
+    Variant variant = 1;
+}
+
+message DeleteVariantRequest {
+    string id = 1;
+}
+
+message DeleteVariantResponse {
+    Variant variant = 1;
+}
+
+message DeleteImageRequest {
+    string id = 1;
+}
+
+message DeleteImageResponse {
+    Image image = 1;
+}
+
+message GetImageRequest {
+    string id = 1;
+}
+
+message GetImageResponse {
+    Image image = 1;
+}
+
+message GetApiKeyRequest {
+    string id = 1;
+}
+
+message GetApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message ListApiKeysFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_USERNAME = 1;
+        FIELD_EMAIL = 2;
+        FIELD_SECRET = 3;
+        FIELD_BY_USER_NAME = 4;
+        FIELD_CREATED_AT = 5;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListApiKeysRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListApiKeysFilter filters = 6;
+}
+
+message ListApiKeysResponse {
+    repeated ApiKey api_keys = 1;
+    string page_token = 2;
+}
+
+message CreateApiKeyRequest {
+    string username = 1;
+    string email = 2;
+    repeated Scope scopes = 3;
+}
+
+message CreateApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message DeleteApiKeyRequest {
+    string id = 1;
+}
+
+message DeleteApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message UpdateScopesByApiKeyRequest {
+    string id = 1;
+    repeated string scopes = 2;
+}
+
+message UpdateScopesByApiKeyResponse {
+    ApiKey api_key = 1;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+    string version = 1;
+}
