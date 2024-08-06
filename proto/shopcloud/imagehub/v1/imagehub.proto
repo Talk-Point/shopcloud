@@ -165,10 +165,11 @@ message ListVariantImagesFilter {
         FIELD_VARIANT = 1;
         FIELD_IMAGE = 2;
         FIELD_STATUS = 3;
-        FIELD_METADATAS__ARTIKELNUMMER = 4;
-        FIELD_METADATAS__AUSPRAEGUNG_ID = 5;
-        FIELD_METADATAS__POSITION = 6;
-        FIELD_CREATED_AT = 7;
+        FIELD_METADATAS__MANDANT = 4;
+        FIELD_METADATAS__ARTIKELNUMMER = 5;
+        FIELD_METADATAS__AUSPRAEGUNG_ID = 6;
+        FIELD_METADATAS__POSITION = 7;
+        FIELD_CREATED_AT = 8;
     }
 
     Field field = 1;
@@ -224,11 +225,12 @@ message ListImagesFilter {
         FIELD_WIDTH = 3;
         FIELD_HEIGHT = 4;
         FIELD_FORMAT = 5;
-        FIELD_METADATAS__ARTIKELNUMMER = 6;
-        FIELD_METADATAS__AUSPRAEGUNG_ID = 7;
-        FIELD_METADATAS__POSITION = 8;
-        FIELD_CREATED_BY = 9;
-        FIELD_CREATED_AT = 10;
+        FIELD_METADATAS__MANDANT = 6;
+        FIELD_METADATAS__ARTIKELNUMMER = 7;
+        FIELD_METADATAS__AUSPRAEGUNG_ID = 8;
+        FIELD_METADATAS__POSITION = 9;
+        FIELD_CREATED_BY = 10;
+        FIELD_CREATED_AT = 11;
     }
 
     Field field = 1;
