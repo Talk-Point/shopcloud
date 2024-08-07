@@ -63,8 +63,9 @@ message Image {
     int32 height = 7;
     string format = 8;
     string created_by = 9;
-    google.protobuf.Timestamp created_at = 10;
-    google.protobuf.Timestamp updated_at = 11;
+    repeated string operations = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
 }
 
 message Variant {
@@ -100,8 +101,9 @@ message VariantImage {
     int32 width = 9;
     int32 height = 10;
     string format = 11;
-    google.protobuf.Timestamp created_at = 12;
-    google.protobuf.Timestamp updated_at = 13;
+    repeated string operations = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
 }
 
 service ImageHubService {
@@ -294,9 +296,10 @@ message ProcessVariantResponse {
 message CreateImageFromUrlRequest {
     string url = 1;
     string name = 2;
-    map<string, string> metadatas = 3;
-    repeated string tags = 4;
-    string created_by = 5;
+    repeated string operations = 3;
+    map<string, string> metadatas = 4;
+    repeated string tags = 5;
+    string created_by = 6;
 }
 
 message CreateImageFromUrlResponse {
@@ -306,6 +309,10 @@ message CreateImageFromUrlResponse {
 message CreateImageFromFileRequest {
     bytes file = 1;
     string name = 2;
+    repeated string operations = 3;
+    map<string, string> metadatas = 4;
+    repeated string tags = 5;
+    string created_by = 6;
 }
 
 message CreateImageFromFileResponse {
