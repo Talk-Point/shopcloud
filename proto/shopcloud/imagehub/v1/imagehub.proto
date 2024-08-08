@@ -77,8 +77,9 @@ message Variant {
     repeated string operations = 6;
     string path_prefix = 7;
     bool active = 8;
-    google.protobuf.Timestamp created_at = 9;
-    google.protobuf.Timestamp updated_at = 10;
+    string event_success_endpoint = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
 }
 
 message VariantImage {
