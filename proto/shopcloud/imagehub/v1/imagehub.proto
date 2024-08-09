@@ -53,6 +53,11 @@ message ApiKey {
     google.protobuf.Timestamp updated_at = 7;
 }
 
+message AnalyseTag {
+    string type = 1;
+    string value = 2;
+}
+
 message Image {
     string id = 1;
     string name = 2;
@@ -64,8 +69,9 @@ message Image {
     string format = 8;
     string created_by = 9;
     repeated string operations = 10;
-    google.protobuf.Timestamp created_at = 11;
-    google.protobuf.Timestamp updated_at = 12;
+    repeated AnalyseTag analyse_tags = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
 }
 
 message Variant {
@@ -126,6 +132,7 @@ service ImageHubService {
     rpc CreateImageFromFile(CreateImageFromFileRequest) returns (CreateImageFromFileResponse);
     rpc DeleteImage(DeleteImageRequest) returns (DeleteImageResponse);
     rpc ProceedImage(ProceedImageRequest) returns (ProceedImageResponse);
+    rpc AnalyseImageContent(AnalyseImageContentRequest) returns (AnalyseImageContentResponse);
 
     // Variant
     rpc GetVariant(GetVariantRequest) returns (GetVariantResponse);
@@ -138,6 +145,14 @@ service ImageHubService {
     rpc GetVariantImage(GetVariantImageRequest) returns (GetVariantImageResponse);
     rpc ListVariantImages(ListVariantImagesRequest) returns (ListVariantImagesResponse);
     rpc DeleteVariantImage(DeleteVariantImageRequest) returns (DeleteVariantImageResponse);
+}
+
+message AnalyseImageContentRequest {
+    string id = 1;
+}
+
+message AnalyseImageContentResponse {
+    Image image = 1;
 }
 
 message ProceedImageRequest {
