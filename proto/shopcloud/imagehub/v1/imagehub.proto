@@ -152,6 +152,7 @@ message ListVariantImagesRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_METADATAS__POSITION = 2;
     }
 
     int32 page_size = 1;
