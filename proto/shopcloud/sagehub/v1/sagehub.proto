@@ -208,9 +208,45 @@ service SageHubService {
 
     // Supplier Article Data
     rpc GetSoneparArticle(GetSoneparArticleRequest) returns (GetSoneparArticleResponse);
+    // Supplier Import
+    rpc ListSupplierImportArticles(ListSupplierImportArticlesRequest) returns (ListSupplierImportArticlesResponse);
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ImportArtikel {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string title = 4;
+    string reference = 5;
+    double qty = 6;
+    bool user_scmpaktiv = 7;
+    string image = 8;
+    string content_status = 9;
+    string content_last_edit = 10;
+}
+
+message ListSupplierImportArticlesRequest {
+    enum Supplier {
+        SUPPLIER_UNSPECIFIED = 0;
+        SUPPLIER_SONEPAR = 1;
+    }
+
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    Supplier supplier = 4;
+    string search = 5;
+    bool debug = 6;
+}
+
+message ListSupplierImportArticlesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ImportArtikel items = 3;
+    repeated string queries = 4;
 }
 
 message SoneparDocument {
