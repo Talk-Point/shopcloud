@@ -153,6 +153,7 @@ service SageHubService {
     rpc ListVKBelegVersandarts(ListVKBelegVersandartsRequest) returns (ListVKBelegVersandartsResponse);
     rpc SetVersandOnVKBeleg(SetVersandOnVKBelegRequest) returns (SetVersandOnVKBelegResponse);
     rpc BatchSetVersandOnVKBeleg(BatchSetVersandOnVKBelegRequest) returns (BatchSetVersandOnVKBelegResponse);
+    rpc UpdateVKBeleg(UpdateVKBelegRequest) returns (UpdateVKBelegResponse);
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
@@ -189,6 +190,7 @@ service SageHubService {
     rpc DisableArticle(DisableArticleRequest) returns (DisableArticleResponse);
     rpc EnableShopArticle(EnableShopArticleRequest) returns (EnableShopArticleResponse);
     rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
+    rpc SetArticleContentStatus(SetArticleContentStatusRequest) returns (SetArticleContentStatusResponse);
     rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
     rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
     rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
@@ -201,9 +203,125 @@ service SageHubService {
     rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
     rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
+    // Reports
+    rpc ListArticleImportReportDatas(ListArticleImportReportDatasRequest) returns (ListArticleImportReportDatasResponse);
+
+    // Supplier Article Data
+    rpc GetSoneparArticle(GetSoneparArticleRequest) returns (GetSoneparArticleResponse);
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message SoneparDocument {
+    string type = 1;
+    string url = 2;
+}
+
+message SoneparArtikel {
+    string reference = 1;
+    string gtin = 2;
+    repeated string images = 3;
+    string category = 4;
+    repeated SoneparDocument documents = 5;
+}
+
+message SoneparRawArtikel {
+    string wg = 1;
+    string hersteller = 2;
+    string artnr = 3;
+    string bez = 4;
+    string typenbez = 5;
+    string h_artnr = 6;
+    string ean = 7;
+    string langtext = 8;
+    string merkmale = 9;
+    string artklasse = 10;
+    string bildurl = 11;
+    string aehnlich = 12;
+    string produktkategorie = 13;
+    string lieferstatus = 14;
+    string sperrgut = 15;
+    string hwg = 16;
+    string bearbeiten = 17;
+    string markenname = 18;
+    string bez2 = 19;
+    string herstellerprogramm = 20;
+    string artiklrelationen = 21;
+    string reachkennzeichen = 22;
+    string zus_bilder = 23;
+    string zus_dokumente = 24;
+    string minbez = 25;
+    string envkv_text = 26;
+    string kennz_abakus = 27;
+    string zolltarifnr = 28;
+    string logistikdaten = 29;
+    string oekod_pdf = 30;
+    string ursprungsland = 31;
+    string energielabel = 32;
+  }
+
+message GetSoneparArticleRequest {
+    string reference = 1;
+    bool debug = 2;
+}
+
+message GetSoneparArticleResponse {
+    SoneparRawArtikel sonepar_raw_artikel = 1;
+    SoneparArtikel sonepar_artikel = 2;
+    repeated string queries = 3;
+}
+
+enum ContentStatus {
+    CONTENT_STATUS_UNSPECIFIED = 0;
+    CONTENT_STATUS_REVIEWED = 1;
+    CONTENT_STATUS_BLACKLISTED = 2;
+}
+
+message SetArticleContentStatusRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string by_user = 4;
+    ContentStatus status = 5;
+}
+
+message SetArticleContentStatusResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message ArticleImportReportData {
+    string grouper = 1;
+    int32 tp = 2;
+    int32 sp = 3;
+    int32 ep = 4;
+    int32 herweck = 5;
+    int32 telepart = 6;
+    int32 yukatel = 7;
+    int32 hitisy = 8;
+}
+
+message ListArticleImportReportDatasRequest {}
+
+message ListArticleImportReportDatasResponse {
+    repeated ArticleImportReportData items = 1;
+    repeated string queries = 2;
+}
+
+message UpdateVKBelegRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string by_user = 3;
+
+    UpdateMask update_mask = 4;
+    string liefertermin = 5; // iso-format date
+
+}
+
+message UpdateVKBelegResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
 }
 
 message VKBelegClassifierV1 {
@@ -795,7 +913,7 @@ message UpdateArticleRequest {
     string user_weee_marke = 40;
     string user_weee_kategorie = 41;
     string user_herstellernummer = 42;
-    string user_groupKey = 43;
+    string user_group_key = 43;
     double user_uvp_price = 44;
     string user_uvp_currency = 45;
     string user_uvp_at = 46;
@@ -806,7 +924,7 @@ message UpdateArticleRequest {
     string user_basename = 51;
     string user_keyword = 52;
     string user_farbe = 53;
-
+    string user_conrad_id = 54;
 }
 
 message UpdateArticleResponse {
@@ -1096,7 +1214,7 @@ message KhkArtikelVariante {
     string user_weee_marke = 62;
     string user_weee_kategorie = 63;
     string user_herstellernummer = 64;
-    string user_groupKey = 65;
+    string user_group_key = 65;
     double user_uvp_price = 66;
     string user_uvp_currency = 67;
     string user_uvp_at = 68;
@@ -1107,7 +1225,7 @@ message KhkArtikelVariante {
     string user_basename = 73;
     string user_keyword = 74;
     string user_farbe = 75;
-
+    string user_conrad_id = 76;
 }
 
 message KhkVariantenAuspraegungen {
