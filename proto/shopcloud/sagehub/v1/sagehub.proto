@@ -232,6 +232,7 @@ message ListSupplierImportArticlesRequest {
     enum Supplier {
         SUPPLIER_UNSPECIFIED = 0;
         SUPPLIER_SONEPAR = 1;
+        SUPPLIER_EP = 2;
     }
 
     int32 page = 1;
