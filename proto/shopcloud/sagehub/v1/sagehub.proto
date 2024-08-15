@@ -194,8 +194,10 @@ service SageHubService {
     rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
     rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
     rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
+    rpc ListArticleMovements(ListArticleMovementsRequest) returns (ListArticleMovementsResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
+    rpc ListArticlePrices(ListArticlePricesRequest) returns (ListArticlePricesResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Onlinbezeichner
@@ -213,6 +215,55 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ArticleMovement {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string p_first_add = 4;
+    string last_add = 5;
+    string last_move = 6;
+    string last_out = 7;
+}
+
+message ListArticleMovementsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    bool debug = 6;
+}
+
+message ListArticleMovementsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleMovement items = 3;
+    repeated string queries = 4;
+}
+
+message ArticleListPrice {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double list_2_price = 4;
+    double list_3_price = 5;
+    double list_6_price = 6;
+}
+
+message ListArticlePricesRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
+}
+
+message ListArticlePricesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleListPrice items = 3;
+    repeated string queries = 4;
 }
 
 message ImportArtikel {
@@ -1319,6 +1370,7 @@ message ListArtikel {
     double zulieferer_bestand = 18;
     bool aktiv = 19;
     string ean = 20;
+    string artikelgruppe = 21;
 }
 
 message ListArticlesResponse {
