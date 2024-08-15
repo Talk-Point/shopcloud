@@ -136,36 +136,18 @@ message GetArticleResponse {
     Article article = 1;
 }
 
-message ListArticlesFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_NAME = 1;
-        FIELD_DESCRIPTION = 2;
-        FIELD_PRICE = 3;
-        FIELD_CREATED_AT = 4;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
 message ListArticlesRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-    }
-
     int32 page = 1;
     int32 page_size = 2;
-    OrderBy order_by = 3;
-    Direction direction = 4;
-    repeated ListArticlesFilter filters = 5;
+    string filter_query = 3;
+    bool debug = 4;
 }
 
 message ListArticlesResponse {
     repeated Article articles = 1;
-    string page_token = 2;
+    int32 page = 2;
+    int32 page_size = 3;
+    repeated string queries = 4;
 }
 
 message GetApiKeyRequest {
