@@ -195,6 +195,7 @@ service SageHubService {
     rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
     rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
     rpc ListArticleMovements(ListArticleMovementsRequest) returns (ListArticleMovementsResponse);
+    rpc ListLastSaleForArticles(ListLastSaleForArticlesRequest) returns (ListLastSaleForArticlesResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc ListArticlePrices(ListArticlePricesRequest) returns (ListArticlePricesResponse);
@@ -210,11 +211,67 @@ service SageHubService {
 
     // Supplier Article Data
     rpc GetSoneparArticle(GetSoneparArticleRequest) returns (GetSoneparArticleResponse);
+    rpc GetEPArticle(GetEPArticleRequest) returns (GetEPArticleResponse);
     // Supplier Import
     rpc ListSupplierImportArticles(ListSupplierImportArticlesRequest) returns (ListSupplierImportArticlesResponse);
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message EPRawArtikel {
+    string ep_art_nr = 1;
+    string name = 2;
+    string ean = 3;
+    string isbn = 4;
+    string farbe = 5;
+    string ep_aenderungsdatum = 6;
+    string kategorie_id = 7;
+    string kurzbeschreibung = 8;
+    string langbeschreibung = 9;
+    string hersteller = 10;
+    string hartikelnummer = 11;
+    double einkaufspreis_ep = 12;
+    string bild1 = 13;
+    string bild2 = 14;
+    string bild3 = 15;
+    string merkmale = 16;
+    string created_date = 17;
+}
+
+message GetEPArticleRequest {
+    string reference = 1;
+    bool debug = 2;
+}
+
+message GetEPArticleResponse {
+    EPRawArtikel ep_raw_artikel = 1;
+    // EPArtikel ep_artikel = 2;
+    repeated string queries = 3;
+}
+
+message ArticleLastSale {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string last_auftrag = 4;
+    string last_invoice = 5;
+}
+
+message ListLastSaleForArticlesRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    bool debug = 6;
+}
+
+message ListLastSaleForArticlesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleLastSale items = 3;
+    repeated string queries = 4;
 }
 
 message ArticleMovement {
@@ -301,17 +358,17 @@ message ListSupplierImportArticlesResponse {
     repeated string queries = 4;
 }
 
-message SoneparDocument {
+message SupplierDocument {
     string type = 1;
     string url = 2;
 }
 
-message SoneparArtikel {
+message SupplierArtikel {
     string reference = 1;
     string gtin = 2;
     repeated string images = 3;
     string category = 4;
-    repeated SoneparDocument documents = 5;
+    repeated SupplierDocument documents = 5;
 }
 
 message SoneparRawArtikel {
@@ -356,7 +413,7 @@ message GetSoneparArticleRequest {
 
 message GetSoneparArticleResponse {
     SoneparRawArtikel sonepar_raw_artikel = 1;
-    SoneparArtikel sonepar_artikel = 2;
+    SupplierArtikel supplier_artikel = 2;
     repeated string queries = 3;
 }
 
