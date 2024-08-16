@@ -341,6 +341,7 @@ message ListSupplierImportArticlesRequest {
         SUPPLIER_UNSPECIFIED = 0;
         SUPPLIER_SONEPAR = 1;
         SUPPLIER_EP = 2;
+        SUPPLIER_TP = 3;
     }
 
     int32 page = 1;
