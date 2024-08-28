@@ -334,6 +334,7 @@ message ImportArtikel {
     string image = 8;
     string content_status = 9;
     string content_last_edit = 10;
+    repeated string tags = 11;
 }
 
 message ListSupplierImportArticlesRequest {
@@ -423,9 +424,10 @@ enum ContentStatus {
     CONTENT_STATUS_REVIEWED = 1;
     CONTENT_STATUS_BLACKLISTED = 2;
     CONTENT_STATUS_ABVERKAUF = 3;
-    CONTENT_STATUS_ERSATZTEIL = 4;
+    // CONTENT_STATUS_ERSATZTEIL = 4;
     CONTENT_STATUS_EIGENBEDARF = 5;
     CONTENT_STATUS_VERSCHROTTUNG = 6;
+    CONTENT_STATUS_VERSTEIEGERUNG = 7;
 }
 
 message SetArticleContentStatusRequest {
