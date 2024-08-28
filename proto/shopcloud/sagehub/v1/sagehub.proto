@@ -47,6 +47,7 @@ enum Scope {
 message ActionItem {
     string reference = 1;
     string value = 2;
+    string field = 3;
 }
 
 message Action {
@@ -1400,6 +1401,58 @@ message GetArticleCoreDataResponse {
     KhkVariantenAuspraegungen khk_varianten_auspraegungen = 3;
 }
 
+message FieldMaskArticle {
+    enum Field {
+        FIELD_UNSPECIFIED = 0;
+        FIELD_MANDANT = 1;
+        FIELD_ARTIKELNUMMER = 2;
+        FIELD_AUSPRAEGUNG_ID = 3;
+        FIELD_MATCHCODE = 4;
+        FIELD_BEZEICHNUNG1 = 5;
+        FIELD_BEZEICHNUNG2 = 6;
+        FIELD_VARIANTE = 7;
+        FIELD_VARIANTEN_AUSPRAEGUNG = 8;
+        FIELD_HERSTELLER = 9;
+        FIELD_VERSANDKLASSE = 10;
+        FIELD_LAGERBESTAND_VERFUEGBAR = 11;
+        FIELD_LETZTER_EK = 12;
+        FIELD_MITTLERER_EK = 13;
+        FIELD_KALKULATORISCHER_EK = 14;
+        FIELD_SCMP_AKTIV = 15;
+        FIELD_ZULIEFERER_CODE = 16;
+        FIELD_ZULIEFERER_ARTIKELNUMMER = 17;
+        FIELD_ZULIEFERER_BESTAND = 18;
+        FIELD_AKTIV = 19;
+        FIELD_EAN = 20;
+        FIELD_ARTIKELGRUPPE = 21;
+        FIELD_USER_CONTENT_STATUS = 22;
+        FIELD_USER_CONTENT_LAST_EDIT = 23;
+        FIELD_USER_VOELKNER_ID = 24;
+        FIELD_USER_IDEALO_ID = 25;
+        FIELD_USER_CONRAD_ID = 26;
+        FIELD_USER_EEC_SKALA = 27;
+        FIELD_USER_EPREL_NR = 28;
+        FIELD_USER_EPREL_KATEGORIE = 29;
+        FIELD_USER_WEEE_NR = 30;
+        FIELD_USER_WEEE_MARKE = 31;
+        FIELD_USER_WEEE_KATEGORIE = 32;
+        FIELD_USER_HERSTELLERNUMMER = 33;
+        FIELD_USER_GROUP_KEY = 34;
+        FIELD_USER_UVP_PRICE = 35;
+        FIELD_USER_UVP_CURRENCY = 36;
+        FIELD_USER_UVP_AT = 37;
+        FIELD_USER_HAUPTKATEGORIE = 38;
+        FIELD_USER_UNTERKATEGORIE = 39;
+        FIELD_USER_PRODUKT_TYP = 40;
+        FIELD_USER_SERIE = 41;
+        FIELD_USER_BASENAME = 42;
+        FIELD_USER_KEYWORD = 43;
+        FIELD_USER_FARBE = 44;
+    }
+
+    repeated Field paths = 1;
+}
+
 message ListArticlesRequest {
     int32 mandant = 1;
     int32 page_size = 2;
@@ -1411,6 +1464,7 @@ message ListArticlesRequest {
     string hersteller = 8;
     string search = 9;
     bool debug = 10;
+    FieldMaskArticle field_mask = 11;
 }
 
 message ListArtikel {
@@ -1435,6 +1489,29 @@ message ListArtikel {
     bool aktiv = 19;
     string ean = 20;
     string artikelgruppe = 21;
+    string user_content_status = 22;
+    string user_content_last_edit = 23;
+    string user_voelkner_id = 24;
+    string user_idealo_id = 25;
+    string user_conrad_id = 26;
+    string user_eec_skala = 27;
+    string user_eprel_nr = 28;
+    string user_eprel_kategorie = 29;
+    string user_weee_nr = 30;
+    string user_weee_marke = 31;
+    string user_weee_kategorie = 32;
+    string user_herstellernummer = 33;
+    string user_group_key = 34;
+    double user_uvp_price = 35;
+    string user_uvp_currency = 36;
+    string user_uvp_at = 37;
+    string user_hauptkategorie = 38;
+    string user_unterkategorie = 39;
+    string user_produkt_typ = 40;
+    string user_serie = 41;
+    string user_basename = 42;
+    string user_keyword = 43;
+    string user_farbe = 44;
 }
 
 message ListArticlesResponse {
