@@ -1,0 +1,111 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Barcode-API",
+      "description": "API for generating various types of barcodes.",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://barcode.talk-point.de",
+        "description": "Production server"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "ApiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-API-Key"
+        }
+      }
+    },
+    "security": [
+      {
+        "ApiKeyAuth": []
+      }
+    ],
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Get API information",
+          "description": "Returns basic information about the API.",
+          "responses": {
+            "200": {
+              "description": "API info retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "Barcode API is running"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{sign}/{operations}/{type}": {
+        "get": {
+          "summary": "Generate a barcode",
+          "description": "Generates a barcode based on the provided parameters.",
+          "parameters": [
+            {
+              "name": "sign",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The signature for authentication."
+            },
+            {
+              "name": "operations",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The operations to apply to the barcode (e.g., width, height, format)."
+            },
+            {
+              "name": "type",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "enum": ["code128", "code128v1", "code128v2", "ean", "qr", "pdf417", "auto"]
+              },
+              "description": "The type of barcode to generate."
+            },
+            {
+              "name": "content",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "The content to encode in the barcode."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Barcode generated successfully",
+              "content": {
+                "image/png": {},
+                "image/jpeg": {}
+              }
+            },
+            "400": {
+              "description": "Bad request, possibly due to invalid parameters"
+            }
+          }
+        }
+      }
+    }
+  }
