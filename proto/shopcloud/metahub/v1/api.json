@@ -1,0 +1,254 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "MetaHub API",
+      "version": "1.0.0",
+      "description": "API for MetaHub"
+    },
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Root endpoint",
+          "responses": {
+            "200": {
+              "description": "MetaHub API V1",
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "summary": "Health check endpoint",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/rest/documents": {
+        "post": {
+          "summary": "Upload a document",
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "app": {
+                      "type": "string"
+                    },
+                    "metadatas": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "string"
+                    },
+                    "gids": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["file", "app"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Document uploaded successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "document": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "405": {
+              "description": "Method not allowed"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        },
+        "options": {
+          "summary": "CORS preflight",
+          "responses": {
+            "200": {
+              "description": "CORS headers set"
+            }
+          }
+        }
+      },
+      "/api/rest/documents/{id}/file": {
+        "get": {
+          "summary": "Get document file by ID",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Redirect to document file URL"
+            },
+            "400": {
+              "description": "Invalid path"
+            },
+            "404": {
+              "description": "Document not found"
+            },
+            "405": {
+              "description": "Method not allowed"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      },
+      "/proto.shopcloud.metahub.v1.MetaHubService/ListDocuments": {
+        "post": {
+          "summary": "List documents",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page_size": {
+                      "type": "integer"
+                    },
+                    "filters": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "operator": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": ["page_size", "filters"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Documents listed successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "documents": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "metadata": {
+                              "type": "object"
+                            },
+                            "tags": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "security": [
+            {
+              "apiKeyAuth": []
+            }
+          ]
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer"
+        },
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-API-Key"
+        }
+      }
+    }
+  }
