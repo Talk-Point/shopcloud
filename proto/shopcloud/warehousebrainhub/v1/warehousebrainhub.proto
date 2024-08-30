@@ -53,29 +53,32 @@ message Article {
     int32 mandant = 1;
     string artikelnummer = 2;
     int64 auspraegung_id = 3;
-    string algorithm = 4;
     string matchcode = 5;
     string hersteller = 6;
     double lagerbestand = 7; 
     string artikelgruppe = 8;
     double mittlerer_ek = 9; 
     double letzter_ek = 10; 
-    google.protobuf.Timestamp last_update_core_data_at = 11;
-    double price_2 = 12; 
-    double price_3 = 13; 
-    double price_6 = 14;
-    google.protobuf.Timestamp last_update_price_data_at = 15;
-    bool online_amz = 16; 
-    bool online_ebay = 17; 
-    bool online_shop = 18; 
-    google.protobuf.Timestamp last_update_online_data_at = 19;
-    string move_first_add = 20;
-    string move_last_add = 21;
-    string move_last_move = 22;
-    string move_last_out = 23;
-    google.protobuf.Timestamp last_update_move_data_at = 24;
-    google.protobuf.Timestamp created_at = 25;
-    google.protobuf.Timestamp updated_at = 26;
+    double lager_total_ek = 11;
+    google.protobuf.Timestamp last_update_core_data_at = 12;
+    double price_2 = 13; 
+    double price_3 = 14; 
+    double price_6 = 15;
+    google.protobuf.Timestamp last_update_price_data_at = 16;
+    bool online_amz = 17; 
+    bool online_ebay = 18; 
+    bool online_shop = 19; 
+    google.protobuf.Timestamp last_update_online_data_at = 20;
+    string move_first_add = 21;
+    string move_last_add = 22;
+    string move_last_move = 23;
+    string move_last_out = 24;
+    google.protobuf.Timestamp last_update_move_data_at = 25;
+    string algorithm = 4;
+    string last_check_at = 26;
+    string last_check_by = 27;
+    google.protobuf.Timestamp created_at = 28;
+    google.protobuf.Timestamp updated_at = 29;
 }
 
 service WarehouseBrainHubService {
@@ -90,10 +93,21 @@ service WarehouseBrainHubService {
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
     // Articles
-    rpc GetArticle(GetArticleRequest) returns (GetArticleResponse);
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     rpc DeleteArticle(DeleteArticleRequest) returns (DeleteArticleResponse);
     rpc SyncArticleWithErp(SyncArticleWithErpRequest) returns (SyncArticleWithErpResponse);
+    rpc MarkAsChecked(MarkAsCheckedRequest) returns (MarkAsCheckedResponse);
+}
+
+message MarkAsCheckedRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    string by = 4;
+}
+
+message MarkAsCheckedResponse {
+    Article article = 1;
 }
 
 enum SyncType {
