@@ -50,6 +50,13 @@ message ApiKey {
 }
 
 message Article {
+    enum Algorithm {
+        ALGORITHM_UNSPECIFIED = 0;
+        ALGORITHM_BESTPREIS = 1;
+        ALGORITHM_AUSVERKAUF_50 = 2;
+        ALGORITHM_AUSVERKAUF_100 = 3;
+    }
+
     int32 mandant = 1;
     string artikelnummer = 2;
     int64 auspraegung_id = 3;
@@ -74,11 +81,14 @@ message Article {
     string move_last_move = 23;
     string move_last_out = 24;
     google.protobuf.Timestamp last_update_move_data_at = 25;
-    string algorithm = 4;
-    string last_check_at = 26;
-    string last_check_by = 27;
-    google.protobuf.Timestamp created_at = 28;
-    google.protobuf.Timestamp updated_at = 29;
+    string beleg_last_order_at = 26;
+    string beleg_last_invoice_at = 27;
+    google.protobuf.Timestamp last_update_beleg_data_at = 28;
+    Algorithm algorithm = 4;
+    string last_check_at = 29;
+    string last_check_by = 30;
+    google.protobuf.Timestamp created_at = 31;
+    google.protobuf.Timestamp updated_at = 32;
 }
 
 service WarehouseBrainHubService {
@@ -97,6 +107,18 @@ service WarehouseBrainHubService {
     rpc DeleteArticle(DeleteArticleRequest) returns (DeleteArticleResponse);
     rpc SyncArticleWithErp(SyncArticleWithErpRequest) returns (SyncArticleWithErpResponse);
     rpc MarkAsChecked(MarkAsCheckedRequest) returns (MarkAsCheckedResponse);
+    rpc SetAlgorithmusForArticle(SetAlgorithmusForArticleRequest) returns (SetAlgorithmusForArticleResponse);
+}
+
+message SetAlgorithmusForArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    Article.Algorithm algorithm = 4;
+}
+
+message SetAlgorithmusForArticleResponse {
+    Article article = 1;
 }
 
 message MarkAsCheckedRequest {
@@ -115,6 +137,7 @@ enum SyncType {
     SYNC_TYPE_CORE = 1;
     SYNC_TYPE_PRICES = 2;
     SYNC_TYPE_MOVEMENTS = 3;
+    SYNC_TYPE_BELEG = 4;
 }
 
 message SyncArticleWithErpRequest {
