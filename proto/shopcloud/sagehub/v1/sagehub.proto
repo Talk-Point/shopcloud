@@ -1545,6 +1545,7 @@ message GetArticlePricesRequest {
     string artikelnummer = 2;
     int32 auspraegung_id = 3;
     repeated int64 price_list_ids = 4;
+    bool debug = 5;
 }
 
 message ArticlePrice {
@@ -1555,10 +1556,12 @@ message ArticlePrice {
     string list_name = 5;
     double price = 6;
     string currency = 7;
+    int64 id = 8;
 }
 
 message GetArticlePricesResponse {
     repeated ArticlePrice prices = 1;
+    repeated string queries = 2;
 }
 
 message UpdateArticlePriceRequest {
@@ -1569,9 +1572,12 @@ message UpdateArticlePriceRequest {
     double price = 5;
     string by_user_id = 6;
     string by_user_name = 7;
+    bool debug = 8;
 }
 
-message UpdateArticlePriceResponse {}
+message UpdateArticlePriceResponse {
+    repeated string queries = 1;
+}
 
 message CreateFeedFileRequest {
     string feed = 1;
