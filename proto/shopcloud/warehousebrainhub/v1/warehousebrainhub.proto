@@ -55,6 +55,7 @@ message Article {
         ALGORITHM_BESTPREIS = 1;
         ALGORITHM_AUSVERKAUF_50 = 2;
         ALGORITHM_AUSVERKAUF_100 = 3;
+        ALGORITHM_GESCHUETZT = 4;
     }
 
     int32 mandant = 1;
