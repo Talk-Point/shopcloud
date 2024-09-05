@@ -207,6 +207,8 @@ service SageHubService {
     rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
     rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
+    // Buchungen
+    rpc ListArticleTransactions(ListArticleTransactionsRequest) returns (ListArticleTransactionsResponse);
     // Reports
     rpc ListArticleImportReportDatas(ListArticleImportReportDatasRequest) returns (ListArticleImportReportDatasResponse);
 
@@ -218,6 +220,44 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message ArticleTransaction {
+    int32 mandant = 1;                   // Mandant ID
+    string artikelnummer = 2;            // Artikelnummer
+    int32 auspraegung_id = 3;            // Ausprägung ID
+    string erfassungsdatum = 4;          // Erfassungsdatum der Transaktion
+    string benutzer = 5;                 // Benutzer, der die Buchung vorgenommen hat
+    string standard_text = 6;            // Standardtext der Buchung
+    string memo = 7;                     // Memo oder Notiz zur Buchung
+    string job = 8;                      // Job ID
+    string herkunfts_lp_kennung = 9;     // Herkunfts-LP-Kennung
+    string ziel_lp_kennung = 10;         // Ziel-LP-Kennung
+    string bewegungsart = 11;            // Bewegungsart (IU, etc.)
+    string bestandswirkung = 12;         // Bestandswirkung (z.B. 0 oder 1)
+    float menge_basis = 13;              // Menge Basis
+    float menge_lager = 14;              // Menge im Lager
+    int32 status = 15;                   // Status der Buchung
+    string bewegungsdatum = 16;          // Bewegungsdatum
+    string bestands_id = 17;             // Bestands ID
+    string lagerkennung = 18;            // Lagerkennung (z.B. "Lost")
+    string matchcode = 19;               // Matchcode oder Artikelbeschreibung
+    float einzelpreis = 20;              // Einzelpreis
+    float bestand = 21;                  // Bestand
+}
+
+message ListArticleTransactionsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
+}
+
+message ListArticleTransactionsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleTransaction items = 3;
+    repeated string queries = 4;
 }
 
 message EPRawArtikel {
@@ -751,6 +791,9 @@ enum TimeSeriesGrouper {
     TIME_SERIES_GROUPER_DAILY_UNSPECIFIED = 0;
     TIME_SERIES_GROUPER_MONTHLY = 1;
     TIME_SERIES_GROUPER_YEARLY = 2;
+    TIME_SERIES_GROUPER_DAILY_DESC = 3;
+    TIME_SERIES_GROUPER_MONTHLY_DESC = 4;
+    TIME_SERIES_GROUPER_YEARLY_DESC = 5;
 }
 
 message SalechannelReportFilter {
@@ -759,10 +802,12 @@ message SalechannelReportFilter {
     string end_date = 3; // iso-format
     repeated string customer_group_ids = 4;
     repeated VKBelegart belegart_items = 5;
+    repeated string skus = 6;
 }
 
 message SalechannelReportGroupBy {
     TimeSeriesGrouper time_series_grouper = 1;
+    bool customer_group = 2;
 }
 
 message GetSalechannelReportRequest {
