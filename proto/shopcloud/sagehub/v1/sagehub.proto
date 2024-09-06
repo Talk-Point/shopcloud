@@ -303,16 +303,22 @@ message ListLastSaleForArticlesRequest {
     int32 page = 1;
     int32 page_size = 2;
     int32 mandant = 3;
-    string artikelnummer = 4;
-    int32 auspraegung_id = 5;
-    bool debug = 6;
+    repeated string artikelnummern = 4;
+    oneof time_frame {
+        TimeRange range = 5;
+        google.protobuf.Duration duration = 6;
+        TimeFramePreset range_shortcut = 7;
+    }
+    bool debug = 8;
 }
 
 message ListLastSaleForArticlesResponse {
     int32 page = 1;
     int32 page_size = 2;
     repeated ArticleLastSale items = 3;
-    repeated string queries = 4;
+    google.protobuf.Timestamp start_at = 4;
+    google.protobuf.Timestamp end_at = 5;
+    repeated string queries = 6;
 }
 
 message ArticleMovement {
@@ -1493,6 +1499,7 @@ message FieldMaskArticle {
         FIELD_USER_BASENAME = 42;
         FIELD_USER_KEYWORD = 43;
         FIELD_USER_FARBE = 44;
+        FIELD_STEUERKLASSE = 45;
     }
 
     repeated Field paths = 1;
@@ -1557,6 +1564,7 @@ message ListArtikel {
     string user_basename = 42;
     string user_keyword = 43;
     string user_farbe = 44;
+    int32 steuerklasse = 45;
 }
 
 message ListArticlesResponse {
