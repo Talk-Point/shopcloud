@@ -50,21 +50,29 @@ message ApiKey {
 }
 
 message Article {
+    enum Status {
+        STATUS_UNSPECIFIED = 0; // keine klassifizierung hat stattgefunden
+        STATUS_ACTIVE = 1; // er würde aktiv algorithmen anwenden
+        STATUS_INACTIVE = 2;
+        STATUS_BLACKLISTED = 3; // er würde auf die blacklist gesetzt
+        STATUS_PRECONDITION_FAILED = 4;
+    }
     enum Algorithm {
         ALGORITHM_UNSPECIFIED = 0;
         ALGORITHM_BESTPREIS = 1;
         ALGORITHM_AUSVERKAUF_50 = 2;
         ALGORITHM_AUSVERKAUF_100 = 3;
-        ALGORITHM_GESCHUETZT = 4;
+        ALGORITHM_BESTPREIS_UP = 4;
     }
 
     int32 mandant = 1;
     string artikelnummer = 2;
     int64 auspraegung_id = 3;
-    string matchcode = 5;
-    string hersteller = 6;
-    double lagerbestand = 7; 
-    string artikelgruppe = 8;
+    string matchcode = 4;
+    string hersteller = 5;
+    double lagerbestand = 6; 
+    string artikelgruppe = 7;
+    int32 steuerklasse = 8;
     double mittlerer_ek = 9; 
     double letzter_ek = 10; 
     double lager_total_ek = 11;
@@ -85,11 +93,55 @@ message Article {
     string beleg_last_order_at = 26;
     string beleg_last_invoice_at = 27;
     google.protobuf.Timestamp last_update_beleg_data_at = 28;
-    Algorithm algorithm = 4;
     string last_check_at = 29;
     string last_check_by = 30;
-    google.protobuf.Timestamp created_at = 31;
-    google.protobuf.Timestamp updated_at = 32;
+    Status status = 31;
+    google.protobuf.Timestamp last_status_check_at = 32;
+    google.protobuf.Timestamp last_status_change_at = 33;
+    Algorithm algorithm = 34;
+    google.protobuf.Timestamp last_algorithm_change_at = 35;
+    google.protobuf.Timestamp created_at = 36;
+    google.protobuf.Timestamp updated_at = 37;
+}
+
+message ArticleStatusChanged {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    Article.Status status = 4;
+}
+
+message ArticleAlgorithmChanged {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    Article.Algorithm algorithm = 4;
+}
+
+message ArticlePriceChanged {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    map<int32, double> prices = 4; // price_list => price
+}
+
+enum EventType {
+    EVENT_TYPE_UNSPECIFIED = 0;
+    EVENT_TYPE_STATUS_CHANGED = 1;
+    EVENT_TYPE_ARTICLE_ALGORITHM_CHANGED = 2;
+    EVENT_TYPE_ARTICLE_PRICE_CHANGED = 3;
+}
+
+message Event {
+    EventType name = 1;
+    string reference = 2;
+    string by = 3;
+    google.protobuf.Timestamp created_at = 4;
+    oneof payload {
+        ArticleStatusChanged article_status_changed = 5;
+        ArticleAlgorithmChanged article_algorithm_changed = 6;
+        ArticlePriceChanged article_price_changed = 7;
+    }
 }
 
 service WarehouseBrainHubService {
@@ -104,11 +156,114 @@ service WarehouseBrainHubService {
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
     // Articles
+    rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse);
     rpc ListArticles(ListArticlesRequest) returns (ListArticlesResponse);
     rpc DeleteArticle(DeleteArticleRequest) returns (DeleteArticleResponse);
     rpc SyncArticleWithErp(SyncArticleWithErpRequest) returns (SyncArticleWithErpResponse);
     rpc MarkAsChecked(MarkAsCheckedRequest) returns (MarkAsCheckedResponse);
+    rpc UnmarkAsChecked(MarkAsCheckedRequest) returns (MarkAsCheckedResponse);
+    // Set Status
+    // - set the status of the product, to activate it for warehousebrain
+    rpc SetStatusForArticle(SetStatusForArticleRequest) returns (SetStatusForArticleResponse);
+    // Check Status
+    // - check if the product has a sales opportunity and then set the status to active
+    rpc CheckStatusForArticle(CheckStatusForArticleRequest) returns (CheckStatusForArticleResponse);
+    // Set Algorithm
+    // - set the algorithm for the product, to activate the price manipulation
     rpc SetAlgorithmusForArticle(SetAlgorithmusForArticleRequest) returns (SetAlgorithmusForArticleResponse);
+    // Reset Algorithm
+    // - when the the product has a sale reset the price algorithm
+    rpc ResetArticleAlgorithmWhenSaledOrEmpty(ResetArticleAlgorithmWhenSaledOrEmptyRequest) returns (ResetArticleAlgorithmWhenSaledOrEmptyResponse);
+    rpc RunPriceAdjustments(RunPriceAdjustmentsRequest) returns (RunPriceAdjustmentsResponse);
+    rpc BroadcastPriceUpdates(BroadcastPriceUpdatesRequest) returns (BroadcastPriceUpdatesResponse);
+}
+
+message RunPriceAdjustmentsRequest {
+    int32 mandant = 1;
+}
+
+message RunPriceAdjustmentsResponse {
+    repeated string references = 1;
+}
+
+message BroadcastPriceUpdatesRequest {
+    repeated string references = 1;
+}
+
+message BroadcastPriceUpdatesResponse {
+    repeated string references = 1;
+}
+
+message ResetArticleAlgorithmWhenSaledOrEmptyRequest {
+    int32 mandant = 1;
+}
+
+message ResetArticleAlgorithmWhenSaledOrEmptyResponse {
+    repeated string references = 1;
+}
+
+message CreateArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    string matchcode = 4;
+    string hersteller = 5;
+    double lagerbestand = 6; 
+    string artikelgruppe = 7;
+    double mittlerer_ek = 8; 
+    double letzter_ek = 9; 
+    double lager_total_ek = 10;
+    google.protobuf.Timestamp last_update_core_data_at = 11;
+    double price_2 = 12; 
+    double price_3 = 13; 
+    double price_6 = 14;
+    google.protobuf.Timestamp last_update_price_data_at = 15;
+    bool online_amz = 16; 
+    bool online_ebay = 17; 
+    bool online_shop = 18; 
+    google.protobuf.Timestamp last_update_online_data_at = 19;
+    string move_first_add = 20;
+    string move_last_add = 21;
+    string move_last_move = 22;
+    string move_last_out = 23;
+    google.protobuf.Timestamp last_update_move_data_at = 24;
+    string beleg_last_order_at = 25;
+    string beleg_last_invoice_at = 26;
+    google.protobuf.Timestamp last_update_beleg_data_at = 27;
+    string last_check_at = 28;
+    string last_check_by = 29;
+    Article.Status status = 30;
+    google.protobuf.Timestamp last_status_check_at = 31;
+    google.protobuf.Timestamp last_status_change_at = 32;
+    Article.Algorithm algorithm = 33;
+    google.protobuf.Timestamp last_algorithm_change_at = 34;
+}
+
+message CreateArticleResponse {
+    Article article = 1;
+}
+
+message CheckStatusForArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+}
+
+message CheckStatusForArticleResponse {
+    Article.Status status = 1;
+    string reson = 2;
+}
+
+message SetStatusForArticleRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    Article.Status status = 4;
+    string by = 5;
+}
+
+message SetStatusForArticleResponse {
+    Article article = 1;
 }
 
 message SetAlgorithmusForArticleRequest {
@@ -116,9 +271,21 @@ message SetAlgorithmusForArticleRequest {
     string artikelnummer = 2;
     int64 auspraegung_id = 3;
     Article.Algorithm algorithm = 4;
+    string by = 5;
 }
 
 message SetAlgorithmusForArticleResponse {
+    Article article = 1;
+}
+
+message UnmarkAsCheckedRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    string by = 4;
+}
+
+message UnmarkAsCheckedResponse {
     Article article = 1;
 }
 
