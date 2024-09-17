@@ -213,11 +213,6 @@ service ContentHubService {
     rpc ExportTagToDb(ExportTagToDbRequest) returns (ExportTagToDbResponse);
     rpc SetTagStatus(SetTagStatusRequest) returns (SetTagStatusResponse);
 
-    // Logs
-    rpc GetLog(GetLogRequest) returns (GetLogResponse);
-    rpc ListLogs(ListLogsRequest) returns (ListLogsResponse);
-    rpc DeleteLog(DeleteLogRequest) returns (DeleteLogResponse);
-
     // Checks
     rpc GetCheck(GetCheckRequest) returns (GetCheckResponse);
     rpc ListChecks(ListChecksRequest) returns (ListChecksResponse);
@@ -239,6 +234,7 @@ service ContentHubService {
 message RenameAttributeKeyRequest {
     string key_old = 1;
     string key_new = 2;
+    string by_user = 3;
 }
 
 message RenameAttributeKeyResponse {
@@ -346,6 +342,7 @@ message SetTagStatusRequest {
     string id = 1;
     Tag.Status status = 2;
     string memo = 3;
+    string by_user = 4;
 }
 
 message SetTagStatusResponse {
@@ -492,6 +489,7 @@ message DeleteTagByReferenceRequest {
     string type = 1;
     string name = 2;
     string reference = 3;
+    string by_user = 4;
 }
 
 message DeleteTagByReferenceResponse {
@@ -595,6 +593,7 @@ message CreateTagResponse {
 
 message DeleteTagRequest {
     string id = 1;
+    string by_user = 2;
 }
 
 message DeleteTagResponse {
@@ -700,6 +699,7 @@ message UpdateAttributeValueRequest {
         string content = 2;
         Document document = 3;
     }
+    string by_user = 4;
 }
 
 message UpdateAttributeValueResponse {
@@ -765,6 +765,7 @@ message CreateAttributeGroupRequest {
     repeated string allowed_values = 3;
     repeated string example_values = 4;
     int32 relevance = 5;
+    string by_user = 6;
 }
 
 message CreateAttributeGroupResponse {
@@ -773,6 +774,7 @@ message CreateAttributeGroupResponse {
 
 message DeleteAttributeGroupRequest {
     string id = 1;
+    string by_user = 2;
 }
 
 message DeleteAttributeGroupResponse {
@@ -837,6 +839,7 @@ message CreateAttributeRequest {
         string content = 5;
         Document document = 6;
     }
+    string by_user = 7;
 }
 
 message CreateAttributeResponse {
@@ -877,6 +880,7 @@ message ListAttributesResponse {
 
 message DeleteAttributeRequest {
     string id = 1;
+    string by_user = 2;
 }
 
 message DeleteAttributeResponse {
