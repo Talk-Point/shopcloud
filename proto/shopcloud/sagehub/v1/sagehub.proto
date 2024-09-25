@@ -140,6 +140,7 @@ service SageHubService {
     // Amazon
     rpc GetAmazonItem(GetAmazonItemRequest) returns (GetAmazonItemResponse);
     rpc ListAmazonItems(ListAmazonItemsRequest) returns (ListAmazonItemsResponse);
+    rpc UpdateAmazonItem(UpdateAmazonItemRequest) returns (UpdateAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
 
     // Ebay
@@ -220,6 +221,20 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message UpdateAmazonItemRequest {
+    int32 mandant = 1;
+    string item_id = 2;
+    string by_user = 3;
+
+    UpdateMask update_mask = 4;
+    bool aktiv = 5;
+}
+
+message UpdateAmazonItemResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
 }
 
 message ArticleTransaction {
@@ -1517,6 +1532,7 @@ message ListArticlesRequest {
     string search = 9;
     bool debug = 10;
     FieldMaskArticle field_mask = 11;
+    string query = 12;
 }
 
 message ListArtikel {
