@@ -210,8 +210,6 @@ service SageHubService {
     rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
     // Buchungen
     rpc ListArticleTransactions(ListArticleTransactionsRequest) returns (ListArticleTransactionsResponse);
-    // Reports
-    rpc ListArticleImportReportDatas(ListArticleImportReportDatasRequest) returns (ListArticleImportReportDatasResponse);
 
     // Supplier Article Data
     rpc GetSoneparArticle(GetSoneparArticleRequest) returns (GetSoneparArticleResponse);
@@ -502,24 +500,6 @@ message SetArticleContentStatusRequest {
 
 message SetArticleContentStatusResponse {
     bool is_success = 1;
-    repeated string queries = 2;
-}
-
-message ArticleImportReportData {
-    string grouper = 1;
-    int32 tp = 2;
-    int32 sp = 3;
-    int32 ep = 4;
-    int32 herweck = 5;
-    int32 telepart = 6;
-    int32 yukatel = 7;
-    int32 hitisy = 8;
-}
-
-message ListArticleImportReportDatasRequest {}
-
-message ListArticleImportReportDatasResponse {
-    repeated ArticleImportReportData items = 1;
     repeated string queries = 2;
 }
 
@@ -1846,6 +1826,7 @@ message ListVKBelegPositionsPulseRequest {
     string search = 12;
     bool fraud = 13;
     bool debug = 14;
+    string query = 15;
 }
 
 message VKBelegProductPulseItem {
@@ -1879,6 +1860,8 @@ message GetVKBelegPulseRequest {
         TimeFramePreset range_shortcut = 4;
     }
     repeated VKBelegart belegart_items = 5;
+    string query = 6;
+    bool debug = 7;
 }
 
 message VKBelegPulseV1 {
@@ -1913,6 +1896,7 @@ message GetVKBelegPulseResponse {
     repeated VKBelegPulseV1 items = 4;
     VKBelegPulseV1.Metrics metrics = 5;
     VKBelegPulseV1.Filters filters = 6;
+    repeated string queries = 7;
 }
 
 message FetchNewestVKBelegEventsRequest {
