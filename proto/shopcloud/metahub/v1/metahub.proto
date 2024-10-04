@@ -54,10 +54,68 @@ message Document {
     string name = 2;
     string value = 3;
     string hash = 4;
-    map<string, string> metadatas = 5;
-    string public_file_url = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
+    repeated string gids = 5;
+    repeated string tags = 6;
+    map<string, string> metadatas = 7;
+    string file_url = 8;
+    string public_file_url = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message Workflow {
+    string id = 1;
+    string name = 2;
+    bool active = 3;
+    string description = 4;
+    string endpoint_metadata = 5;
+    string endpoint_run = 6;
+    repeated string states = 7;
+    repeated string tags = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+message WorkflowItem {
+    string id = 1;
+    string workflow = 2;
+    repeated string gids = 3;
+    repeated string tags = 4;
+    repeated string assings = 5;
+    string reference = 6; // can empoty when set then must be unique with workflow
+    string state = 7;
+    bool ack_needed = 8;
+    string ack_by = 9;
+    google.protobuf.Timestamp ack_at = 10;
+    string memo = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+}
+
+message ChronikItem {
+    enum Type {
+        TYPE_UNSPECIFIED = 0;
+        TYPE_ACTION = 1;
+        TYPE_COMMENT = 2;
+        TYPE_FILE = 3;
+    }
+    enum ContentType {
+        CONTENT_TYPE_UNSPECIFIED = 0;
+        CONTENT_TYPE_TEXT = 1;
+        CONTENT_TYPE_MARKDOWN = 2;
+    }
+
+    string id = 1;
+    string reference = 2;
+    repeated string gids = 3;
+    repeated string assigns = 4;
+    string created_by = 5;
+    string content = 6;
+    ContentType content_type = 7;
+    repeated string labels = 8;
+    Type type = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
 }
 
 service MetaHubService {
@@ -77,12 +135,275 @@ service MetaHubService {
     rpc CreateGidDocument(CreateGidDocumentRequest) returns (CreateGidDocumentResponse);
     rpc CreateFileDocument(CreateFileDocumentRequest) returns (CreateFileDocumentResponse);
     rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse);
+
+    // Workflows
+    rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse);
+    rpc ListWorkflows(ListWorkflowsRequest) returns (ListWorkflowsResponse);
+    rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse);
+    rpc DeleteWorkflow(DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
+
+    // WorkflowItems
+    rpc GetWorkflowItem(GetWorkflowItemRequest) returns (GetWorkflowItemResponse);
+    rpc ListWorkflowItems(ListWorkflowItemsRequest) returns (ListWorkflowItemsResponse);
+    rpc CreateWorkflowItem(CreateWorkflowItemRequest) returns (CreateWorkflowItemResponse);
+    rpc DeleteWorkflowItem(DeleteWorkflowItemRequest) returns (DeleteWorkflowItemResponse);
+    rpc SetStateWorkflowItem(SetStateWorkflowItemRequest) returns (SetStateWorkflowItemResponse);
+    // Fetch Metadatas for WorkflowItem to better show the item as table in the ui
+    rpc RunMetaFetchForWorkflowItem(RunMetaFetchForWorkflowItemRequest) returns (RunMetaFetchForWorkflowItemResponse);
+    // Run the workflow item and can return a state change
+    rpc RunWorkflowItem(RunWorkflowItemRequest) returns (RunWorkflowItemResponse);
+
+    // Chronik
+    rpc GetChronikItem(GetChronikItemRequest) returns (GetChronikItemResponse);
+    rpc ListChronikItems(ListChronikItemsRequest) returns (ListChronikItemsResponse);
+    rpc CreateChronikItem(CreateChronikItemRequest) returns (CreateChronikItemResponse);
+    rpc DeleteChronikItem(DeleteChronikItemRequest) returns (DeleteChronikItemResponse);
+}
+
+message GetChronikItemRequest {
+    string id = 1;
+}
+
+message GetChronikItemResponse {
+    ChronikItem chronik_item = 1;
+}
+
+message ListChronikItemsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_REFERENCE = 1;
+        FIELD_GIDS = 2;
+        FIELD_ASSIGNS = 3;
+        FIELD_CREATED_BY = 4;
+        FIELD_TYPE = 5;
+        FIELD_CREATED_AT = 6;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListChronikItemsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListChronikItemsFilter filters = 6;
+}
+
+message ListChronikItemsResponse {
+    repeated ChronikItem chronik_items = 1;
+    string page_token = 2;
+}
+
+message CreateChronikItemRequest {
+    string reference = 1;
+    repeated string gids = 2;
+    repeated string assigns = 3;
+    string created_by = 4;
+    string content = 5;
+    ChronikItem.ContentType content_type = 6;
+    repeated string labels = 7;
+    ChronikItem.Type type = 8;
+}
+
+message CreateChronikItemResponse {
+    ChronikItem chronik_item = 1;
+}
+
+message DeleteChronikItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message DeleteChronikItemResponse {
+    ChronikItem chronik_item = 1;
+}
+
+message RunMetaFetchForWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message RunMetaFetchForWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message RunWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message RunWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message FetchMetadatasForWorkflowItemRequest {
+    string id = 1;
+}
+
+message FetchMetadatasForWorkflowItemResponse {
+    string id = 1;
+    string by_user = 2;
+}
+
+message SetStateWorkflowItemRequest {
+    string id = 1;
+    string state = 2;
+    string by_user = 3;
+}
+
+message SetStateWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message GetWorkflowItemRequest {
+    string id = 1;
+}
+
+message GetWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message ListWorkflowItemsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_WORKFLOW = 1;
+        FIELD_GIDS = 2;
+        FIELD_TAGS = 3;
+        FIELD_ASSINGS = 4;
+        FIELD_STATE = 5;
+        FIELD_ACK_NEEDED = 6;
+        FIELD_ACK_BY = 7;
+        FIELD_ACK_AT = 8;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListWorkflowItemsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListWorkflowItemsFilter filters = 6;
+}
+
+message ListWorkflowItemsResponse {
+    repeated WorkflowItem workflow_items = 1;
+    string page_token = 2;
+}
+
+message CreateWorkflowItemRequest {
+    string workflow = 1;
+    repeated string gids = 2;
+    repeated string tags = 3;
+    repeated string assings = 4;
+    string reference = 5;
+    string state = 6;
+    bool ack_needed = 7;
+    string memo = 8;
+    string by_user = 9;
+}
+
+message CreateWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message DeleteWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message DeleteWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message GetWorkflowRequest {
+    string id = 1;
+}
+
+message GetWorkflowResponse {
+    Workflow workflow = 1;
+}
+
+message ListWorkflowsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_ACTIVE = 2;
+        FIELD_TAGS = 3;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListWorkflowsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListWorkflowsFilter filters = 6;
+}
+
+message ListWorkflowsResponse {
+    repeated Workflow workflows = 1;
+    string page_token = 2;
+}
+
+message CreateWorkflowRequest {
+    string name = 1;
+    bool active = 2;
+    string description = 3;
+    string endpoint_metadata = 4;
+    string endpoint_run = 5;
+    repeated string states = 6;
+    repeated string tags = 7;
+    string by_user = 8;
+}
+
+message CreateWorkflowResponse {
+    Workflow workflow = 1;
+}
+
+message DeleteWorkflowRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message DeleteWorkflowResponse {
+    Workflow workflow = 1;
 }
 
 message CreateGidDocumentRequest {
     string app = 1;
     string value = 2;
-    map<string, string> metadatas = 3;
+    repeated string gids = 3;
+    repeated string tags = 4;
+    map<string, string> metadatas = 5;
 }
 
 message CreateGidDocumentResponse {
@@ -93,7 +414,9 @@ message CreateFileDocumentRequest {
     string app = 1;
     string name = 2;
     bytes content = 3;
-    map<string, string> metadatas = 4;
+    repeated string gids = 4;
+    repeated string tags = 5;
+    map<string, string> metadatas = 6;
 }
 
 message CreateFileDocumentResponse {
@@ -113,6 +436,8 @@ message ListDocumentsFilter {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_NAME = 1;
         FIELD_METADATAS__APP = 2;
+        FIELD_TAGS = 3;
+        FIELD_GIDS = 4;
     }
 
     Field field = 1;
