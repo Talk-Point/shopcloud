@@ -90,6 +90,10 @@ message WorkflowItem {
     string memo = 11;
     google.protobuf.Timestamp created_at = 12;
     google.protobuf.Timestamp updated_at = 13;
+    string title = 14;
+    string created_by = 15;
+    string workflow_value = 16;
+    map<string, string> meta_datas = 17;
 }
 
 message ChronikItem {
@@ -319,6 +323,8 @@ message CreateWorkflowItemRequest {
     bool ack_needed = 7;
     string memo = 8;
     string by_user = 9;
+    string title = 10;
+    map<string, string> meta_datas = 11;
 }
 
 message CreateWorkflowItemResponse {
