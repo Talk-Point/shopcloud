@@ -30,6 +30,10 @@ enum Direction {
     DIRECTION_DESC = 1;
 }
 
+message UpdateMask {
+    repeated string paths = 1;
+}
+
 // Scopes
 enum Scope {
     SCOPE_UNSPECIFIED = 0;
@@ -150,18 +154,59 @@ service MetaHubService {
     rpc GetWorkflowItem(GetWorkflowItemRequest) returns (GetWorkflowItemResponse);
     rpc ListWorkflowItems(ListWorkflowItemsRequest) returns (ListWorkflowItemsResponse);
     rpc CreateWorkflowItem(CreateWorkflowItemRequest) returns (CreateWorkflowItemResponse);
+    rpc UpdateWorkflowItem(UpdateWorkflowItemRequest) returns (UpdateWorkflowItemResponse);
     rpc DeleteWorkflowItem(DeleteWorkflowItemRequest) returns (DeleteWorkflowItemResponse);
     rpc SetStateWorkflowItem(SetStateWorkflowItemRequest) returns (SetStateWorkflowItemResponse);
+    rpc MarkAckWorkflowItem(MarkAckWorkflowItemRequest) returns (MarkAckWorkflowItemResponse);
+    rpc UnmarkAckWorkflowItem(UnmarkAckWorkflowItemRequest) returns (UnmarkAckWorkflowItemResponse);
     // Fetch Metadatas for WorkflowItem to better show the item as table in the ui
     rpc RunMetaFetchForWorkflowItem(RunMetaFetchForWorkflowItemRequest) returns (RunMetaFetchForWorkflowItemResponse);
     // Run the workflow item and can return a state change
     rpc RunWorkflowItem(RunWorkflowItemRequest) returns (RunWorkflowItemResponse);
-
+    
     // Chronik
     rpc GetChronikItem(GetChronikItemRequest) returns (GetChronikItemResponse);
     rpc ListChronikItems(ListChronikItemsRequest) returns (ListChronikItemsResponse);
     rpc CreateChronikItem(CreateChronikItemRequest) returns (CreateChronikItemResponse);
     rpc DeleteChronikItem(DeleteChronikItemRequest) returns (DeleteChronikItemResponse);
+}
+
+message UpdateWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+    UpdateMask update_mask = 3;
+    repeated string gids = 4;
+    repeated string tags = 5;
+    repeated string assings = 6;
+    string reference = 7;
+    string state = 8;
+    bool ack_needed = 9;
+    string memo = 10;
+    string title = 11;
+    map<string, string> meta_datas = 12;
+    string workflow_value = 13;
+}
+
+message UpdateWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message UnmarkAckWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message UnmarkAckWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message MarkAckWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message MarkAckWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
 }
 
 message GetChronikItemRequest {
