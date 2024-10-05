@@ -78,6 +78,7 @@ message Workflow {
     repeated string tags = 8;
     google.protobuf.Timestamp created_at = 9;
     google.protobuf.Timestamp updated_at = 10;
+    string endpoint_total = 11;
 }
 
 message WorkflowItem {
@@ -148,6 +149,7 @@ service MetaHubService {
     rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse);
     rpc ListWorkflows(ListWorkflowsRequest) returns (ListWorkflowsResponse);
     rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse);
+    rpc UpdateWorkflow(UpdateWorkflowRequest) returns (UpdateWorkflowResponse);
     rpc DeleteWorkflow(DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
 
     // WorkflowItems
@@ -169,6 +171,24 @@ service MetaHubService {
     rpc ListChronikItems(ListChronikItemsRequest) returns (ListChronikItemsResponse);
     rpc CreateChronikItem(CreateChronikItemRequest) returns (CreateChronikItemResponse);
     rpc DeleteChronikItem(DeleteChronikItemRequest) returns (DeleteChronikItemResponse);
+}
+
+message UpdateWorkflowRequest {
+    string id = 1;
+    string by_user = 2;
+    UpdateMask update_mask = 3;
+    string name = 4;
+    bool active = 5;
+    string description = 6;
+    string endpoint_metadata = 7;
+    string endpoint_run = 8;
+    repeated string states = 9;
+    repeated string tags = 10;
+    string endpoint_total = 11;
+}
+
+message UpdateWorkflowResponse {
+    Workflow workflow = 1;
 }
 
 message UpdateWorkflowItemRequest {
@@ -434,6 +454,7 @@ message CreateWorkflowRequest {
     repeated string states = 6;
     repeated string tags = 7;
     string by_user = 8;
+    string endpoint_total = 9;
 }
 
 message CreateWorkflowResponse {
