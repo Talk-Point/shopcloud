@@ -229,6 +229,87 @@ service ContentHubService {
     // Misc
     rpc ConvertHtmlToMarkdown(ConvertHtmlToMarkdownRequest) returns (ConvertHtmlToMarkdownResponse);
     rpc ConvertMarkdownToHtml(ConvertMarkdownToHtmlRequest) returns (ConvertMarkdownToHtmlResponse);
+
+    // Complaince
+    rpc GetGpsrContactPerson(GetGpsrContactPersonRequest) returns (GetGpsrContactPersonResponse);
+    rpc ListGpsrContactPersons(ListGpsrContactPersonsRequest) returns (ListGpsrContactPersonsResponse);
+    rpc CreateGpsrContactPerson(CreateGpsrContactPersonRequest) returns (CreateGpsrContactPersonResponse);
+    rpc DeleteGpsrContactPerson(DeleteGpsrContactPersonRequest) returns (DeleteGpsrContactPersonResponse);
+}
+
+message GpsrContactPerson {
+    int64 id = 1;
+    string marke = 2;
+    string name = 3;
+    string addess = 4;
+    string email = 5;
+    string phone = 6;
+    bool is_active = 7;
+    string memo = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+message GetGpsrContactPersonRequest {
+    int64 id = 1;
+}
+
+message GetGpsrContactPersonResponse {
+    GpsrContactPerson contact_person = 1;
+}
+
+message ListGpsrContactPersonsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_NAME = 1;
+        FIELD_EMAIL = 2;
+        FIELD_PHONE = 3;
+        FIELD_CREATED_AT = 4;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListGpsrContactPersonsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+    }
+
+    int32 page_size = 1;
+    int64 page = 2;
+    OrderBy order_by = 3;
+    Direction direction = 6;
+    repeated ListGpsrContactPersonsFilter filters = 7;
+}
+
+message ListGpsrContactPersonsResponse {
+    repeated GpsrContactPerson contact_persons = 1;
+    int64 page = 2;
+}
+
+message CreateGpsrContactPersonRequest {
+    string marke = 1;
+    string name = 2;
+    string address = 3;
+    string email = 4;
+    string phone = 5;
+    string memo = 6;
+    string by_user = 7;
+}
+
+message CreateGpsrContactPersonResponse {
+    GpsrContactPerson contact_person = 1;
+}
+
+message DeleteGpsrContactPersonRequest {
+    int64 id = 1;
+    string by_user = 2;
+}
+
+message DeleteGpsrContactPersonResponse {
+    GpsrContactPerson contact_person = 1;
 }
 
 message RenameAttributeKeyRequest {

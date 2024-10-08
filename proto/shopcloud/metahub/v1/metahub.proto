@@ -1,9 +1,9 @@
-// ContentHub API
+// MetaHub API
 // To access the erp
 
 syntax = "proto3";
 
-package proto.shopcloud.contenthub.v1;
+package proto.shopcloud.metahub.v1;
 
 import "google/protobuf/timestamp.proto";
 
@@ -30,6 +30,10 @@ enum Direction {
     DIRECTION_DESC = 1;
 }
 
+message UpdateMask {
+    repeated string paths = 1;
+}
+
 // Scopes
 enum Scope {
     SCOPE_UNSPECIFIED = 0;
@@ -49,123 +53,81 @@ message ApiKey {
     google.protobuf.Timestamp updated_at = 7;
 }
 
-message Attribute {
+message Document {
     string id = 1;
-    repeated string keys = 2;
-    string group = 3;
-    string group_value = 4;
-    string value = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
-}
-
-message AttributeFlat {
-    string id = 1;
-    string key = 2;
-    string group = 3;
-    string group_value = 4;
-    string language = 5;
-    string value = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
-}
-
-message Log {
-    enum Action {
-        ACTION_UNSPECIFIED = 0;
-        ACTION_CREATE = 1;
-        ACTION_UPDATE = 2;
-        ACTION_DELETE = 3;
-    }
-
-    string id = 1;
-    string for = 2;
-    string reference = 3;
-    Action action = 4;
-    string by_user = 5;
-    map<string, string> payload = 6;
-    google.protobuf.Timestamp ttl = 7;
-    google.protobuf.Timestamp created_at = 8;
-}
-
-message Tag {
-    enum Relevance {
-        RELEVANCE_UNSPECIFIED = 0;
-        RELEVANCE_LOW = 1;
-        RELEVANCE_MEDIUM = 2;
-        RELEVANCE_HIGH = 3;
-        RELEVANCE_STATUS = 4;
-    }
-    enum Color {
-        COLOR_UNSPECIFIED = 0;
-        COLOR_YELLOW = 1;
-        COLOR_RED = 2;
-        COLOR_GREEN = 3;
-        COLOR_BLUE = 4;
-    }
-    enum Status {
-        STATUS_UNSPECIFIED = 0;
-        STATUS_FILTERED = 1;
-        STATUS_SUCCESS = 2;
-        STATUS_FAILED = 3;
-        STATUS_OFFLINE_REQUIRED_MISSING = 4;
-    }
-
-    string id = 1;
-    string type = 2;
-    string name = 3;
-    string reference = 4;
-    string created_by = 5;
-    Relevance relevance = 6;
-    Color color = 7;
-    repeated string search_keys = 8;
-    string memo = 9;
-    string src = 10;
-    google.protobuf.Timestamp created_at = 11;
-    google.protobuf.Timestamp updated_at = 12;
-    Status status = 13;
-}
-
-message TagFlat {
-    string id = 1;
-    string type = 2;
-    string name = 3;
-    string reference = 4;
-    string created_by = 5;
-    Tag.Relevance relevance = 6;
-    Tag.Color color = 7;
-    string memo = 8;
-    string src = 9;
+    string name = 2;
+    string value = 3;
+    string hash = 4;
+    repeated string gids = 5;
+    repeated string tags = 6;
+    map<string, string> metadatas = 7;
+    string file_url = 8;
+    string public_file_url = 9;
     google.protobuf.Timestamp created_at = 10;
     google.protobuf.Timestamp updated_at = 11;
-    Tag.Status status = 12;
 }
 
-message Check {
-    enum Group {
-        GROUP_UNSPECIFIED = 0;
-        GROUP_ARTICLE = 1;
-    }
+message Workflow {
+    string id = 1;
+    string name = 2;
+    bool active = 3;
+    string description = 4;
+    string endpoint_metadata = 5;
+    string endpoint_run = 6;
+    repeated string states = 7;
+    repeated string tags = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+    string endpoint_total = 11;
+}
 
+message WorkflowItem {
+    string id = 1;
+    string workflow = 2;
+    repeated string gids = 3;
+    repeated string tags = 4;
+    repeated string assings = 5;
+    string reference = 6; // can empoty when set then must be unique with workflow
+    string state = 7;
+    bool ack_needed = 8;
+    string ack_by = 9;
+    google.protobuf.Timestamp ack_at = 10;
+    string memo = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+    string title = 14;
+    string created_by = 15;
+    string workflow_value = 16;
+    map<string, string> meta_datas = 17;
+}
+
+message ChronikItem {
     enum Type {
         TYPE_UNSPECIFIED = 0;
-        TYPE_ARTICLE_EU_ENERGY_V1 = 1;
-        TYPE_ARTICLE_IMAGE_EXISTS = 2;
-        TYPE_ARTICLE_EAN_VALID = 3;
+        TYPE_ACTION = 1;
+        TYPE_COMMENT = 2;
+        TYPE_FILE = 3;
+    }
+    enum ContentType {
+        CONTENT_TYPE_UNSPECIFIED = 0;
+        CONTENT_TYPE_TEXT = 1;
+        CONTENT_TYPE_MARKDOWN = 2;
     }
 
     string id = 1;
-    string code = 2;
-    string name = 3;
-    Group group = 4;
-    Type type = 5;
-    bool is_active = 6;
-    string description = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
+    string reference = 2;
+    repeated string gids = 3;
+    repeated string assigns = 4;
+    string created_by = 5;
+    string content = 6;
+    ContentType content_type = 7;
+    repeated string labels = 8;
+    Type type = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
 }
 
-service ContentHubService {
+service MetaHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
 
@@ -176,95 +138,114 @@ service ContentHubService {
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
-    // AttributeGroup
-    rpc GetAttributeGroup(GetAttributeGroupRequest) returns (GetAttributeGroupResponse);
-    rpc ListAttributeGroups(ListAttributeGroupsRequest) returns (ListAttributeGroupsResponse);
-    rpc CreateAttributeGroup(CreateAttributeGroupRequest) returns (CreateAttributeGroupResponse);
-    rpc DeleteAttributeGroup(DeleteAttributeGroupRequest) returns (DeleteAttributeGroupResponse);
-    // Attribute
-    rpc GetAttribute(GetAttributeRequest) returns (GetAttributeResponse);
-    rpc ListAttributes(ListAttributesRequest) returns (ListAttributesResponse);
-    rpc CreateAttribute(CreateAttributeRequest) returns (CreateAttributeResponse);
-    rpc DeleteAttribute(DeleteAttributeRequest) returns (DeleteAttributeResponse);
-    rpc UpdateAttributeValue(UpdateAttributeValueRequest) returns (UpdateAttributeValueResponse);
-    rpc ExportAttributeToDb(ExportAttributeToDbRequest) returns (ExportAttributeToDbResponse);
-    rpc RenameAttributeKey(RenameAttributeKeyRequest) returns (RenameAttributeKeyResponse);
+    // Dcuments
+    rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse);
+    rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
+    rpc CreateGidDocument(CreateGidDocumentRequest) returns (CreateGidDocumentResponse);
+    rpc CreateFileDocument(CreateFileDocumentRequest) returns (CreateFileDocumentResponse);
+    rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse);
+
+    // Workflows
+    rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse);
+    rpc ListWorkflows(ListWorkflowsRequest) returns (ListWorkflowsResponse);
+    rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse);
+    rpc UpdateWorkflow(UpdateWorkflowRequest) returns (UpdateWorkflowResponse);
+    rpc DeleteWorkflow(DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
+
+    // WorkflowItems
+    rpc GetWorkflowItem(GetWorkflowItemRequest) returns (GetWorkflowItemResponse);
+    rpc ListWorkflowItems(ListWorkflowItemsRequest) returns (ListWorkflowItemsResponse);
+    rpc CreateWorkflowItem(CreateWorkflowItemRequest) returns (CreateWorkflowItemResponse);
+    rpc UpdateWorkflowItem(UpdateWorkflowItemRequest) returns (UpdateWorkflowItemResponse);
+    rpc DeleteWorkflowItem(DeleteWorkflowItemRequest) returns (DeleteWorkflowItemResponse);
+    rpc SetStateWorkflowItem(SetStateWorkflowItemRequest) returns (SetStateWorkflowItemResponse);
+    rpc MarkAckWorkflowItem(MarkAckWorkflowItemRequest) returns (MarkAckWorkflowItemResponse);
+    rpc UnmarkAckWorkflowItem(UnmarkAckWorkflowItemRequest) returns (UnmarkAckWorkflowItemResponse);
+    // Fetch Metadatas for WorkflowItem to better show the item as table in the ui
+    rpc RunMetaFetchForWorkflowItem(RunMetaFetchForWorkflowItemRequest) returns (RunMetaFetchForWorkflowItemResponse);
+    // Run the workflow item and can return a state change
+    rpc RunWorkflowItem(RunWorkflowItemRequest) returns (RunWorkflowItemResponse);
     
-    // Content Section
-    rpc RenderContentSection(RenderContentSectionRequest) returns (RenderContentSectionResponse);
-
-    // Icecat
-    rpc GetIcecatProductXml(GetIcecatProductXmlRequest) returns (GetIcecatProductXmlResponse);
-    rpc GetIcecatProductDataV2(GetIcecatProductDataV2Request) returns (GetIcecatProductDataV2Response);
-    rpc GetIcecatFile(GetIcecatFileRequest) returns (GetIcecatFileResponse);
-    rpc ListIcecatProductDocuments(ListIcecatProductDocumentsRequest) returns (ListIcecatProductDocumentsResponse);
-    rpc GetIcecatDocument(GetIcecatDocumentRequest) returns (GetIcecatDocumentResponse);
-    rpc BatchImportIcecatDocuments(BatchImportIcecatDocumentsRequest) returns (BatchImportIcecatDocumentsResponse);
-    rpc ImportIcecatDocument(ImportIcecatDocumentRequest) returns (ImportIcecatDocumentResponse);
-    rpc ImportIcecatEnergyData(ImportIcecatEnergyDataRequest) returns (ImportIcecatEnergyDataResponse);
-
-    // Tags
-    rpc GetTag(GetTagRequest) returns (GetTagResponse);
-    rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
-    rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
-    rpc BatchCreateTags(BatchCreateTagsRequest) returns (BatchCreateTagsResponse);
-    rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
-    rpc DeleteTagByReference(DeleteTagByReferenceRequest) returns (DeleteTagByReferenceResponse);
-    rpc ExportTagToDb(ExportTagToDbRequest) returns (ExportTagToDbResponse);
-    rpc SetTagStatus(SetTagStatusRequest) returns (SetTagStatusResponse);
-
-    // Checks
-    rpc GetCheck(GetCheckRequest) returns (GetCheckResponse);
-    rpc ListChecks(ListChecksRequest) returns (ListChecksResponse);
-    rpc CreateCheck(CreateCheckRequest) returns (CreateCheckResponse);
-    rpc DeleteCheck(DeleteCheckRequest) returns (DeleteCheckResponse);
-    rpc RunCheck(RunCheckRequest) returns (RunCheckResponse);
-
-    // Events
-    rpc EventHubFire(EventHubFireRequest) returns (EventHubFireResponse);
-
-    // Categorisation
-    rpc CategorizeV1(CategorizeV1Request) returns (CategorizeV1Response);
-
-    // Misc
-    rpc ConvertHtmlToMarkdown(ConvertHtmlToMarkdownRequest) returns (ConvertHtmlToMarkdownResponse);
-    rpc ConvertMarkdownToHtml(ConvertMarkdownToHtmlRequest) returns (ConvertMarkdownToHtmlResponse);
-
-    // Complaince
-    rpc GetGpsrContactPerson(GetGpsrContactPersonRequest) returns (GetGpsrContactPersonResponse);
-    rpc ListGpsrContactPersons(ListGpsrContactPersonsRequest) returns (ListGpsrContactPersonsResponse);
-    rpc CreateGpsrContactPerson(CreateGpsrContactPersonRequest) returns (CreateGpsrContactPersonResponse);
-    rpc DeleteGpsrContactPerson(DeleteGpsrContactPersonRequest) returns (DeleteGpsrContactPersonResponse);
+    // Chronik
+    rpc GetChronikItem(GetChronikItemRequest) returns (GetChronikItemResponse);
+    rpc ListChronikItems(ListChronikItemsRequest) returns (ListChronikItemsResponse);
+    rpc CreateChronikItem(CreateChronikItemRequest) returns (CreateChronikItemResponse);
+    rpc DeleteChronikItem(DeleteChronikItemRequest) returns (DeleteChronikItemResponse);
 }
 
-message GpsrContactPerson {
-    int64 id = 1;
-    string marke = 2;
-    string name = 3;
-    string addess = 4;
-    string email = 5;
-    string phone = 6;
-    bool is_active = 7;
-    string memo = 8;
-    google.protobuf.Timestamp created_at = 9;
-    google.protobuf.Timestamp updated_at = 10;
+message UpdateWorkflowRequest {
+    string id = 1;
+    string by_user = 2;
+    UpdateMask update_mask = 3;
+    string name = 4;
+    bool active = 5;
+    string description = 6;
+    string endpoint_metadata = 7;
+    string endpoint_run = 8;
+    repeated string states = 9;
+    repeated string tags = 10;
+    string endpoint_total = 11;
 }
 
-message GetGpsrContactPersonRequest {
-    int64 id = 1;
+message UpdateWorkflowResponse {
+    Workflow workflow = 1;
 }
 
-message GetGpsrContactPersonResponse {
-    GpsrContactPerson contact_person = 1;
+message UpdateWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+    UpdateMask update_mask = 3;
+    repeated string gids = 4;
+    repeated string tags = 5;
+    repeated string assings = 6;
+    string reference = 7;
+    string state = 8;
+    bool ack_needed = 9;
+    string memo = 10;
+    string title = 11;
+    map<string, string> meta_datas = 12;
+    string workflow_value = 13;
 }
 
-message ListGpsrContactPersonsFilter {
+message UpdateWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message UnmarkAckWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message UnmarkAckWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message MarkAckWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message MarkAckWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message GetChronikItemRequest {
+    string id = 1;
+}
+
+message GetChronikItemResponse {
+    ChronikItem chronik_item = 1;
+}
+
+message ListChronikItemsFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
-        FIELD_NAME = 1;
-        FIELD_EMAIL = 2;
-        FIELD_PHONE = 3;
-        FIELD_CREATED_AT = 4;
+        FIELD_REFERENCE = 1;
+        FIELD_GIDS = 2;
+        FIELD_ASSIGNS = 3;
+        FIELD_CREATED_BY = 4;
+        FIELD_TYPE = 5;
+        FIELD_CREATED_AT = 6;
     }
 
     Field field = 1;
@@ -272,528 +253,172 @@ message ListGpsrContactPersonsFilter {
     Operator operator = 3;
 }
 
-message ListGpsrContactPersonsRequest {
+message ListChronikItemsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
     }
 
     int32 page_size = 1;
-    int64 page = 2;
-    OrderBy order_by = 3;
-    Direction direction = 6;
-    repeated ListGpsrContactPersonsFilter filters = 7;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListChronikItemsFilter filters = 6;
 }
 
-message ListGpsrContactPersonsResponse {
-    repeated GpsrContactPerson contact_persons = 1;
-    int64 page = 2;
+message ListChronikItemsResponse {
+    repeated ChronikItem chronik_items = 1;
+    string page_token = 2;
 }
 
-message CreateGpsrContactPersonRequest {
-    string marke = 1;
-    string name = 2;
-    string address = 3;
-    string email = 4;
-    string phone = 5;
-    string memo = 6;
-    string by_user = 7;
+message CreateChronikItemRequest {
+    string reference = 1;
+    repeated string gids = 2;
+    repeated string assigns = 3;
+    string created_by = 4;
+    string content = 5;
+    ChronikItem.ContentType content_type = 6;
+    repeated string labels = 7;
+    ChronikItem.Type type = 8;
 }
 
-message CreateGpsrContactPersonResponse {
-    GpsrContactPerson contact_person = 1;
+message CreateChronikItemResponse {
+    ChronikItem chronik_item = 1;
 }
 
-message DeleteGpsrContactPersonRequest {
-    int64 id = 1;
+message DeleteChronikItemRequest {
+    string id = 1;
     string by_user = 2;
 }
 
-message DeleteGpsrContactPersonResponse {
-    GpsrContactPerson contact_person = 1;
+message DeleteChronikItemResponse {
+    ChronikItem chronik_item = 1;
 }
 
-message RenameAttributeKeyRequest {
-    string key_old = 1;
-    string key_new = 2;
+message RunMetaFetchForWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message RunMetaFetchForWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message RunWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message RunWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message FetchMetadatasForWorkflowItemRequest {
+    string id = 1;
+}
+
+message FetchMetadatasForWorkflowItemResponse {
+    string id = 1;
+    string by_user = 2;
+}
+
+message SetStateWorkflowItemRequest {
+    string id = 1;
+    string state = 2;
     string by_user = 3;
 }
 
-message RenameAttributeKeyResponse {
-    repeated string success_ids = 1;
-    repeated string failed_ids = 2;
-    bool success = 3;
+message SetStateWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
 }
 
-message GetIcecatFileRequest {
-    string src = 1;
-}
-
-message GetIcecatFileResponse {
-    bytes content = 1;
-}
-
-message ConvertHtmlToMarkdownRequest {
-    string content = 1;
-}
-
-message ConvertHtmlToMarkdownResponse {
-    string content = 1;
-}
-
-message ConvertMarkdownToHtmlRequest {
-    string content = 1;
-}
-
-message ConvertMarkdownToHtmlResponse {
-    string content = 1;
-}
-
-message GetCheckRequest {
+message GetWorkflowItemRequest {
     string id = 1;
 }
 
-message GetCheckResponse {
-    Check check = 1;
+message GetWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
 }
 
-message ListChecksFilter {
+message ListWorkflowItemsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_WORKFLOW = 1;
+        FIELD_GIDS = 2;
+        FIELD_TAGS = 3;
+        FIELD_ASSINGS = 4;
+        FIELD_STATE = 5;
+        FIELD_ACK_NEEDED = 6;
+        FIELD_ACK_BY = 7;
+        FIELD_ACK_AT = 8;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListWorkflowItemsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListWorkflowItemsFilter filters = 6;
+}
+
+message ListWorkflowItemsResponse {
+    repeated WorkflowItem workflow_items = 1;
+    string page_token = 2;
+}
+
+message CreateWorkflowItemRequest {
+    string workflow = 1;
+    repeated string gids = 2;
+    repeated string tags = 3;
+    repeated string assings = 4;
+    string reference = 5;
+    string state = 6;
+    bool ack_needed = 7;
+    string memo = 8;
+    string by_user = 9;
+    string title = 10;
+    map<string, string> meta_datas = 11;
+}
+
+message CreateWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message DeleteWorkflowItemRequest {
+    string id = 1;
+    string by_user = 2;
+}
+
+message DeleteWorkflowItemResponse {
+    WorkflowItem workflow_item = 1;
+}
+
+message GetWorkflowRequest {
+    string id = 1;
+}
+
+message GetWorkflowResponse {
+    Workflow workflow = 1;
+}
+
+message ListWorkflowsFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
         FIELD_NAME = 1;
-        FIELD_GROUP = 2;
-        FIELD_TYPE = 3;
-        FIELD_IS_ACTIVE = 4;
-        FIELD_CREATED_AT = 5;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
-message ListChecksRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-    }
-
-    int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListChecksFilter filters = 6;
-}
-
-message ListChecksResponse {
-    repeated Check checks = 1;
-    string page_token = 2;
-}
-
-message CreateCheckRequest {
-    string code = 1;
-    string name = 2;
-    Check.Type type = 3;
-    bool is_active = 4;
-    string description = 5;
-}
-
-message CreateCheckResponse {
-    Check check = 1;
-}
-
-message DeleteCheckRequest {
-    string id = 1;
-}
-
-message DeleteCheckResponse {
-    Check check = 1;
-}
-
-message RunCheckRequest {
-    string id = 1;
-    string reference = 2;
-}
-
-message RunCheckResponse {
-    Tag tag = 1;
-}
-
-message SetTagStatusRequest {
-    string id = 1;
-    Tag.Status status = 2;
-    string memo = 3;
-    string by_user = 4;
-}
-
-message SetTagStatusResponse {
-    Tag tag = 1;
-}
-
-message CategorizeV1Request {
-    string title = 1;
-    bool not_use_cache = 2;
-    bool debug = 3;
-}
-
-message CategorizeV1Response {
-    bool is_success = 1;
-    string main_category = 2;
-    string category = 3;
-    string product_type = 4;
-    string prompt = 5;
-    string raw_result = 6;
-}
-
-message AttributeCreatedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string group = 4;
-    string group_value = 5;
-    repeated string keys = 6;
-    string value = 7;
-}
-
-message AttributeDeletedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string group = 4;
-    string group_value = 5;
-    repeated string keys = 6;
-    string value = 7;
-}
-
-message TagCreatedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string type = 4;
-    string name = 5;
-    string reference = 6;
-    string created_by = 7;
-    Tag.Relevance relevance = 8;
-    Tag.Status status = 9;
-}
-
-message TagDeletedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    string type = 4;
-    string name = 5;
-    string reference = 6;
-    Tag.Status status = 7;
-}
-
-message TagUpdatedEvent {
-    string topic = 1;
-    string id = 2;
-    google.protobuf.Timestamp created_at = 3;
-    google.protobuf.Timestamp updated_at = 4;
-    string type = 5;
-    string name = 6;
-    string reference = 7;
-    string created_by = 8;
-    Tag.Relevance relevance = 9;
-    Tag.Status status = 10;
-}
-
-message EventHubFireRequest {
-    string topic = 1;
-    string payload = 2;
-}
-
-message EventHubFireResponse {
-    string id = 1;   
-}
-
-message GetLogRequest {
-    string id = 1;
-}
-
-message GetLogResponse {
-    Log log = 1;
-}
-
-message ListLogsFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_FOR = 1;
-        FIELD_ACTION = 2;
-        FIELD_BY_USER = 3;
-        FIELD_CREATED_AT = 4;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
-message ListLogsRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-    }
-
-    int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListLogsFilter filters = 6;
-}
-
-message ListLogsResponse {
-    repeated Log logs = 1;
-    string page_token = 2;
-}
-
-message DeleteLogRequest {
-    string id = 1;
-}
-
-message DeleteLogResponse {
-    Log log = 1;
-}
-
-message ExportTagToDbRequest {
-    string id = 1;
-}
-
-message ExportTagToDbResponse {
-    repeated TagFlat tags = 1;
-}
-
-message DeleteTagByReferenceRequest {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-    string by_user = 4;
-}
-
-message DeleteTagByReferenceResponse {
-    Tag tag = 1;
-}
-
-message BatchCreateTagsRequest {
-    repeated CreateTagRequest tags = 1;
-}
-
-message TagStatusCreated {
-    string id = 1;
-}
-
-message TagStatusExists {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-}
-
-message TagStatusFailure {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-    string message = 4;
-}
-
-message TagCreateInfo {
-    oneof status {
-        TagStatusCreated created = 1;
-        TagStatusExists exists = 2;
-        TagStatusFailure failure = 3;
-    }
-}
-
-message BatchCreateTagsResponse {
-    repeated TagCreateInfo tags = 1;
-}
-
-message GetTagRequest {
-    string id = 1;
-}
-
-message GetTagResponse {
-    Tag tag = 1;
-}
-
-message ListTagsFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_TYPE = 1;
-        FIELD_NAME = 2;
-        FIELD_REFERENCE = 3;
-        FIELD_RELEVANCE = 4;
-        FIELD_SEARCH_KEYS = 5;
-        FIELD_CREATED_BY = 6;
-        FIELD_CREATED_AT = 7;
-        FIELD_STATUS = 8;
-    }
-
-    Field field = 1;
-    string value = 2;
-    Operator operator = 3;
-}
-
-message ListTagsRequest {
-    enum OrderBy {
-        ORDER_BY_ID_UNSPECIFIED = 0;
-        ORDER_BY_CREATED_AT = 1;
-        ORDER_BY_RELEVANCE = 2;
-    }
-
-    int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListTagsFilter filters = 6;
-}
-
-message ListTagsResponse {
-    repeated Tag tags = 1;
-    string page_token = 2;
-}
-
-message CreateTagRequest {
-    string type = 1;
-    string name = 2;
-    string reference = 3;
-    string created_by = 4;
-    Tag.Relevance relevance = 5;
-    Tag.Color color = 6;
-    repeated string search_keys = 7;
-    string memo = 8;
-    string src = 9;
-}
-
-message CreateTagResponse {
-    Tag tag = 1;
-}
-
-message DeleteTagRequest {
-    string id = 1;
-    string by_user = 2;
-}
-
-message DeleteTagResponse {
-    Tag tag = 1;
-}
-
-message IcecatProductDataV2Enery {
-    string eprel = 1;
-    string class = 2;
-    string scala = 3;
-}
-
-message IcecatProductDataV2AttributeItem {
-    string name = 1;
-    string value = 2;
-}
-
-message IcecatProductDataV2AttributeGroup {
-    string name = 1;
-    repeated IcecatProductDataV2AttributeItem items = 2;
-}
-
-message IcecatProductDataV2 {
-    string name = 1;
-    string brand = 2;
-    string description = 3;
-    string category = 4;
-    string gtin = 5;
-    string serie = 6;
-    string basename = 7;
-    IcecatProductDataV2Enery energy = 8;
-    string release_date = 9;
-    string end_of_life_date = 10;
-    repeated IcecatProductDataV2AttributeGroup attributes = 11;
-    repeated string images = 12;
-}
-
-message GetIcecatProductDataV2Request {
-    string gtin = 1;
-    string language = 2;
-}
-
-message GetIcecatProductDataV2Response {
-    IcecatProductDataV2 data = 1;
-}
-
-message ImportIcecatEnergyDataRequest {
-    string gtin = 1;
-    string language = 2;
-}
-
-message ImportIcecatEnergyDataResponse {
-    repeated Attribute attributes = 1;
-}
-
-enum ContentSectionType {
-    CONTENT_SECTION_TYPE_UNSPECIFIED = 0;
-    CONTENT_SECTION_TYPE_DOCUMENTS_V1 = 1;
-    CONTENT_SECTION_TYPE_EU_ENERGIE_LABEL_V1 = 2;
-}
-
-message RenderContentSectionRequest {
-    ContentSectionType section = 1;
-    string gtin = 2;
-    string language = 3;
-}
-
-message RenderContentSectionResponse {
-    string content = 1;
-    string cache_path = 2;
-}
-
-message ImportIcecatDocumentRequest {
-    string gtin = 1;
-    string language = 2;
-    IcecatDocument document = 3;
-}
-
-message ImportIcecatDocumentResponse {
-    Attribute attribute = 1;
-}
-
-message BatchImportIcecatDocumentsRequest {
-    string gtin = 1;
-    string language = 2;
-}
-
-message BatchImportIcecatDocumentsResponse {
-    repeated Attribute attributes = 1;
-}
-
-message ExportAttributeToDbRequest {
-    string id = 1;
-}
-
-message ExportAttributeToDbResponse {
-    repeated AttributeFlat attributes = 1;
-}
-
-message UpdateAttributeValueRequest {
-    string id = 1;
-    oneof value {
-        string content = 2;
-        Document document = 3;
-    }
-    string by_user = 4;
-}
-
-message UpdateAttributeValueResponse {
-    Attribute attribute = 1;
-}
-
-message ListAttributeGroupsFilter {
-    enum Field {
-        FIELD_ID_UNSPECIFIED = 0;
-        FIELD_GROUP = 1;
-        FIELD_NAME = 2;
+        FIELD_ACTIVE = 2;
         FIELD_TAGS = 3;
-        FIELD_CREATED_AT = 4;
     }
 
     Field field = 1;
@@ -801,7 +426,7 @@ message ListAttributeGroupsFilter {
     Operator operator = 3;
 }
 
-message ListAttributeGroupsRequest {
+message ListWorkflowsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
@@ -812,127 +437,79 @@ message ListAttributeGroupsRequest {
     string page_previous = 3;
     OrderBy order_by = 4;
     Direction direction = 5;
-    repeated ListAttributeGroupsFilter filters = 6;
+    repeated ListWorkflowsFilter filters = 6;
 }
 
-message ListAttributeGroupsResponse {
-    repeated AttributeGroup groups = 1;
+message ListWorkflowsResponse {
+    repeated Workflow workflows = 1;
     string page_token = 2;
 }
 
-message GetAttributeGroupRequest {
-    string id = 1;
-}
-
-message GetAttributeGroupResponse {
-    AttributeGroup attribute_group = 1;
-}
-
-message AttributeGroup {
-    string id = 1;
-    string group = 2;
-    string name = 3;
-    repeated string allowed_values = 4;
-    repeated string example_values = 5;
-    int32 relevance = 6;
+message CreateWorkflowRequest {
+    string name = 1;
+    bool active = 2;
+    string description = 3;
+    string endpoint_metadata = 4;
+    string endpoint_run = 5;
+    repeated string states = 6;
     repeated string tags = 7;
-    google.protobuf.Timestamp created_at = 8;
-    google.protobuf.Timestamp updated_at = 9;
+    string by_user = 8;
+    string endpoint_total = 9;
 }
 
-message CreateAttributeGroupRequest {
-    string group = 1;
-    string name = 2;
-    repeated string allowed_values = 3;
-    repeated string example_values = 4;
-    int32 relevance = 5;
-    string by_user = 6;
+message CreateWorkflowResponse {
+    Workflow workflow = 1;
 }
 
-message CreateAttributeGroupResponse {
-    AttributeGroup attribute_group = 1;
-}
-
-message DeleteAttributeGroupRequest {
+message DeleteWorkflowRequest {
     string id = 1;
     string by_user = 2;
 }
 
-message DeleteAttributeGroupResponse {
-    AttributeGroup attribute_group = 1;
-    repeated Attribute attributes_success = 2;
-    repeated string attributes_failed = 3;
+message DeleteWorkflowResponse {
+    Workflow workflow = 1;
 }
 
-message GetIcecatDocumentRequest {
-    string src = 1;
+message CreateGidDocumentRequest {
+    string app = 1;
+    string value = 2;
+    repeated string gids = 3;
+    repeated string tags = 4;
+    map<string, string> metadatas = 5;
 }
 
-message GetIcecatDocumentResponse {
-    string name = 1;
-    string type = 2;
+message CreateGidDocumentResponse {
+    Document document = 1;
+}
+
+message CreateFileDocumentRequest {
+    string app = 1;
+    string name = 2;
     bytes content = 3;
+    repeated string gids = 4;
+    repeated string tags = 5;
+    map<string, string> metadatas = 6;
 }
 
-message IcecatDocument {
-    string name = 1;
-    string type = 2;
-    string src = 3;
+message CreateFileDocumentResponse {
+    Document document = 1;
 }
 
-message ListIcecatProductDocumentsRequest {
-    string gtin = 1;
-    string language = 2;
-}
-
-message ListIcecatProductDocumentsResponse {
-    repeated IcecatDocument documents = 1;
-}
-
-message GetIcecatProductXmlRequest {
-    string gtin = 1;
-    string language = 2;
-    bool not_use_cache = 3;
-}
-
-message GetIcecatProductXmlResponse {
-    string content = 1;
-}
-
-message GetAttributeRequest {
+message GetDocumentRequest {
     string id = 1;
 }
 
-message GetAttributeResponse {
-    Attribute attribute = 1;
+message GetDocumentResponse {
+    Document document = 1;
 }
 
-message Document {
-    bytes content = 1;
-    string name = 2;
-}
-
-message CreateAttributeRequest {
-    string group = 1;
-    repeated string keys = 2;
-    repeated string languages = 4;
-    oneof value {
-        string content = 5;
-        Document document = 6;
-    }
-    string by_user = 7;
-}
-
-message CreateAttributeResponse {
-    Attribute attribute = 1;
-}
-
-message ListAttributesFilter {
+message ListDocumentsFilter {
     enum Field {
         FIELD_ID_UNSPECIFIED = 0;
-        FIELD_KEYS = 1;
-        FIELD_GROUP = 2;
-        FIELD_CREATED_AT = 3;
+        FIELD_NAME = 1;
+        FIELD_METADATAS__APP = 2;
+        FIELD_TAGS = 3;
+        FIELD_GIDS = 4;
     }
 
     Field field = 1;
@@ -940,7 +517,7 @@ message ListAttributesFilter {
     Operator operator = 3;
 }
 
-message ListAttributesRequest {
+message ListDocumentsRequest {
     enum OrderBy {
         ORDER_BY_ID_UNSPECIFIED = 0;
         ORDER_BY_CREATED_AT = 1;
@@ -951,21 +528,20 @@ message ListAttributesRequest {
     string page_previous = 3;
     OrderBy order_by = 4;
     Direction direction = 5;
-    repeated ListAttributesFilter filters = 6;
+    repeated ListDocumentsFilter filters = 6;
 }
 
-message ListAttributesResponse {
-    repeated Attribute attributes = 1;
+message ListDocumentsResponse {
+    repeated Document documents = 1;
     string page_token = 2;
 }
 
-message DeleteAttributeRequest {
+message DeleteDocumentRequest {
     string id = 1;
-    string by_user = 2;
 }
 
-message DeleteAttributeResponse {
-    Attribute attribute = 1;
+message DeleteDocumentResponse {
+    Document document = 1;
 }
 
 message GetApiKeyRequest {
