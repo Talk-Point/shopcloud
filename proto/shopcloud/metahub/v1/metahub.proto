@@ -40,6 +40,7 @@ enum Scope {
     SCOPE_READ = 1;
     SCOPE_WRITE = 2;
     SCOPE_ADMIN = 3;
+    SCOPE_AUDIT = 4;
 }
 
 // Models
@@ -171,6 +172,35 @@ service MetaHubService {
     rpc ListChronikItems(ListChronikItemsRequest) returns (ListChronikItemsResponse);
     rpc CreateChronikItem(CreateChronikItemRequest) returns (CreateChronikItemResponse);
     rpc DeleteChronikItem(DeleteChronikItemRequest) returns (DeleteChronikItemResponse);
+
+    // AuditHub Gateway
+    rpc CreateAuditEvent(CreateAuditEventRequest) returns (CreateAuditEventResponse);
+}
+
+message AuditEvent {
+    string env = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    string service = 3;
+    string event = 4;
+    repeated string gids = 5;
+    repeated string labels = 6;
+    string by_user = 7;
+    map<string, string> metadata = 8;
+}
+
+message ItemError {
+    int32 idx = 1;
+    string message = 2;
+}
+
+message CreateAuditEventRequest {
+    string system = 1;
+    repeated AuditEvent events = 2;
+    bool transaction = 3;
+}
+
+message CreateAuditEventResponse {
+    repeated ItemError errors = 1;
 }
 
 message UpdateWorkflowRequest {
