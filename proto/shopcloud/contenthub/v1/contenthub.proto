@@ -248,6 +248,11 @@ message GpsrContactPerson {
     string memo = 8;
     google.protobuf.Timestamp created_at = 9;
     google.protobuf.Timestamp updated_at = 10;
+    string street = 11;
+    string street_nr = 12;
+    string zip = 13;
+    string city = 14;
+    string country = 15;
 }
 
 message GetGpsrContactPersonRequest {
@@ -278,11 +283,15 @@ message ListGpsrContactPersonsResponse {
 message CreateGpsrContactPersonRequest {
     string marke = 1;
     string name = 2;
-    string address = 3;
     string email = 4;
     string phone = 5;
     string memo = 6;
     string by_user = 7;
+    string street = 8;
+    string street_nr = 9;
+    string zip = 10;
+    string city = 11;
+    string country = 12;
 }
 
 message CreateGpsrContactPersonResponse {
