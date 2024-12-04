@@ -8,6 +8,10 @@ package proto.shopcloud.sagehub.v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
+message CreateMask {
+    repeated string paths = 1;
+}
+
 message UpdateMask {
     repeated string paths = 1;
 }
@@ -132,6 +136,12 @@ service SageHubService {
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
+    // Address
+    rpc GetAddress(GetAddressRequest) returns (GetAddressResponse);
+    rpc ListAddresses(ListAddressesRequest) returns (ListAddressesResponse);
+    rpc CreateAddress(CreateAddressRequest) returns (CreateAddressResponse);
+    rpc UpdateAddress(UpdateAddressRequest) returns (UpdateAddressResponse);
+
     // Events
     rpc GetEvent(GetEventRequest) returns (GetEventResponse);
     rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
@@ -147,6 +157,7 @@ service SageHubService {
     rpc GetEbayItem(GetEbayItemRequest) returns (GetEbayItemResponse);
     rpc ListEbayItems(ListEbayItemsRequest) returns (ListEbayItemsResponse);
     rpc UpdateEbayItem(UpdateEbayItemRequest) returns (UpdateEbayItemResponse);
+    rpc ReviseEbayItems(ReviseEbayItemsRequest) returns (ReviseEbayItemsResponse);
 
     // VKBelege
     rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
@@ -219,6 +230,193 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message Address {
+    string adresse = 1;                     
+    string mandant = 2;                     
+    string kategorie = 3;                   
+    string matchcode = 4;                   
+    string anrede = 5;                      
+    string name1 = 6;                       
+    string name2 = 7;                       
+    string liefer_zusatz = 8;               
+    string liefer_strasse = 9;              
+    string liefer_land = 10;                
+    string liefer_plz = 11;                 
+    string liefer_ort = 12;                 
+    string post_zusatz = 13;                
+    string post_strasse = 14;               
+    string post_land = 15;                  
+    string post_plz = 16;                   
+    string post_ort = 17;                   
+    string ansprache = 18;                  
+    string telefon = 19;                    
+    string telefax = 20;                    
+    string mobilfunk = 21;                  
+    string email = 22;                      
+    string homepage = 23;                   
+    string memo = 24;                       
+    string sprache = 25;                    
+    string erstkontakt = 26;                
+    string gruppe = 27;                     
+    string a1_besteuerung = 28;             
+    string auswertungskennzeichen = 29;     
+    string referenz = 30;                   
+    bool aktiv = 31;                        
+    string abladestelle = 32;               
+    string werkschluessel = 33;             
+    string user_ebay_user_id = 35;          
+    string user_meinpaket_customer_id = 36; 
+    string user_geburtsdatum = 37;          
+    string user_liefer_state_or_province = 38; 
+    string user_post_state_or_province = 39; 
+    string sonderfunktion = 40;             
+}
+
+message GetAddressRequest {
+    int32 mandant = 1;
+    string id = 2;
+    bool debug = 3;
+}
+
+message GetAddressResponse {
+    Address address = 1;
+    repeated string queries = 2;
+}
+
+message ListAddressesRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
+    string query = 5;
+}
+
+message ListAddressesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated Address items = 3;
+    repeated string queries = 4;
+}
+
+message CreateAddressRequest {
+    int32 mandant = 1;
+    string by_user = 2;
+
+    string kategorie = 3;                   
+    string matchcode = 4;                   
+    string anrede = 5;                      
+    string name1 = 6;                       
+    string name2 = 7;                       
+    string liefer_zusatz = 8;               
+    string liefer_strasse = 9;              
+    string liefer_land = 10;                
+    string liefer_plz = 11;                 
+    string liefer_ort = 12;                 
+    string post_zusatz = 13;                
+    string post_strasse = 14;               
+    string post_land = 15;                  
+    string post_plz = 16;                   
+    string post_ort = 17;                   
+    string ansprache = 18;                  
+    string telefon = 19;                    
+    string telefax = 20;                    
+    string mobilfunk = 21;                  
+    string email = 22;                      
+    string homepage = 23;                   
+    string memo = 24;                       
+    string sprache = 25;                    
+    string erstkontakt = 26;                
+    string gruppe = 27;                     
+    string a1_besteuerung = 28;             
+    string auswertungskennzeichen = 29;     
+    string referenz = 30;                   
+    bool aktiv = 31;                        
+    string abladestelle = 32;               
+    string werkschluessel = 33;             
+    string user_ebay_user_id = 35;          
+    string user_meinpaket_customer_id = 36; 
+    string user_geburtsdatum = 37;          
+    string user_liefer_state_or_province = 38; 
+    string user_post_state_or_province = 39; 
+    string sonderfunktion = 40; 
+    
+    CreateMask create_mask = 41;
+}
+
+message CreateAddressResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message UpdateAddressRequest {
+    int32 mandant = 1;
+    string id = 2;
+    string by_user = 3;
+
+    string kategorie = 4;                   
+    string matchcode = 5;                   
+    string anrede = 6;                      
+    string name1 = 7;                       
+    string name2 = 8;                       
+    string liefer_zusatz = 9;               
+    string liefer_strasse = 10;              
+    string liefer_land = 11;                
+    string liefer_plz = 12;                 
+    string liefer_ort = 13;                 
+    string post_zusatz = 14;                
+    string post_strasse = 15;               
+    string post_land = 16;                  
+    string post_plz = 17;                   
+    string post_ort = 18;                   
+    string ansprache = 19;                  
+    string telefon = 20;                    
+    string telefax = 21;                    
+    string mobilfunk = 22;                  
+    string email = 23;                      
+    string homepage = 24;                   
+    string memo = 25;                       
+    string sprache = 26;                    
+    string erstkontakt = 27;                
+    string gruppe = 28;                     
+    string a1_besteuerung = 29;             
+    string auswertungskennzeichen = 30;     
+    string referenz = 31;                   
+    bool aktiv = 32;                        
+    string abladestelle = 33;               
+    string werkschluessel = 34;             
+    string user_ebay_user_id = 36;          
+    string user_meinpaket_customer_id = 37; 
+    string user_geburtsdatum = 38;          
+    string user_liefer_state_or_province = 39; 
+    string user_post_state_or_province = 40; 
+    string sonderfunktion = 41; 
+    
+    UpdateMask update_mask = 42;
+}
+
+message UpdateAddressResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message Article {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    bool revise = 4;
+}
+
+message ReviseEbayItemsRequest {
+    repeated Article items = 1;
+    string by_user = 2;
+    bool debug = 3;
+}
+
+message ReviseEbayItemsResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
 }
 
 message UpdateAmazonItemRequest {
@@ -487,7 +685,8 @@ enum ContentStatus {
     // CONTENT_STATUS_ERSATZTEIL = 4;
     CONTENT_STATUS_EIGENBEDARF = 5;
     CONTENT_STATUS_VERSCHROTTUNG = 6;
-    CONTENT_STATUS_VERSTEIEGERUNG = 7;
+    // CONTENT_STATUS_VERSTEIEGERUNG = 7;
+    CONTENT_STATUS_VERSTEIGERUNG = 8;
 }
 
 message SetArticleContentStatusRequest {
@@ -1124,6 +1323,9 @@ message UpdateArticleRequest {
     string user_keyword = 52;
     string user_farbe = 53;
     string user_conrad_id = 54;
+    string user_hersteller_adress_id = 55;
+    string user_importeur_adress_id = 56;
+    string user_verantwortliche_person_adress_id = 57;
 }
 
 message UpdateArticleResponse {
@@ -1425,6 +1627,9 @@ message KhkArtikelVariante {
     string user_keyword = 74;
     string user_farbe = 75;
     string user_conrad_id = 76;
+    string user_hersteller_adress_id = 77;
+    string user_importeur_adress_id = 78;
+    string user_verantwortliche_person_adress_id = 79;
 }
 
 message KhkVariantenAuspraegungen {
@@ -1495,6 +1700,9 @@ message FieldMaskArticle {
         FIELD_USER_KEYWORD = 43;
         FIELD_USER_FARBE = 44;
         FIELD_STEUERKLASSE = 45;
+        FIELD_USER_HERSTELLER_ADRESS_ID = 46;
+        FIELD_USER_IMPORTEUR_ADRESS_ID = 47;
+        FIELD_USER_VERANTWORTLICHE_PERSON_ADRESS_ID = 48;
     }
 
     repeated Field paths = 1;
@@ -1561,6 +1769,9 @@ message ListArtikel {
     string user_keyword = 43;
     string user_farbe = 44;
     int32 steuerklasse = 45;
+    string user_hersteller_adress_id = 46;
+    string user_importeur_adress_id = 47;
+    string user_verantwortliche_person_adress_id = 48;
 }
 
 message ListArticlesResponse {
