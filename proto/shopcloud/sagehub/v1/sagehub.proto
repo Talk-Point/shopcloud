@@ -1267,7 +1267,6 @@ message UpdateArticleRequest {
     int32 auspraegung_id = 3;   
     string by_user = 4;
 
-    // khkartikel
     string bezeichnung1 = 5;
     string bezeichnung2 = 6;
     string hersteller = 7;
@@ -1290,7 +1289,6 @@ message UpdateArticleRequest {
     double grundpreisbasis = 24;
     bool istfavorit = 25;
 
-    // khkartikelvariante
     double gewicht = 26;
     double letzterek = 27;
     double mittlererek = 28;
@@ -1299,7 +1297,6 @@ message UpdateArticleRequest {
 
     UpdateMask update_mask = 31;
 
-    // khkartikelvariante
     string user_content_status = 32;
     string user_content_last_edit = 33;
     string user_voelkner_id = 34;
@@ -1326,6 +1323,9 @@ message UpdateArticleRequest {
     string user_hersteller_adress_id = 55;
     string user_importeur_adress_id = 56;
     string user_verantwortliche_person_adress_id = 57;
+
+    bool user_ce_label = 58;
+    bool user_ce_label_verified = 59;
 }
 
 message UpdateArticleResponse {
@@ -1548,6 +1548,8 @@ message KhkArtikel {
     string user_zulieferercode = 128;
     string user_zuliefererartikelnummer = 129;
     double user_zuliefererbestand = 130;
+    bool user_ce_label = 131;
+    bool user_ce_label_verified = 132;
 }
 
 message KhkArtikelVariante {
