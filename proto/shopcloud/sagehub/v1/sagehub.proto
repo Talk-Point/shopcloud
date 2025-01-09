@@ -209,6 +209,7 @@ service SageHubService {
     rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
     rpc ListArticleMovements(ListArticleMovementsRequest) returns (ListArticleMovementsResponse);
     rpc ListLastSaleForArticles(ListLastSaleForArticlesRequest) returns (ListLastSaleForArticlesResponse);
+    rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc ListArticlePrices(ListArticlePricesRequest) returns (ListArticlePricesResponse);
@@ -230,6 +231,56 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message CreateArticleRequest {
+    int32 mandant = 1;
+    string bezeichnung1 = 2;
+    string bezeichnung2 = 3;
+    string matchcode = 4;
+    string artikelgruppe = 5;
+    string basismengeneinheit = 6;
+    string verkaufsmenegeneinheit = 7;
+    string verpackungseinheit = 8;
+    int32 vpme_enthaelt_vkme = 9;
+    string grundpreiseinheit = 10;
+    double grundpreisbasis = 11;
+    double bmee_enthaelt_grundme = 12;
+    string hersteller = 13;
+    string hartikelnummer = 14;
+    string ean = 15;
+    int32 aktiv = 16;
+    int32 favorit = 17;
+    int32 dispositionsmethode = 18;
+    double dispofaktor = 19;
+    double laenge = 20;
+    double breite = 21;
+    double hoehe = 22;
+    int32 steuerklasse = 23;
+    string memo = 24;
+    double gewicht = 25;
+    int32 lagerfuehrung = 26;
+    string letzter_lieferant = 27;
+    double bewertungssatz = 28;
+    int32 serienummernpflicht = 29;
+    string dimensionstext = 30;
+    int32 user_scmp_aktiv = 31;
+    string versandklasse = 32;
+    int32 preisberechnung = 33;
+    string energieeffizienzklasse = 34;
+    string user_zulieferer_code = 35;
+    string user_zulieferer_artikelnummer = 36;
+    double user_zulieferer_bestand = 37;
+    double kalkulatorischer_ek = 38;
+    double letzter_ek = 39;
+    string sachkonto_vk = 40;
+    int32 reverse_charge = 41;
+}
+
+message CreateArticleResponse {
+    bool is_success = 1;
+    string reference = 2;
+    string error  = 3;
 }
 
 message Address {
@@ -868,8 +919,57 @@ message UpdateEbayItemRequest {
     bool check_dispo = 30;
     bool relist = 31;
     bool list_after_end = 32;
-
     UpdateMask update_mask = 33;
+
+    string restricted_to_business = 34;
+    string signal_word = 35;
+    string pictogram1 = 36;
+    string pictogram2 = 37;
+    string pictogram3 = 38;
+    string pictogram4 = 39;
+    string statement1 = 40;
+    string statement2 = 41;
+    string statement3 = 42;
+    string statement4 = 43;
+    string statement5 = 44;
+    string statement6 = 45;
+    string statement7 = 46;
+    string statement8 = 47;
+
+    string photo_url13 = 48;
+    string photo_url14 = 49;
+    string photo_url15 = 50;
+    string photo_url16 = 51;
+    string photo_url17 = 52;
+    string photo_url18 = 53;
+    string photo_url19 = 54;
+    string photo_url20 = 55;
+    string photo_url21 = 56;
+    string photo_url22 = 57;
+    string photo_url23 = 58;
+    string photo_url24 = 59;
+
+    string certificate_of_analysis = 60;
+    string certificate_of_conformity = 61;
+    string declaration_of_conformity = 62;
+    string instructions_for_use = 63;
+    string other_safety_documents = 64;
+    string safety_data_sheet = 65;
+    string trouble_shooting_guide = 66;
+    string user_guide_or_manual = 67;
+    string installation_instructions = 68;
+    string safety_component = 69;
+    string safety_pictogram1 = 70;
+    string safety_pictogram2 = 71;
+
+    string safety_statement1 = 72;
+    string safety_statement2 = 73;
+    string safety_statement3 = 74;
+    string safety_statement4 = 75;
+    string safety_statement5 = 76;
+    string safety_statement6 = 77;
+    string safety_statement7 = 78;
+    string safety_statement8 = 79;
 }
 
 message UpdateEbayItemResponse {
@@ -914,6 +1014,56 @@ message EbayItem {
     bool list_after_end = 34;
     bool aktiv = 35;
     bool freigabe = 36;
+
+    string restricted_to_business = 37;
+    string signal_word = 38;
+    string pictogram1 = 39;
+    string pictogram2 = 40;
+    string pictogram3 = 41;
+    string pictogram4 = 42;
+    string statement1 = 43;
+    string statement2 = 44;
+    string statement3 = 45;
+    string statement4 = 46;
+    string statement5 = 47;
+    string statement6 = 48;
+    string statement7 = 49;
+    string statement8 = 50;
+
+    string photo_url13 = 51;
+    string photo_url14 = 52;
+    string photo_url15 = 53;
+    string photo_url16 = 54;
+    string photo_url17 = 55;
+    string photo_url18 = 56;
+    string photo_url19 = 57;
+    string photo_url20 = 58;
+    string photo_url21 = 59;
+    string photo_url22 = 60;
+    string photo_url23 = 61;
+    string photo_url24 = 62;
+
+    string certificate_of_analysis = 63;
+    string certificate_of_conformity = 64;
+    string declaration_of_conformity = 65;
+    string instructions_for_use = 66;
+    string other_safety_documents = 67;
+    string safety_data_sheet = 68;
+    string trouble_shooting_guide = 69;
+    string user_guide_or_manual = 70;
+    string installation_instructions = 71;
+    string safety_component = 72;
+    string safety_pictogram1 = 73;
+    string safety_pictogram2 = 74;
+
+    string safety_statement1 = 75;
+    string safety_statement2 = 76;
+    string safety_statement3 = 77;
+    string safety_statement4 = 78;
+    string safety_statement5 = 79;
+    string safety_statement6 = 80;
+    string safety_statement7 = 81;
+    string safety_statement8 = 82;
 }
 
 message GetEbayItemRequest {
