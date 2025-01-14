@@ -24,6 +24,10 @@ To build the client code in you application use the `buf` tool. You can install 
 $ buf generate https://github.com/Talk-Point/shopcloud.git --path proto/shopcloud/eventhub
 ```
 
+## Documentation generate
+
+Per `mkdocs`
+
 ## Repository Structure
 
 The repository is structured as follows:
