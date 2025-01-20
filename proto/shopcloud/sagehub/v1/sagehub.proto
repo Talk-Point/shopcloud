@@ -210,6 +210,9 @@ service SageHubService {
     rpc ListArticleMovements(ListArticleMovementsRequest) returns (ListArticleMovementsResponse);
     rpc ListLastSaleForArticles(ListLastSaleForArticlesRequest) returns (ListLastSaleForArticlesResponse);
     rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse);
+    rpc CreateContentSnapshot(CreateContentSnapshotRequest) returns (CreateContentSnapshotResponse);
+    rpc ListContentSnapshots(ListContentSnapshotsRequest) returns (ListContentSnapshotsResponse);
+    rpc ReadContentSnapshot(ReadContentSnapshotRequest) returns (ReadContentSnapshotResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc ListArticlePrices(ListArticlePricesRequest) returns (ListArticlePricesResponse);
@@ -231,6 +234,39 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+}
+
+message CreateContentSnapshotRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string sprache = 4;
+    string by_user = 5;
+}
+
+message CreateContentSnapshotResponse {
+    repeated string files = 1;
+}
+
+message ListContentSnapshotsRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string sprache = 4;
+    string by_user = 5;
+}
+
+message ListContentSnapshotsResponse {
+    repeated string files = 1;
+}
+
+message ReadContentSnapshotRequest {
+    string path = 1;
+}
+
+message ReadContentSnapshotResponse {
+    string file = 1;
+    string content = 2;
 }
 
 message CreateArticleRequest {
