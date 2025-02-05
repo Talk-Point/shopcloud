@@ -1436,6 +1436,7 @@ message ListArticleRanksRequest {
         google.protobuf.Duration duration = 10;
         TimeFramePreset range_shortcut = 11;
     }
+    string kundengruppe = 12;
 }
 
 message ListArticleRanksResponse {
@@ -1891,6 +1892,7 @@ message FieldMaskArticle {
         FIELD_USER_HERSTELLER_ADRESS_ID = 46;
         FIELD_USER_IMPORTEUR_ADRESS_ID = 47;
         FIELD_USER_VERANTWORTLICHE_PERSON_ADRESS_ID = 48;
+        FIELD_LAGERBESTAND_OHNE_DISPO = 49;
     }
 
     repeated Field paths = 1;
@@ -1960,6 +1962,7 @@ message ListArtikel {
     string user_hersteller_adress_id = 46;
     string user_importeur_adress_id = 47;
     string user_verantwortliche_person_adress_id = 48;
+    double lagerbestand_ohne_dispo = 49;
 }
 
 message ListArticlesResponse {
