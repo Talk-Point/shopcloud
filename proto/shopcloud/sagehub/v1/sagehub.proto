@@ -1516,8 +1516,8 @@ message UpdateArticleRequest {
 
     bool user_fuag_required = 60;
     bool user_fuag_hat_power_supply = 61;
-    float user_fuag_min = 62;
-    float user_fuag_max = 63;
+    double user_fuag_min = 62;
+    double user_fuag_max = 63;
     string user_fuag_prefix = 64;
 }
 
@@ -1827,8 +1827,8 @@ message KhkArtikelVariante {
     string user_verantwortliche_person_adress_id = 79;
     bool user_fuag_required = 80;
     bool user_fuag_hat_power_supply = 81;
-    float user_fuag_min = 82;
-    float user_fuag_max = 83;
+    double user_fuag_min = 82;
+    double user_fuag_max = 83;
     string user_fuag_prefix = 84;
 }
 
@@ -1981,8 +1981,8 @@ message ListArtikel {
     double lagerbestand_ohne_dispo = 49;
     bool user_fuag_required = 50;
     bool user_fuag_hat_power_supply = 51;
-    float user_fuag_min = 52;
-    float user_fuag_max = 53;
+    double user_fuag_min = 52;
+    double user_fuag_max = 53;
     string user_fuag_prefix = 54;
 }
 
