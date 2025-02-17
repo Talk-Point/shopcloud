@@ -1513,6 +1513,12 @@ message UpdateArticleRequest {
 
     bool user_ce_label = 58;
     bool user_ce_label_verified = 59;
+
+    bool user_fuag_required = 60;
+    bool user_fuag_hat_power_supply = 61;
+    float user_fuag_min = 62;
+    float user_fuag_max = 63;
+    string user_fuag_prefix = 64;
 }
 
 message UpdateArticleResponse {
@@ -1819,6 +1825,11 @@ message KhkArtikelVariante {
     string user_hersteller_adress_id = 77;
     string user_importeur_adress_id = 78;
     string user_verantwortliche_person_adress_id = 79;
+    bool user_fuag_required = 80;
+    bool user_fuag_hat_power_supply = 81;
+    float user_fuag_min = 82;
+    float user_fuag_max = 83;
+    string user_fuag_prefix = 84;
 }
 
 message KhkVariantenAuspraegungen {
@@ -1893,6 +1904,11 @@ message FieldMaskArticle {
         FIELD_USER_IMPORTEUR_ADRESS_ID = 47;
         FIELD_USER_VERANTWORTLICHE_PERSON_ADRESS_ID = 48;
         FIELD_LAGERBESTAND_OHNE_DISPO = 49;
+        FIELD_USER_FUAG_REQUIRED = 50;
+        FIELD_USER_FUAG_HAT_POWER_SUPPLY = 51;
+        FIELD_USER_FUAG_MIN = 52;
+        FIELD_USER_FUAG_MAX = 53;
+        FIELD_USER_FUAG_PREFIX = 54;
     }
 
     repeated Field paths = 1;
@@ -1963,6 +1979,11 @@ message ListArtikel {
     string user_importeur_adress_id = 47;
     string user_verantwortliche_person_adress_id = 48;
     double lagerbestand_ohne_dispo = 49;
+    bool user_fuag_required = 50;
+    bool user_fuag_hat_power_supply = 51;
+    float user_fuag_min = 52;
+    float user_fuag_max = 53;
+    string user_fuag_prefix = 54;
 }
 
 message ListArticlesResponse {
