@@ -167,6 +167,10 @@ service SageHubService {
     rpc SetVersandOnVKBeleg(SetVersandOnVKBelegRequest) returns (SetVersandOnVKBelegResponse);
     rpc BatchSetVersandOnVKBeleg(BatchSetVersandOnVKBelegRequest) returns (BatchSetVersandOnVKBelegResponse);
     rpc UpdateVKBeleg(UpdateVKBelegRequest) returns (UpdateVKBelegResponse);
+    rpc MarkVKBelegAsFraud(MarkVKBelegAsFraudRequest) returns (MarkVKBelegAsFraudResponse);
+    rpc MarkVKBelegVorgangAsFraud(MarkVKBelegVorgangAsFraudRequest) returns (MarkVKBelegVorgangAsFraudResponse);
+    rpc UnMarkVKBelegAsFraud(UnMarkVKBelegAsFraudRequest) returns (UnMarkVKBelegAsFraudResponse);
+    rpc UnMarkVKBelegVorgangAsFraud(UnMarkVKBelegVorgangAsFraudRequest) returns (UnMarkVKBelegVorgangAsFraudResponse);
     // VKBelegEvents
     rpc FetchNewestVKBelegEvents(FetchNewestVKBelegEventsRequest) returns (FetchNewestVKBelegEventsResponse);
     rpc BatchEmitVKBelegEvents(BatchEmitVKBelegEventsRequest) returns (BatchEmitVKBelegEventsResponse);
@@ -207,12 +211,16 @@ service SageHubService {
     rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
     rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
     rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
+    rpc ListArticleWarehouseStoragePlaceStocks(ListArticleWarehouseStoragePlaceStocksRequest) returns (ListArticleWarehouseStoragePlaceStocksResponse);
     rpc ListArticleMovements(ListArticleMovementsRequest) returns (ListArticleMovementsResponse);
     rpc ListLastSaleForArticles(ListLastSaleForArticlesRequest) returns (ListLastSaleForArticlesResponse);
     rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse);
     rpc CreateContentSnapshot(CreateContentSnapshotRequest) returns (CreateContentSnapshotResponse);
     rpc ListContentSnapshots(ListContentSnapshotsRequest) returns (ListContentSnapshotsResponse);
     rpc ReadContentSnapshot(ReadContentSnapshotRequest) returns (ReadContentSnapshotResponse);
+    // Article Lieferant
+    rpc ListArticleLiferants(ListArticleLiferantsRequest) returns (ListArticleLiferantsResponse);
+    rpc UpdateArticleLiferant(UpdateArticleLiferantRequest) returns (UpdateArticleLiferantResponse);
     // Articles Prices
     rpc ListArticlesPriceLists(ListArticlesPriceListsRequest) returns (ListArticlesPriceListsResponse);
     rpc ListArticlePrices(ListArticlePricesRequest) returns (ListArticlePricesResponse);
@@ -234,7 +242,82 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+
+    // Utils
+    rpc ValidateVatId(ValidateVatIdRequest) returns (ValidateVatIdResponse);
 }
+
+message ArticleLieferant {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string lieferant = 4;
+    string bestellnummer = 5;
+    double einzelpreis = 6;
+    double rabattsatz = 7;
+}
+
+message ListArticleLiferantsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    string query = 3;
+    bool debug = 4;
+}
+
+message ListArticleLiferantsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleLieferant items = 3;
+    repeated string queries = 4;
+}
+
+message UpdateArticleLiferantRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string lieferant = 4;
+    string by_user = 5;
+    
+    string bestellnummer = 6;
+    double einzelpreis = 7;
+    double rabattsatz = 8;
+    
+    UpdateMask update_mask = 9;
+    bool debug = 10;
+}
+
+message UpdateArticleLiferantResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message ValidateVatIdRequest {
+    string vat_id = 1;             // Die zu prüfende USt-ID
+    string company_name = 2;       // Optional: Firmenname für qualifizierte Bestätigung
+    string city = 3;               // Optional: Ort für qualifizierte Bestätigung
+    string postal_code = 4;        // Optional: PLZ für qualifizierte Bestätigung
+    string street = 5;             // Optional: Straße für qualifizierte Bestätigung
+    bool detailed_response = 6;    // Optional: Wenn true, werden mehr Details zurückgegeben
+  }
+  
+  message ValidateVatIdResponse {
+    bool is_valid = 1;             // Ist die USt-ID gültig?
+    string error_code = 2;         // BZSt-Fehlercode
+    string error_message = 3;      // Fehlermeldung vom BZSt
+    string company_name = 4;       // Firmenname (wenn verfügbar)
+    string address = 5;            // Adresse (wenn verfügbar)
+    string country_code = 6;       // Ländercode aus der USt-ID
+    string valid_from = 7;         // Gültig ab (für ErrorCode 203/204)
+    string valid_to = 8;           // Gültig bis (für ErrorCode 204)
+    
+    // Ergebnisse der qualifizierten Abfrage
+    string name_result = 9;        // Ergebnis für Firmenname (A, B, C, D)
+    string city_result = 10;       // Ergebnis für Ort (A, B, C, D)
+    string postal_code_result = 11; // Ergebnis für PLZ (A, B, C, D)
+    string street_result = 12;     // Ergebnis für Straße (A, B, C, D)
+    
+    repeated string debug_info = 13; // Debug-Informationen (wenn angefordert)
+  }
 
 message CreateContentSnapshotRequest {
     int32 mandant = 1;
@@ -806,6 +889,56 @@ message UpdateVKBelegResponse {
     repeated string queries = 2;
 }
 
+message MarkVKBelegAsFraudRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string by_user = 3;
+    bool debug = 4;
+}
+
+message MarkVKBelegAsFraudResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message MarkVKBelegVorgangAsFraudRequest {
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    string by_user = 3;
+    bool debug = 4;
+}
+
+message MarkVKBelegVorgangAsFraudResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+    repeated int64 marked_bel_ids = 3;
+}
+
+message UnMarkVKBelegVorgangAsFraudRequest {
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    string by_user = 3;
+    bool debug = 4;
+}
+
+message UnMarkVKBelegVorgangAsFraudResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+    repeated int64 unmarked_bel_ids = 3;
+}
+
+message UnMarkVKBelegAsFraudRequest {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    string by_user = 3;
+    bool debug = 4;
+}
+
+message UnMarkVKBelegAsFraudResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
 message VKBelegClassifierV1 {
     string name = 1;
     string description = 2;
@@ -1249,6 +1382,35 @@ message ListArticleWarehouseStocksResponse {
     int32 page = 1;
     int32 page_size = 2;
     repeated ArticleWarehouseStock items = 3;
+    repeated string queries = 4;
+}
+
+message ArticleWarehouseStoragePlaceStock {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string lagerkennung = 4;
+    int32 platz_id = 5;
+    bool is_sperrlager = 6;
+    bool is_platz_gesperrt = 7;
+    string kurzbezeichnung = 8;
+    string platzbezeichnung = 9;
+    double bestand = 10;
+}
+
+message ListArticleWarehouseStoragePlaceStocksRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    bool debug = 6;
+}
+
+message ListArticleWarehouseStoragePlaceStocksResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleWarehouseStoragePlaceStock items = 3;
     repeated string queries = 4;
 }
 
