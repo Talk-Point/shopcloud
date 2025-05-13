@@ -859,6 +859,7 @@ enum ContentStatus {
     CONTENT_STATUS_VERSTEIGERUNG = 8;
     CONTENT_STATUS_NUR_AMAZON = 9;
     CONTENT_STATUS_NUR_EBAY = 10;
+    CONTENT_STATUS_IN_PRUEFUNG = 11;
 }
 
 message SetArticleContentStatusRequest {
