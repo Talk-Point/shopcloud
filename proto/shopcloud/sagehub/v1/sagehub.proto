@@ -1684,6 +1684,11 @@ message UpdateArticleRequest {
     double user_fuag_min = 62;
     double user_fuag_max = 63;
     string user_fuag_prefix = 64;
+    
+    bool user_idealo_aktiv = 65;
+    string user_artcontrol_status = 66;
+    string user_artcontrol_last_edit = 67;
+    string user_artcontrol_nutzer = 68;
 }
 
 message UpdateArticleResponse {
@@ -1995,6 +2000,10 @@ message KhkArtikelVariante {
     double user_fuag_min = 82;
     double user_fuag_max = 83;
     string user_fuag_prefix = 84;
+    bool user_idealo_aktiv = 85;
+    string user_artcontrol_status = 86;
+    string user_artcontrol_last_edit = 87;
+    string user_artcontrol_nutzer = 88;
 }
 
 message KhkVariantenAuspraegungen {
