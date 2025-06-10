@@ -185,6 +185,8 @@ service SageHubService {
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
+    // VKBelegOpenPicks
+    rpc ListVKBelegOpenPicks(ListVKBelegOpenPicksRequest) returns (ListVKBelegOpenPicksResponse);
     // Report API
     rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
 
@@ -242,6 +244,10 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+
+    // Shipments
+    rpc GetShipment(GetShipmentRequest) returns (GetShipmentResponse);
+    rpc ListShipments(ListShipmentsRequest) returns (ListShipmentsResponse);
 
     // Utils
     rpc ValidateVatId(ValidateVatIdRequest) returns (ValidateVatIdResponse);
@@ -1689,6 +1695,7 @@ message UpdateArticleRequest {
     string user_artcontrol_status = 66;
     string user_artcontrol_last_edit = 67;
     string user_artcontrol_nutzer = 68;
+    string hartikelnummer = 69;  // Herstellerartikelnummer (HAN)
 }
 
 message UpdateArticleResponse {
@@ -2822,6 +2829,38 @@ message GetVKBelegV2Response {
     repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
 }
 
+message ListVKBelegOpenPicksRequest {
+    int32 mandant = 1;
+    bool debug = 2;
+}
+
+message VKBelegOpenPick {
+    int64 pickliste_id = 1;
+    google.protobuf.Timestamp datum = 2;
+    string benutzer = 3;
+    string name = 4;
+    string sku = 5;
+    int32 menge = 6;
+    string lager_platz = 7;
+    int64 vorgang = 8;
+    string versand = 9;
+    string kundennummer = 10;
+    string kundenname = 11;
+    int64 bel_id = 12;
+    string kundengruppe = 13;
+    string kg_bezeichnung = 14;
+    string belegnummer = 15;
+    google.protobuf.Timestamp user_cd = 16;
+    string gg_erfuellt = 17;
+    string user_belegjahr_belegnummer = 18;
+    string belegart = 19;
+}
+
+message ListVKBelegOpenPicksResponse {
+    repeated VKBelegOpenPick items = 1;
+    repeated string queries = 2;
+}
+
 message GetApiKeyRequest {
     string id = 1;
 }
@@ -2962,4 +3001,61 @@ message InfoRequest {}
 
 message InfoResponse {
     string version = 1;
+}
+
+// Shipment Messages
+message ShipmentPosition {
+    string belpos_id = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    double quantity = 4;
+}
+
+message Shipment {
+    int64 id = 1;
+    int32 mandant = 2;
+    string invoice_number = 3;
+    string mode_of_dispatch = 4;
+    string shipping_type = 5;
+    string shipping_product = 6;
+    google.protobuf.Timestamp created_at = 7;
+    string profile = 8;
+    string transaction_code = 9;
+    string customer_group = 10;
+    string reference = 11;
+    string bel_id = 12;
+    repeated ShipmentPosition positions = 13;
+    string external_shipment_id = 14;
+    string tracking_id = 15;
+}
+
+message GetShipmentRequest {
+    string invoice_number = 1;
+    int32 mandant = 2;
+}
+
+message GetShipmentResponse {
+    repeated Shipment shipments = 1;
+}
+
+message ListShipmentsRequest {
+    message Filter {
+        string field = 1;
+        Operator operator = 2;
+        string value = 3;
+    }
+    
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated Filter filters = 3;
+    string order_by = 4;
+    Direction direction = 5;
+    int32 mandant = 6;
+}
+
+message ListShipmentsResponse {
+    repeated Shipment shipments = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+    int32 total_count = 4;
 }
