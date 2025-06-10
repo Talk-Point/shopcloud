@@ -185,6 +185,8 @@ service SageHubService {
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
+    // VKBelegOpenPicks
+    rpc ListVKBelegOpenPicks(ListVKBelegOpenPicksRequest) returns (ListVKBelegOpenPicksResponse);
     // Report API
     rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
 
@@ -2825,6 +2827,38 @@ message GetVKBelegV2Response {
     VKBelegV2 beleg = 1;
     repeated VKBelegePositionenV2 positions = 2;
     repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
+}
+
+message ListVKBelegOpenPicksRequest {
+    int32 mandant = 1;
+    bool debug = 2;
+}
+
+message VKBelegOpenPick {
+    int64 pickliste_id = 1;
+    google.protobuf.Timestamp datum = 2;
+    string benutzer = 3;
+    string name = 4;
+    string sku = 5;
+    int32 menge = 6;
+    string lager_platz = 7;
+    int64 vorgang = 8;
+    string versand = 9;
+    string kundennummer = 10;
+    string kundenname = 11;
+    int64 bel_id = 12;
+    string kundengruppe = 13;
+    string kg_bezeichnung = 14;
+    string belegnummer = 15;
+    google.protobuf.Timestamp user_cd = 16;
+    string gg_erfuellt = 17;
+    string user_belegjahr_belegnummer = 18;
+    string belegart = 19;
+}
+
+message ListVKBelegOpenPicksResponse {
+    repeated VKBelegOpenPick items = 1;
+    repeated string queries = 2;
 }
 
 message GetApiKeyRequest {
