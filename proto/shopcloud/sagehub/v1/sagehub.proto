@@ -181,12 +181,17 @@ service SageHubService {
     rpc RemoveTagFromVKBelegEvent(RemoveTagFromVKBelegEventRequest) returns (RemoveTagFromVKBelegEventResponse);
     rpc MarkTagDoneVKBelegEvent(MarkTagDoneVKBelegEventRequest) returns (MarkTagDoneVKBelegEventResponse);
     rpc ClassifyVKBelegEventV1(ClassifyVKBelegEventV1Request) returns (ClassifyVKBelegEventV1Response);
+    // VKBelegDetails
+    rpc GetVKBelegDetails(GetVKBelegDetailsRequest) returns (GetVKBelegDetailsResponse);
+    
     rpc ListVKBelegClassifiersV1(ListVKBelegClassifiersV1Request) returns (ListVKBelegClassifiersV1Response);
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
     // VKBelegOpenPicks
     rpc ListVKBelegOpenPicks(ListVKBelegOpenPicksRequest) returns (ListVKBelegOpenPicksResponse);
+    // VKBelegLineItemsOpens
+    rpc ListVKBelegLineItemsOpens(ListVKBelegLineItemsOpensRequest) returns (ListVKBelegLineItemsOpensResponse);
     // Report API
     rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
 
@@ -2858,6 +2863,197 @@ message VKBelegOpenPick {
 
 message ListVKBelegOpenPicksResponse {
     repeated VKBelegOpenPick items = 1;
+    repeated string queries = 2;
+}
+
+message ListVKBelegLineItemsOpensRequest {
+    int32 mandant = 1;
+    bool debug = 2;
+    int32 limit = 3;  // Default: 100000
+    int32 gg_erfuellt = 4;  // Default: 0
+    int32 gg_geliefert = 5;  // Default: 0
+    int32 gg_berechnet = 6;  // Default: 0
+    repeated string exclude_belegart = 7;  // Default: ['Gutschrift', 'Sofortrechnung', 'Rechnung', 'Stornorechnung', 'Lieferschein', 'Rücklieferschein', 'Sofortstornorechnung', 'Proformarechnung']
+}
+
+message VKBelegLineItemOpen {
+    int32 vor_id = 1;
+    string bestellnummer = 2;
+    string belegnummer = 3;
+    string belegdatum = 4;
+    google.protobuf.Timestamp normal_date = 5;
+    string kundennummer = 6;
+    string type = 7;
+    string a0_name1 = 8;
+    string a0_name2 = 9;
+    string belegart = 10;
+    double betrag = 11;
+    string zahlungskond = 12;
+    int32 user_bezahlt = 13;
+    string versand_status = 14;
+    google.protobuf.Timestamp amazon_early_process_date = 15;
+    google.protobuf.Timestamp amazon_latest_process_date = 16;
+    google.protobuf.Timestamp ebay_process_date = 17;
+    string versand = 18;
+    string kundengruppe = 19;
+    string status_bearbeiter = 20;
+    string sku = 21;
+    string bezeichnung1 = 22;
+    int32 menge = 23;
+    string lagerplatz = 24;
+    google.protobuf.Timestamp user_sonepar_bestellt_markiert_datum = 25;
+    google.protobuf.Timestamp user_ep_bestellt_markiert_datum = 26;
+    int32 bestand = 27;
+    int32 dispo = 28;
+    int32 bestand_ohne_dispo = 29;
+    int32 verfuegbar_shop = 30;
+}
+
+message ListVKBelegLineItemsOpensResponse {
+    repeated VKBelegLineItemOpen items = 1;
+    repeated string queries = 2;
+}
+
+// VKBelegDetails Messages
+message GetVKBelegDetailsRequest {
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    bool debug = 3;
+}
+
+message VKBelegDetail {
+    int32 mandant = 1;
+    int64 bel_id = 2;
+    int64 vor_id = 3;
+    string belegkennzeichen = 4;
+    string belegart = 5;
+    string matchcode = 6;
+    
+    // Adressdaten (A0 = Rechnungsadresse)
+    string a0_adress_nr = 7;
+    string a0_empfaenger = 8;
+    string a0_name1 = 9;
+    string a0_name2 = 10;
+    string a0_zusatz = 11;
+    string a0_strasse = 12;
+    string a0_land = 13;
+    string a0_plz = 14;
+    string a0_ort = 15;
+    
+    // Lieferadresse (A1)
+    string a1_adress_nr = 16;
+    string a1_name1 = 17;
+    string a1_name2 = 18;
+    string a1_zusatz = 19;
+    string a1_strasse = 20;
+    string a1_land = 21;
+    string a1_plz = 22;
+    string a1_ort = 23;
+    
+    // Kundengruppe
+    string kundengruppe = 24;
+    string kundengruppe_bezeichnung = 25;
+    
+    // Währung und Bearbeiter
+    string wkz = 26;
+    double wkz_kurs_fw = 27;
+    string bearbeiter = 28;
+    string versand = 29;
+    string lieferbedingung = 30;
+    
+    // Referenzen
+    int64 referenz_bel_id = 31;
+    string referenznummer = 32;
+    
+    // Beträge
+    double zw_intern_ew = 33;
+    double zwischensumme = 34;
+    double nettobetrag = 35;
+    double steuerbetrag = 36;
+    double bruttobetrag = 37;
+    double nettobetrag_ew = 38;
+    double bruttobetrag_ew = 39;
+    
+    // Weitere Eigenschaften
+    double gewicht = 40;
+    string besteuerung = 41;
+    string eu_land = 42;
+    string eu_ust_id = 43;
+    string memo = 44;
+    string kopftext = 45;
+    
+    // Buchhaltung
+    string fibu_tan = 46;
+    string journal = 47;
+    
+    // Status
+    string status = 48;
+    string status_bearbeiter = 49;
+    google.protobuf.Timestamp status_datum = 50;
+    
+    // User-definierte Felder
+    PayedStatus user_bezahlt = 51;
+    MahnstufeStatus user_mahnstufe = 52;
+    string user_kaufabwicklung = 53;
+    bool user_kommissioniert = 54;
+    string user_kom_bearbeiter = 55;
+    google.protobuf.Timestamp user_kom_zeit = 56;
+    string user_zahlungsreferenz = 57;
+    string user_amazon_mcf_seller = 58;
+    google.protobuf.Timestamp user_cd = 59;
+    int32 user_is_fraud = 60;
+    string user_belegjahr_belegnummer = 61;
+    
+    // Zahlungskondition
+    string zkd_zahlungskond = 62;
+    double zkd_betrag = 63;
+    
+    // Kontaktdaten
+    string email = 64;
+    string telefon = 65;
+    
+    // Zuschläge (aggregiert)
+    double zuschlag = 66;
+    double zuschlag_intern = 67;
+    double zuschlag_steuerbetrag = 68;
+    
+    // Line items
+    repeated VKBelegDetailLineItem line_items = 69;
+}
+
+message VKBelegDetailLineItem {
+    // Basis-IDs
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    int64 bel_id = 3;
+    int64 bel_pos_id = 4;
+    string position = 5;
+    
+    // Artikel-Informationen
+    string artikelnummer = 6;
+    int32 auspraegung_id = 7;
+    string bezeichnung1 = 8;
+    string bezeichnung2 = 9;
+    
+    // Preise und Mengen
+    string steuerklasse = 10;
+    double einzelpreis = 11;
+    double gesamtpreis = 12;
+    double gesamtpreis_intern_ew = 13;
+    double roherloes = 14;
+    double menge = 15;
+    string mengeneinheit = 16;
+    
+    // User-definierte Felder
+    string user_amazon_sku = 17;
+    bool user_sonepar_bestellt = 18;
+    
+    // Status
+    bool ist_erledigt = 19;
+}
+
+message GetVKBelegDetailsResponse {
+    repeated VKBelegDetail belege = 1;
     repeated string queries = 2;
 }
 
