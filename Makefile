@@ -1,6 +1,9 @@
 setup:
 	echo "setup"
 
+sync-proto:
+	./scripts/sync-proto.sh
+
 test:
 	go test ./...
 
