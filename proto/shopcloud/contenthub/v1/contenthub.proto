@@ -235,6 +235,51 @@ service ContentHubService {
     rpc ListGpsrContactPersons(ListGpsrContactPersonsRequest) returns (ListGpsrContactPersonsResponse);
     rpc CreateGpsrContactPerson(CreateGpsrContactPersonRequest) returns (CreateGpsrContactPersonResponse);
     rpc DeleteGpsrContactPerson(DeleteGpsrContactPersonRequest) returns (DeleteGpsrContactPersonResponse);
+
+    // Taxonomy
+    // rpc GetCategoryItem(GetCategoryItemRequest) returns (GetCategoryItemResponse);
+    // rpc ListCategoryItems(ListCategoryItemsRequest) returns (ListCategoryItemsResponse);
+    // rpc CreateCategoryItem(CreateCategoryItemRequest) returns (CreateCategoryItemResponse);
+    // rpc DeleteCategoryItem(DeleteCategoryItemRequest) returns (DeleteCategoryItemResponse);
+    // rpc UpdateCategoryItem(UpdateCategoryItemRequest) returns (UpdateCategoryItemResponse);
+    rpc ListCategoryTree(ListCategoryTreeRequest) returns (ListCategoryTreeResponse);
+    rpc CreateOrUpdateTaxonomyProduct(CreateOrUpdateTaxonomyProductRequest) returns (CreateOrUpdateTaxonomyProductResponse);
+    rpc WriteTaxonomyProductToErp(WriteTaxonomyProductToErpRequest) returns (WriteTaxonomyProductToErpResponse);
+}
+
+message WriteTaxonomyProductToErpRequest {
+    string reference = 1;
+}
+
+message WriteTaxonomyProductToErpResponse {
+    bool is_success = 1;
+}
+
+message CreateOrUpdateTaxonomyProductRequest {
+    string reference = 1;
+    string title = 2;
+    repeated string keywords = 3;
+    string product_type = 4;
+    string category = 5;
+    string by_user = 6;
+}
+
+message CreateOrUpdateTaxonomyProductResponse {
+    bool is_success = 1;
+    int64 id = 2;
+}
+
+message ListCategoryTreeRequest {
+    string search = 1;
+}
+
+message CategoryTreeItem {
+    int32 id = 1;
+    string name = 2;
+}
+
+message ListCategoryTreeResponse {
+    repeated CategoryTreeItem items = 1;
 }
 
 message GpsrContactPerson {

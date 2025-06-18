@@ -60,9 +60,28 @@ service SupplierHubService {
     rpc DeleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
     rpc UpdateScopesByApiKey(UpdateScopesByApiKeyRequest) returns (UpdateScopesByApiKeyResponse);
 
+    // Procurement
     rpc GetProcurementOrder(GetProcurementOrderRequest) returns (GetProcurementOrderResponse);
     rpc MarkProcurementOrderAsPaid(MarkProcurementOrderAsPaidRequest) returns (MarkProcurementOrderAsPaidResponse);
     rpc MarkProcurementOrderAsCanceled(MarkProcurementOrderAsCanceledRequest) returns (MarkProcurementOrderAsCanceledResponse);
+    rpc MarkProcurementOrderAsInvoiced(MarkProcurementOrderAsInvoicedRequest) returns (MarkProcurementOrderAsInvoicedResponse);
+
+    // EasyLineItems
+    rpc ListEasyLineItems(ListEasyLineItemsRequest) returns (ListEasyLineItemsResponse);
+
+    // DropshipmentOrders
+    rpc ListDropshipmentOrders(ListDropshipmentOrdersRequest) returns (ListDropshipmentOrdersResponse);
+}
+
+message MarkProcurementOrderAsInvoicedRequest {
+    int32 mandant = 1;
+    int64 vor_id = 2;
+    string invoice_number = 3;
+}
+
+message MarkProcurementOrderAsInvoicedResponse {
+    int64 id = 1;
+    string action = 2;
 }
 
 message GetProcurementOrderRequest {
@@ -81,6 +100,7 @@ message GetProcurementOrderResponse {
     bool is_invoiced = 8;
     google.protobuf.Timestamp created_at = 9;
 }
+
 
 message MarkProcurementOrderAsPaidRequest {
     int32 mandant = 1;
@@ -175,4 +195,154 @@ message InfoRequest {}
 
 message InfoResponse {
     string version = 1;
+}
+
+// EasyLineItem Models
+message EasyLineItem {
+    int64 id = 1;
+    int64 vendor_line_item_id = 2;
+    string sku = 3;
+    string sku_vendor = 4;
+    double qty = 5;
+    string title = 6;
+    double unit_price = 7;
+    string unit_price_currency = 8;
+    double unit_price_ek = 9;
+    string unit_price_ek_currency = 10;
+    google.protobuf.Timestamp ordered_at = 11;
+    string ordered_by_username = 12;
+    string ordered_by_userid = 13;
+    string state = 14;
+    google.protobuf.Timestamp created_at = 15;
+    google.protobuf.Timestamp updated_at = 16;
+    // Related data
+    int64 line_item_id = 17;
+    int64 order_id = 18;
+    int64 supplier_id = 19;
+    string erp_reference = 20;
+    bool is_cancel = 21;
+    string supplier_code = 22;
+}
+
+message ListEasyLineItemsFilter {
+    enum Field {
+        FIELD_UNSPECIFIED = 0;
+        FIELD_ID = 1;
+        FIELD_VENDOR_LINE_ITEM_ID = 2;
+        FIELD_SKU = 3;
+        FIELD_SKU_VENDOR = 4;
+        FIELD_STATE = 5;
+        FIELD_ORDERED_BY_USERNAME = 6;
+        FIELD_ORDERED_BY_USERID = 7;
+        FIELD_SUPPLIER_CODE = 8;
+        FIELD_ERP_REFERENCE = 9;
+        FIELD_ORDERED_AT = 10;
+        FIELD_CREATED_AT = 11;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListEasyLineItemsRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_ORDERED_AT = 1;
+        ORDER_BY_CREATED_AT = 2;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListEasyLineItemsFilter filters = 6;
+}
+
+message ListEasyLineItemsResponse {
+    repeated EasyLineItem easy_line_items = 1;
+    string page_token = 2;
+}
+
+message DropshipmentOrder {
+    int64 id = 1;
+    int64 vendor_order_id = 2;
+    int64 connector_id = 3;
+    string connector_filter_rule = 4;
+    bool is_approved = 5;
+    int64 approved_by_id = 6;
+    bool has_precondition = 7;
+    google.protobuf.Timestamp precondition_at = 8;
+    bool is_pushed = 9;
+    google.protobuf.Timestamp pushed_at = 10;
+    bool is_fullfilled = 11;
+    google.protobuf.Timestamp fullfilled_at = 12;
+    string erp_invoiced_type = 13;
+    bool is_erp_marked_dropshipment = 14;
+    google.protobuf.Timestamp erp_marked_dropshipment_at = 15;
+    int64 erp_marked_dropshipment_user_id = 16;
+    string erp_marked_dropshipment_user_username = 17;
+    bool is_invoice_uploaded = 18;
+    google.protobuf.Timestamp invoice_uploaded_at = 19;
+    int64 invoice_uploaded_user_id = 20;
+    string invoice_uploaded_user_username = 21;
+    string vendor_reference = 22;
+    string vendor_state = 23;
+    google.protobuf.Timestamp created_at = 24;
+    google.protobuf.Timestamp updated_at = 25;
+    // Related vendor order fields
+    int64 vendor_order_id_ref = 26;
+    string vendor_order_erp_reference = 27;
+    string vendor_order_erp_order_reference = 28;
+    bool vendor_order_is_invoiced = 29;
+    bool vendor_order_is_cancel = 30;
+    // Related connector fields
+    int64 connector_id_ref = 31;
+    string connector_type = 32;
+}
+
+message ListDropshipmentOrdersFilter {
+    enum Field {
+        FIELD_UNSPECIFIED = 0;
+        FIELD_ID = 1;
+        FIELD_VENDOR_ORDER_ID = 2;
+        FIELD_CONNECTOR_ID = 3;
+        FIELD_IS_APPROVED = 4;
+        FIELD_IS_PUSHED = 5;
+        FIELD_IS_FULLFILLED = 6;
+        FIELD_VENDOR_REFERENCE = 7;
+        FIELD_VENDOR_STATE = 8;
+        FIELD_VENDOR_ORDER_ERP_REFERENCE = 9;
+        FIELD_VENDOR_ORDER_ERP_ORDER_REFERENCE = 10;
+        FIELD_CONNECTOR_TYPE = 11;
+        FIELD_CREATED_AT = 12;
+        FIELD_PUSHED_AT = 13;
+        FIELD_FULLFILLED_AT = 14;
+    }
+
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListDropshipmentOrdersRequest {
+    enum OrderBy {
+        ORDER_BY_ID_UNSPECIFIED = 0;
+        ORDER_BY_CREATED_AT = 1;
+        ORDER_BY_PUSHED_AT = 2;
+        ORDER_BY_FULLFILLED_AT = 3;
+    }
+
+    int32 page_size = 1;
+    string page_next = 2;
+    string page_previous = 3;
+    OrderBy order_by = 4;
+    Direction direction = 5;
+    repeated ListDropshipmentOrdersFilter filters = 6;
+}
+
+message ListDropshipmentOrdersResponse {
+    repeated DropshipmentOrder dropshipment_orders = 1;
+    string page_token = 2;
 }
