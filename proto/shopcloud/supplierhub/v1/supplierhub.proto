@@ -72,6 +72,7 @@ service SupplierHubService {
     // DropshipmentOrders
     rpc ListDropshipmentOrders(ListDropshipmentOrdersRequest) returns (ListDropshipmentOrdersResponse);
     rpc GetDropshipmentOrder(GetDropshipmentOrderRequest) returns (GetDropshipmentOrderResponse);
+    rpc GetDropshipmentOrderByVorId(GetDropshipmentOrderByVorIdRequest) returns (GetDropshipmentOrderByVorIdResponse);
 }
 
 message MarkProcurementOrderAsInvoicedRequest {
@@ -153,11 +154,10 @@ message ListApiKeysRequest {
     }
 
     int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListApiKeysFilter filters = 6;
+    int32 page = 2;
+    OrderBy order_by = 3;
+    Direction direction = 4;
+    repeated ListApiKeysFilter filters = 5;
 }
 
 message ListApiKeysResponse {
@@ -254,11 +254,10 @@ message ListEasyLineItemsRequest {
     }
 
     int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListEasyLineItemsFilter filters = 6;
+    int32 page = 2;
+    OrderBy order_by = 3;
+    Direction direction = 4;
+    repeated ListEasyLineItemsFilter filters = 5;
 }
 
 message ListEasyLineItemsResponse {
@@ -336,11 +335,10 @@ message ListDropshipmentOrdersRequest {
     }
 
     int32 page_size = 1;
-    string page_next = 2;
-    string page_previous = 3;
-    OrderBy order_by = 4;
-    Direction direction = 5;
-    repeated ListDropshipmentOrdersFilter filters = 6;
+    int32 page = 2;
+    OrderBy order_by = 3;
+    Direction direction = 4;
+    repeated ListDropshipmentOrdersFilter filters = 5;
 }
 
 message ListDropshipmentOrdersResponse {
@@ -359,10 +357,19 @@ message DropshipmentFulfillment {
 }
 
 message GetDropshipmentOrderRequest {
-    string vor_reference = 1;
+    int64 dropshipment_order_id = 1;
 }
 
 message GetDropshipmentOrderResponse {
+    DropshipmentOrder dropshipment_order = 1;
+    repeated DropshipmentFulfillment fulfillments = 2;
+}
+
+message GetDropshipmentOrderByVorIdRequest {
+    string vor_reference = 1;
+}
+
+message GetDropshipmentOrderByVorIdResponse {
     DropshipmentOrder dropshipment_order = 1;
     repeated DropshipmentFulfillment fulfillments = 2;
 }
