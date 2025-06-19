@@ -356,6 +356,23 @@ message DropshipmentFulfillment {
     google.protobuf.Timestamp updated_at = 7;
 }
 
+message DropshipmentLineItem {
+    int64 id = 1;
+    string sku = 2;
+    string sku_vendor = 3;
+    double qty = 4;
+    google.protobuf.Timestamp created_at = 5;
+    // From procurement_lineitem
+    string title = 6;
+    double unit_price = 7;
+    string unit_price_currency = 8;
+    int64 supplier_id = 9;
+    // From core_supplier
+    string supplier_name = 10;
+    // Reference to vendor_line_item_id
+    int64 vendor_line_item_id = 11;
+}
+
 message GetDropshipmentOrderRequest {
     int64 dropshipment_order_id = 1;
 }
@@ -363,6 +380,7 @@ message GetDropshipmentOrderRequest {
 message GetDropshipmentOrderResponse {
     DropshipmentOrder dropshipment_order = 1;
     repeated DropshipmentFulfillment fulfillments = 2;
+    repeated DropshipmentLineItem line_items = 3;
 }
 
 message GetDropshipmentOrderByVorIdRequest {
@@ -372,4 +390,5 @@ message GetDropshipmentOrderByVorIdRequest {
 message GetDropshipmentOrderByVorIdResponse {
     DropshipmentOrder dropshipment_order = 1;
     repeated DropshipmentFulfillment fulfillments = 2;
+    repeated DropshipmentLineItem line_items = 3;
 }
