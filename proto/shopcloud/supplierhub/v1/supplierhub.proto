@@ -19,8 +19,8 @@ enum Operator {
     // OPERATOR_NOT_IN = 7;
     // OPERATOR_LIKE = 8;
     // OPERATOR_NOT_LIKE = 9;
-    // OPERATOR_IS_NULL = 10;
-    // OPERATOR_IS_NOT_NULL = 11;
+    OPERATOR_IS_NULL = 10;
+    OPERATOR_IS_NOT_NULL = 11;
     OPERATOR_CONTAINS = 12;
     OPERATOR_ARRAY_CONTAINS = 13;
 }
@@ -239,6 +239,7 @@ message ListEasyLineItemsFilter {
         FIELD_ERP_REFERENCE = 9;
         FIELD_ORDERED_AT = 10;
         FIELD_CREATED_AT = 11;
+        FIELD_IS_CANCEL = 12;
     }
 
     Field field = 1;
