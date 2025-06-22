@@ -7,6 +7,7 @@ package proto.shopcloud.sagehub.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
 
 message CreateMask {
     repeated string paths = 1;
@@ -164,6 +165,7 @@ service SageHubService {
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
     rpc ListVKBelegVersandarts(ListVKBelegVersandartsRequest) returns (ListVKBelegVersandartsResponse);
+    rpc ListLBVersandklassen(ListLBVersandklassenRequest) returns (ListLBVersandklassenResponse);
     rpc SetVersandOnVKBeleg(SetVersandOnVKBelegRequest) returns (SetVersandOnVKBelegResponse);
     rpc BatchSetVersandOnVKBeleg(BatchSetVersandOnVKBelegRequest) returns (BatchSetVersandOnVKBelegResponse);
     rpc UpdateVKBeleg(UpdateVKBelegRequest) returns (UpdateVKBelegResponse);
@@ -233,13 +235,13 @@ service SageHubService {
     rpc ListArticlePrices(ListArticlePricesRequest) returns (ListArticlePricesResponse);
     rpc GetArticlePrices(GetArticlePricesRequest) returns (GetArticlePricesResponse);
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
+    // Lagerplatzbuchungen
+    rpc ListLagerplatzBuchungen(ListLagerplatzBuchungenRequest) returns (ListLagerplatzBuchungenResponse);
     // Onlinbezeichner
     rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
     rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
     rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
-    // Buchungen
-    rpc ListArticleTransactions(ListArticleTransactionsRequest) returns (ListArticleTransactionsResponse);
 
     // Supplier Article Data
     rpc GetSoneparArticle(GetSoneparArticleRequest) returns (GetSoneparArticleResponse);
@@ -249,6 +251,10 @@ service SageHubService {
 
     // Meta
     rpc GetTableSchema(GetTableSchemaRequest) returns (GetTableSchemaResponse);
+    rpc ListTables(ListTablesRequest) returns (ListTablesResponse);
+    rpc ListTableColumns(ListTableColumnsRequest) returns (ListTableColumnsResponse);
+    rpc ExecuteQuery(ExecuteQueryRequest) returns (ExecuteQueryResponse);
+    rpc ExecuteUnsafeQuery(ExecuteUnsafeQueryRequest) returns (ExecuteUnsafeQueryResponse);
 
     // Shipments
     rpc GetShipment(GetShipmentRequest) returns (GetShipmentResponse);
@@ -612,44 +618,6 @@ message UpdateAmazonItemRequest {
 message UpdateAmazonItemResponse {
     bool is_success = 1;
     repeated string queries = 2;
-}
-
-message ArticleTransaction {
-    int32 mandant = 1;                   // Mandant ID
-    string artikelnummer = 2;            // Artikelnummer
-    int32 auspraegung_id = 3;            // Ausprägung ID
-    string erfassungsdatum = 4;          // Erfassungsdatum der Transaktion
-    string benutzer = 5;                 // Benutzer, der die Buchung vorgenommen hat
-    string standard_text = 6;            // Standardtext der Buchung
-    string memo = 7;                     // Memo oder Notiz zur Buchung
-    string job = 8;                      // Job ID
-    string herkunfts_lp_kennung = 9;     // Herkunfts-LP-Kennung
-    string ziel_lp_kennung = 10;         // Ziel-LP-Kennung
-    string bewegungsart = 11;            // Bewegungsart (IU, etc.)
-    string bestandswirkung = 12;         // Bestandswirkung (z.B. 0 oder 1)
-    float menge_basis = 13;              // Menge Basis
-    float menge_lager = 14;              // Menge im Lager
-    int32 status = 15;                   // Status der Buchung
-    string bewegungsdatum = 16;          // Bewegungsdatum
-    string bestands_id = 17;             // Bestands ID
-    string lagerkennung = 18;            // Lagerkennung (z.B. "Lost")
-    string matchcode = 19;               // Matchcode oder Artikelbeschreibung
-    float einzelpreis = 20;              // Einzelpreis
-    float bestand = 21;                  // Bestand
-}
-
-message ListArticleTransactionsRequest {
-    int32 page = 1;
-    int32 page_size = 2;
-    int32 mandant = 3;
-    bool debug = 4;
-}
-
-message ListArticleTransactionsResponse {
-    int32 page = 1;
-    int32 page_size = 2;
-    repeated ArticleTransaction items = 3;
-    repeated string queries = 4;
 }
 
 message EPRawArtikel {
@@ -1506,6 +1474,114 @@ message GetTableSchemaResponse {
     string proto_message = 4;
 }
 
+message ListTablesRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    string search = 3;
+    bool debug = 4;
+}
+
+message TableInfo {
+    string table_catalog = 1;
+    string table_schema = 2;
+    string table_name = 3;
+    string table_type = 4;
+}
+
+message ListTablesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 total = 3;
+    repeated TableInfo items = 4;
+    repeated string queries = 5;
+    string debug_id = 6;
+}
+
+message ListTableColumnsRequest {
+    string table_name = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+    string search = 4;
+    bool debug = 5;
+}
+
+message ColumnInfo {
+    string table_catalog = 1;
+    string table_schema = 2;
+    string table_name = 3;
+    string column_name = 4;
+    int32 ordinal_position = 5;
+    string column_default = 6;
+    string is_nullable = 7;
+    string data_type = 8;
+    int32 character_maximum_length = 9;
+    int32 character_octet_length = 10;
+    int32 numeric_precision = 11;
+    int32 numeric_precision_radix = 12;
+    int32 numeric_scale = 13;
+    int32 datetime_precision = 14;
+    string character_set_catalog = 15;
+    string character_set_schema = 16;
+    string character_set_name = 17;
+    string collation_catalog = 18;
+    string collation_schema = 19;
+    string collation_name = 20;
+    string domain_catalog = 21;
+    string domain_schema = 22;
+    string domain_name = 23;
+}
+
+message ListTableColumnsResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 total = 3;
+    repeated ColumnInfo items = 4;
+    repeated string queries = 5;
+    string debug_id = 6;
+}
+
+message ExecuteQueryRequest {
+    string query = 1;
+    map<string, google.protobuf.Value> parameters = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+    bool debug = 5;
+}
+
+message ColumnMetadata {
+    string name = 1;
+    string type = 2;
+    bool nullable = 3;
+}
+
+message ExecuteQueryResponse {
+    repeated google.protobuf.Struct rows = 1;
+    repeated ColumnMetadata columns = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+    int32 total = 5;
+    repeated string queries = 6;
+    string debug_id = 7;
+}
+
+message ExecuteUnsafeQueryRequest {
+    string query = 1;
+    map<string, google.protobuf.Value> parameters = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+    bool debug = 5;
+}
+
+message ExecuteUnsafeQueryResponse {
+    repeated google.protobuf.Struct rows = 1;
+    repeated ColumnMetadata columns = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+    int32 total = 5;
+    repeated string queries = 6;
+    string debug_id = 7;
+}
+
 message ListVKBelegsRequest {
     int32 page = 1;
     int32 page_size = 2;
@@ -1583,6 +1659,32 @@ message ListVKBelegVersandartsResponse {
     int32 page = 1;
     int32 page_size = 2;
     repeated VersandartItem items = 3;
+    repeated string queries = 4;
+}
+
+message ListLBVersandklassenRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string search = 4;
+    bool debug = 5;
+    string query = 6;
+}
+
+message LBVersandklasseItem {
+    int32 mandant = 1;
+    string versandklasse = 2;
+    string bezeichnung = 3;
+    double verpackungsgewicht = 4;
+    string checkout_instructions = 5;
+    string description = 6;
+    bool stueckweise = 7;
+}
+
+message ListLBVersandklassenResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated LBVersandklasseItem items = 3;
     repeated string queries = 4;
 }
 
@@ -3261,4 +3363,43 @@ message ListShipmentsResponse {
     int32 page = 2;
     int32 page_size = 3;
     int32 total_count = 4;
+}
+
+// Lagerplatzbuchungen
+message Lagerplatzbuchung {
+    string job = 1;
+    string seriennummer = 2;
+    int64 buchungs_id = 3;
+    string matchcode = 4;
+    string artikelnummer = 5;
+    int32 auspraegung_id = 6;
+    double menge_lager = 7;
+    double mek = 8;
+    double einstandspreis = 9;
+    string benutzer = 10;
+    string ean = 11;
+    string herkunftslager = 12;
+    string ziellager = 13;
+    string bewegungsart = 14;
+    string referenz = 15;
+    string memo = 16;
+    google.protobuf.Timestamp bewegungsdatum = 17;
+}
+
+message ListLagerplatzBuchungenRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    string query = 3;
+    string order_by = 4;
+    Direction direction = 5;
+    int32 mandant = 6;
+    bool debug = 7;
+}
+
+message ListLagerplatzBuchungenResponse {
+    repeated Lagerplatzbuchung items = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+    int32 total_count = 4;
+    repeated string queries = 5;
 }
