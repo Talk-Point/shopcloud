@@ -183,8 +183,17 @@ service SageHubService {
     rpc RemoveTagFromVKBelegEvent(RemoveTagFromVKBelegEventRequest) returns (RemoveTagFromVKBelegEventResponse);
     rpc MarkTagDoneVKBelegEvent(MarkTagDoneVKBelegEventRequest) returns (MarkTagDoneVKBelegEventResponse);
     rpc ClassifyVKBelegEventV1(ClassifyVKBelegEventV1Request) returns (ClassifyVKBelegEventV1Response);
+    
+    // Shipment Events
+    rpc FetchNewestShipmentEvents(FetchNewestShipmentEventsRequest) returns (FetchNewestShipmentEventsResponse);
+    rpc BatchEmitShipmentEvents(BatchEmitShipmentEventsRequest) returns (BatchEmitShipmentEventsResponse);
+    rpc EmitShipmentEvents(EmitShipmentEventsRequest) returns (EmitShipmentEventsResponse);
+    rpc GetShipmentEvent(GetShipmentEventRequest) returns (GetShipmentEventResponse);
+    rpc ListShipmentEvents(ListShipmentEventsRequest) returns (ListShipmentEventsResponse);
+    
     // VKBelegDetails
     rpc GetVKBelegDetails(GetVKBelegDetailsRequest) returns (GetVKBelegDetailsResponse);
+    rpc GetVKBelegPositionsLagerDetails(GetVKBelegPositionsLagerDetailsRequest) returns (GetVKBelegPositionsLagerDetailsResponse);
     
     rpc ListVKBelegClassifiersV1(ListVKBelegClassifiersV1Request) returns (ListVKBelegClassifiersV1Response);
     // VKBelegPulse
@@ -2628,6 +2637,71 @@ message FetchNewestVKBelegEventsResponse {
     repeated int64 bel_ids = 1;
 }
 
+// Shipment Events Request/Response Messages
+message FetchNewestShipmentEventsRequest {
+    int32 mandant = 1;
+    int64 shipment_id = 2;
+}
+
+message FetchNewestShipmentEventsResponse {
+    repeated EventItemShipment events = 1;
+}
+
+message EmitShipmentEventsRequest {
+    int32 mandant = 1;
+    int64 shipment_id = 2;
+}
+
+message EmitShipmentEventsResponse {
+    repeated EventItemShipment events = 1;
+}
+
+message BatchEmitShipmentEventsRequest {
+    int32 mandant = 1;
+    repeated int64 shipment_ids = 2;
+}
+
+message BatchEmitShipmentEventsResponse {
+    repeated EventItemShipment events = 1;
+}
+
+message GetShipmentEventRequest {
+    string id = 1;
+}
+
+message GetShipmentEventResponse {
+    EventItemShipment event = 1;
+}
+
+message ListShipmentEventsRequest {
+    int32 page_size = 1;
+    int32 page = 2;
+    string order_by = 3;
+    Direction order_by_direction = 4;
+    repeated ListShipmentEventsFilter filters = 5;
+}
+
+message ListShipmentEventsFilter {
+    enum Field {
+        FIELD_ID_UNSPECIFIED = 0;
+        FIELD_TOPIC = 1;
+        FIELD_MANDANT = 2;
+        FIELD_SHIPMENT_ID = 3;
+        FIELD_CREATED_AT = 4;
+        FIELD_INVOICE_NUMBER = 5;
+    }
+    
+    Field field = 1;
+    string value = 2;
+    Operator operator = 3;
+}
+
+message ListShipmentEventsResponse {
+    int32 page_size = 1;
+    int32 page = 2;
+    repeated EventItemShipment items = 3;
+}
+
 message EmitVKBelegEventsRequest {
     int32 mandant = 3;
     int64 bel_id = 4;
@@ -2649,6 +2723,7 @@ enum EventTopic {
     EVENT_TOPIC_VK_BELEG_CANCELD = 8;
     EVENT_TOPIC_VK_BELEG_FULFILLED = 9;
     EVENT_TOPIC_FEED_FILE_CREATED = 10;
+    EVENT_TOPIC_SHIPMENT_CREATED = 11;
 }
 
 message EventItemVkBeleg {
@@ -2803,6 +2878,37 @@ message EventFeedFileCreated {
     int64 size = 6;
     string size_humanized = 7;
     google.protobuf.Timestamp created_at = 8;
+}
+
+// EVENT_TOPIC_SHIPMENT_CREATED
+message EventShipmentCreated {
+    EventTopic topic = 1;
+    int64 shipment_id = 2;
+    int32 mandant = 3;
+    string invoice_number = 4;
+    string tracking_id = 5;
+    string mode_of_dispatch = 6;
+    string shipping_type = 7;
+    string shipping_product = 8;
+    string profile = 9;
+    repeated ShipmentPosition positions = 10;
+    google.protobuf.Timestamp created_at = 11;
+}
+
+// Container for Shipment Events
+message EventItemShipment {
+    string id = 1;
+    EventTopic topic = 2;
+    int64 shipment_id = 3;
+    int32 mandant = 4;
+    repeated string tags = 5;
+    repeated string processed_tags = 6;
+    
+    oneof event {
+        EventShipmentCreated created = 10;
+    }
+    
+    google.protobuf.Timestamp created_at = 100;
 }
 
 message GetVKBelegEventResponse {
@@ -3164,6 +3270,39 @@ message VKBelegDetailLineItem {
 message GetVKBelegDetailsResponse {
     repeated VKBelegDetail belege = 1;
     repeated string queries = 2;
+}
+
+// VKBelegPositionsLagerDetails Messages
+message GetVKBelegPositionsLagerDetailsRequest {
+    int32 mandant = 1;
+    // Mit oneof kann genau einer der Identifier gesetzt werden
+    oneof identifier {
+        int64 bel_id = 2;
+        string belegnummer = 3;  // USER_BelegjahrBelegnummer
+    }
+    bool debug = 4;
+}
+
+message VKBelegPositionsLagerDetail {
+    google.protobuf.Timestamp beleg_datum = 1;
+    string name = 2;
+    string belegart = 3;
+    string referenznummer = 4;
+    string artikelnummer = 5;
+    int32 auspraegung_id = 6;
+    string seriennummer = 7;
+    double menge = 8;
+    string belegnummer = 9;
+    string lagerplatz = 10;
+    string lager = 11;
+    int64 bel_pos_id = 12;
+}
+
+message GetVKBelegPositionsLagerDetailsResponse {
+    repeated VKBelegPositionsLagerDetail items = 1;
+    repeated string queries = 2;
+    // Summary information
+    repeated string warehouses = 3;  // Unique warehouse codes (e.g., ["EB", "TG"])
 }
 
 message GetApiKeyRequest {
