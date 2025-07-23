@@ -90,6 +90,7 @@ message LBAmazonItem {
     string asin = 7;
     string marketplace_id = 8;
     int32 leadtime_to_ship = 9;
+    bool offer_only = 10;
 }
 
 message Event {
@@ -622,6 +623,7 @@ message UpdateAmazonItemRequest {
 
     UpdateMask update_mask = 4;
     bool aktiv = 5;
+    bool offer_only = 6;
 }
 
 message UpdateAmazonItemResponse {
