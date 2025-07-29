@@ -3264,6 +3264,9 @@ message VKBelegDetailLineItem {
     // User-definierte Felder
     string user_amazon_sku = 17;
     bool user_sonepar_bestellt = 18;
+    google.protobuf.Timestamp user_sonepar_bestellt_markiert_datum = 20;
+    bool user_ep_bestellt = 21;
+    google.protobuf.Timestamp user_ep_bestellt_markiert_datum = 22;
     
     // Status
     bool ist_erledigt = 19;
