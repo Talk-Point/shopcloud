@@ -123,6 +123,129 @@ message Feed {
     }
 }
 
+// ========== METRICS MESSAGES ==========
+
+enum ChangeType {
+    CHANGE_TYPE_UNSPECIFIED = 0;
+    CHANGE_TYPE_POSITIVE = 1;
+    CHANGE_TYPE_NEGATIVE = 2;
+    CHANGE_TYPE_NEUTRAL = 3;
+}
+
+enum DashboardStatus {
+    DASHBOARD_STATUS_UNSPECIFIED = 0;
+    DASHBOARD_STATUS_READY = 1;
+    DASHBOARD_STATUS_CALCULATING = 2;
+    DASHBOARD_STATUS_STALE = 3;
+}
+
+message Metric {
+    string type = 1;
+    string display_name = 2;
+    string unit = 3;
+    repeated string required_permissions = 4;
+    string category = 5;
+    string icon = 6;
+    int32 decimal_places = 7;
+    bool inverse_positive = 8;
+    int32 sort_order = 9;
+}
+
+message MetricValue {
+    string metric_type = 1;
+    string period = 2;
+    repeated string segments = 3;
+    double value = 4;
+    double compare_value = 5;
+    double change_percent = 6;
+    int64 calculated_at = 7;
+    int64 valid_until = 8;
+    string display_value = 9;
+    string change_display = 10;
+    ChangeType change_type = 11;
+}
+
+message Dashboard {
+    string id = 1;
+    string name = 2;
+    repeated DashboardMetric metrics = 3;
+    repeated string required_permissions = 4;
+    bool is_default = 5;
+}
+
+message DashboardMetric {
+    string metric_type = 1;
+    int32 position = 2;
+    bool visible = 3;
+}
+
+message DashboardData {
+    string dashboard_id = 1;
+    string period = 2;
+    int64 last_updated = 3;
+    map<string, MetricValue> metrics = 4;
+    DashboardStatus status = 5;
+}
+
+message GetDashboardDataRequest {
+    string company_id = 1;
+    string dashboard_id = 2;
+    string period = 3;
+    bool force_refresh = 4;
+    repeated string user_permissions = 5; // Optional: if empty, all metrics are returned
+}
+
+message GetDashboardDataResponse {
+    DashboardData data = 1;
+    repeated string filtered_metrics = 2;
+    bool from_cache = 3;
+}
+
+message GetMetricsRequest {
+    string company_id = 1;
+    repeated MetricQuery queries = 2;
+    repeated string user_permissions = 3; // Optional: if empty, all metrics are returned
+}
+
+message MetricQuery {
+    string metric_type = 1;
+    string period = 2;
+    repeated string segments = 3;
+}
+
+message GetMetricsResponse {
+    repeated MetricValue values = 1;
+}
+
+message MetricValueInput {
+    string metric_type = 1;
+    string period = 2;
+    double value = 3;
+    double compare_value = 4;
+    // change_percent is calculated internally
+}
+
+message BatchUpdateMetricsRequest {
+    string company_id = 1;
+    repeated MetricValueInput values = 2;
+}
+
+message BatchUpdateMetricsResponse {
+    int32 updated_count = 1;
+}
+
+message RefreshDashboardsRequest {
+    string company_id = 1;
+    repeated string dashboard_ids = 2;
+    repeated string periods = 3;
+    string source = 4;
+}
+
+message RefreshDashboardsResponse {
+    int32 dashboards_refreshed = 1;
+    repeated string refreshed_paths = 2;
+}
+
 service SageHubService {
     // Info
     rpc Info(InfoRequest) returns (InfoResponse);
@@ -272,6 +395,12 @@ service SageHubService {
 
     // Utils
     rpc ValidateVatId(ValidateVatIdRequest) returns (ValidateVatIdResponse);
+
+    // Metrics
+    rpc GetDashboardData(GetDashboardDataRequest) returns (GetDashboardDataResponse);
+    rpc GetMetrics(GetMetricsRequest) returns (GetMetricsResponse);
+    rpc BatchUpdateMetrics(BatchUpdateMetricsRequest) returns (BatchUpdateMetricsResponse);
+    rpc RefreshDashboards(RefreshDashboardsRequest) returns (RefreshDashboardsResponse);
 }
 
 message ArticleLieferant {
