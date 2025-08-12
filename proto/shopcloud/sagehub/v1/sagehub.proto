@@ -183,7 +183,7 @@ message DashboardData {
     string dashboard_id = 1;
     string period = 2;
     int64 last_updated = 3;
-    map<string, MetricValue> metrics = 4;
+    repeated MetricValue metrics = 4; // Sorted array of metrics
     DashboardStatus status = 5;
 }
 
