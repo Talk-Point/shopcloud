@@ -323,6 +323,8 @@ service SageHubService {
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
     rpc ListVKBelegPositionsPulse(ListVKBelegPositionsPulseRequest) returns (ListVKBelegPositionsPulseResponse);
+    // VKBelegsWhatsUp - Quick overview of VK Belege changes
+    rpc GetVKBelegsWhatsUp(GetVKBelegsWhatsUpRequest) returns (GetVKBelegsWhatsUpResponse);
     // VKBelegOpenPicks
     rpc ListVKBelegOpenPicks(ListVKBelegOpenPicksRequest) returns (ListVKBelegOpenPicksResponse);
     // VKBelegLineItemsOpens
@@ -2631,6 +2633,8 @@ enum TimeFramePreset {
     TIME_FRAME_PRESET_LAST_365_DAYS = 8;
     TIME_FRAME_PRESET_THIS_YEAR = 9;
     TIME_FRAME_PRESET_TODAY_AND_YESTERDAY = 10;
+    TIME_FRAME_PRESET_TODAY = 11;
+    TIME_FRAME_PRESET_THIS_WEEK = 12;
 }
 
 message BatchEmitVKBelegEventsRequest {
@@ -3675,4 +3679,69 @@ message ListLagerplatzBuchungenResponse {
     int32 page_size = 3;
     int32 total_count = 4;
     repeated string queries = 5;
+}
+
+// VKBelegsWhatsUp Messages - Zeitraum-Analyse für VK Belege für schnellen Überblick
+message GetVKBelegsWhatsUpRequest {
+    int32 mandant = 1;
+    oneof time_frame {
+        TimeRange range = 2;                    // Spezifischer Zeitraum
+        google.protobuf.Duration duration = 3;  // Letzte X Sekunden
+        TimeFramePreset range_shortcut = 4;     // Vordefinierte Zeiträume
+    }
+    repeated VKBelegart belegart_items = 5;
+    repeated string kundengruppen = 6;  // Filter für bestimmte Kundengruppen (z.B. ["1011", "11"])
+    bool debug = 7;
+}
+
+message GetVKBelegsWhatsUpResponse {
+    VKBelegsWhatsUpData data = 1;
+    VKBelegsWhatsUpFilters filters = 2;
+    repeated string queries = 3;
+}
+
+message VKBelegsWhatsUpData {
+    message SalesChannel {
+        string kundengruppe = 1;
+        string kundengruppe_name = 2;
+        int32 orders = 3;
+        double turnover = 4;
+        double profit = 5;
+        double profit_margin = 6;  // Profit/Turnover in %
+        int32 products_sold = 7;   // Anzahl unterschiedlicher Produkte
+    }
+    
+    message Product {
+        string artikelnummer = 1;
+        int64 auspraegung_id = 2;
+        string sku = 3;
+        string bezeichnung = 4;
+        double qty = 5;
+        double turnover = 6;
+        double profit = 7;
+        double profit_margin = 8;  // Profit/Turnover in %
+        string supplier = 9;       // Lieferant
+    }
+    
+    message Summary {
+        int32 total_orders = 1;
+        double total_turnover = 2;
+        double total_profit = 3;
+        double avg_profit_margin = 4;
+        int32 unique_products = 5;
+        int32 unique_customers = 6;
+    }
+    
+    Summary summary = 1;
+    repeated SalesChannel sales_channels = 2;     // Nach Profit sortiert
+    repeated Product top_performers = 3;           // Produkte mit höchstem Profit
+    repeated Product poor_performers = 4;          // Produkte mit niedrigstem/negativem Profit
+    repeated Product best_sellers = 5;             // Meistverkaufte Produkte (nach Menge)
+}
+
+message VKBelegsWhatsUpFilters {
+    int32 mandant = 1;
+    TimeRange period = 2;
+    repeated string belegart_items = 3;
+    repeated string kundengruppen = 4;
 }
