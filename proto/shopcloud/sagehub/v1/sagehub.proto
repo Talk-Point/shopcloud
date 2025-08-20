@@ -397,6 +397,7 @@ service SageHubService {
 
     // Utils
     rpc ValidateVatId(ValidateVatIdRequest) returns (ValidateVatIdResponse);
+    rpc TransliterateToLatin(TransliterateToLatinRequest) returns (TransliterateToLatinResponse);
 
     // Metrics
     rpc GetDashboardData(GetDashboardDataRequest) returns (GetDashboardDataResponse);
@@ -476,6 +477,15 @@ message ValidateVatIdRequest {
     
     repeated string debug_info = 13; // Debug-Informationen (wenn angefordert)
   }
+
+message TransliterateToLatinRequest {
+    string text = 1;               // Text to convert from any non-Latin script to Latin
+}
+
+message TransliterateToLatinResponse {
+    string original = 1;          // Original text with non-Latin characters
+    string converted = 2;         // Text converted to Latin characters
+}
 
 message CreateContentSnapshotRequest {
     int32 mandant = 1;
@@ -1003,7 +1013,28 @@ message UpdateVKBelegRequest {
 
     UpdateMask update_mask = 4;
     string liefertermin = 5; // iso-format date
-
+    
+    // Rechnungsadresse (A0)
+    string a0_empfaenger = 6;
+    string a0_name1 = 7;
+    string a0_name2 = 8;
+    string a0_zusatz = 9;
+    string a0_strasse = 10;
+    string a0_land = 11;
+    string a0_plz = 12;
+    string a0_ort = 13;
+    
+    // Lieferadresse (A1)
+    string a1_name1 = 14;
+    string a1_name2 = 15;
+    string a1_zusatz = 16;
+    string a1_strasse = 17;
+    string a1_land = 18;
+    string a1_plz = 19;
+    string a1_ort = 20;
+    
+    // Versandart
+    string versand = 21;
 }
 
 message UpdateVKBelegResponse {
