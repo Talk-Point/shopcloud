@@ -3369,6 +3369,9 @@ message VKBelegDetail {
     
     // Line items
     repeated VKBelegDetailLineItem line_items = 69;
+    
+    // Liefertermin
+    string liefertermin = 70;
 }
 
 message VKBelegDetailLineItem {
