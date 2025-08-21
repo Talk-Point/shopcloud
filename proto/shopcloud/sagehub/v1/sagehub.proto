@@ -1035,6 +1035,9 @@ message UpdateVKBelegRequest {
     
     // Versandart
     string versand = 21;
+    
+    // Lieferbedingung
+    string lieferbedingung = 22;
 }
 
 message UpdateVKBelegResponse {
