@@ -329,6 +329,14 @@ service SageHubService {
     rpc ListVKBelegOpenPicks(ListVKBelegOpenPicksRequest) returns (ListVKBelegOpenPicksResponse);
     // VKBelegLineItemsOpens
     rpc ListVKBelegLineItemsOpens(ListVKBelegLineItemsOpensRequest) returns (ListVKBelegLineItemsOpensResponse);
+    // VKBeleg Close Operations
+    rpc ListBelegCloseReasons(ListBelegCloseReasonsRequest) returns (ListBelegCloseReasonsResponse);
+    rpc CloseBelege(CloseBelegeRequest) returns (CloseBelegeResponse);
+    // Photo-Picking
+    rpc ListPhotoPickArticles(ListPhotoPickArticlesRequest) returns (ListPhotoPickArticlesResponse);
+    rpc GetPhotoPickArticleDetails(GetPhotoPickArticleDetailsRequest) returns (GetPhotoPickArticleDetailsResponse);
+    // Stock Transfer
+    rpc TransferStock(TransferStockRequest) returns (TransferStockResponse);
     // Report API
     rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
 
@@ -3781,4 +3789,115 @@ message VKBelegsWhatsUpFilters {
     TimeRange period = 2;
     repeated string belegart_items = 3;
     repeated string kundengruppen = 4;
+}
+
+// VKBeleg Close Operations Messages
+message BelegCloseReason {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    bool requires_comment = 4;
+}
+
+message ListBelegCloseReasonsRequest {
+    // Empty request, returns static list
+}
+
+message ListBelegCloseReasonsResponse {
+    repeated BelegCloseReason reasons = 1;
+}
+
+message CloseBelegeRequest {
+    int32 mandant = 1;
+    repeated int64 bel_ids = 2;
+    string reason_id = 3;
+    string comment = 4;
+    string by_user = 5;
+    bool debug = 6;
+}
+
+message CloseBelegeResponse {
+    bool is_success = 1;
+    repeated int64 closed_bel_ids = 2;
+    repeated int64 failed_bel_ids = 3;
+    repeated string error_messages = 4;
+    repeated string queries = 5;
+}
+
+// Photo-Picking Messages
+message PhotoPickArticle {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    string bezeichnung1 = 4;
+    string bezeichnung2 = 5;
+    int32 anzahl_plaetze = 6;
+    double gesamt_bestand = 7;
+    int32 anzahl_seriennummern = 8;
+    string standort = 9;
+    string alle_platz_ids = 10;
+    string alle_platzbezeichnungen = 11;
+}
+
+message PhotoPickArticleDetail {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    string bezeichnung1 = 4;
+    string bezeichnung2 = 5;
+    int32 platz_id = 6;
+    string platzbezeichnung = 7;
+    string kurzbezeichnung = 8;
+    string seriennummer = 9;
+    double bestand = 10;
+}
+
+message ListPhotoPickArticlesRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string standort = 4;
+    bool debug = 5;
+    string query = 6; // Advanced search query for filtering and sorting (e.g., "status:=:PICK sort:standort__asc")
+}
+
+message ListPhotoPickArticlesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated PhotoPickArticle items = 3;
+    repeated string queries = 4;
+}
+
+message GetPhotoPickArticleDetailsRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    bool debug = 4;
+}
+
+message GetPhotoPickArticleDetailsResponse {
+    repeated PhotoPickArticleDetail items = 1;
+    repeated string queries = 2;
+}
+
+// Stock Transfer Messages
+message TransferStockRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3; // Required: 0 for standard articles, >0 for variants
+    string lagerbewegungsart = 4; // Movement type (e.g., "IU" for internal transfer)
+    int32 herkunftslagerplatz = 5; // Source storage place ID
+    int32 ziellagerplatz = 6; // Target storage place ID
+    double menge = 7; // Quantity
+    repeated string seriennummern = 8; // Optional serial numbers
+    string buchungsmemo = 9; // Optional booking memo
+    bool debug = 10;
+}
+
+message TransferStockResponse {
+    bool success = 1;
+    repeated string messages = 2;
+    repeated string error_messages = 3;
+    string xml_request = 4; // Debug: the XML that was sent
+    string xml_response = 5; // Debug: the XML response received
 }
