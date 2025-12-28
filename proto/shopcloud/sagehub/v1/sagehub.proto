@@ -412,6 +412,9 @@ service SageHubService {
     rpc GetMetrics(GetMetricsRequest) returns (GetMetricsResponse);
     rpc BatchUpdateMetrics(BatchUpdateMetricsRequest) returns (BatchUpdateMetricsResponse);
     rpc RefreshDashboards(RefreshDashboardsRequest) returns (RefreshDashboardsResponse);
+
+    // BuchungsJournal (Customer payment tracking)
+    rpc ListBuchungsJournal(ListBuchungsJournalRequest) returns (ListBuchungsJournalResponse);
 }
 
 message ArticleLieferant {
@@ -1994,6 +1997,7 @@ message UpdateArticleRequest {
     string user_artcontrol_last_edit = 67;
     string user_artcontrol_nutzer = 68;
     string hartikelnummer = 69;  // Herstellerartikelnummer (HAN)
+    bool user_preisberechnung = 70;  // Preisberechnung aktivieren/deaktivieren
 }
 
 message UpdateArticleResponse {
@@ -3900,4 +3904,68 @@ message TransferStockResponse {
     repeated string error_messages = 3;
     string xml_request = 4; // Debug: the XML that was sent
     string xml_response = 5; // Debug: the XML response received
+}
+
+// ========== BUCHUNGSJOURNAL MESSAGES ==========
+// Used to track customer payment status from KHKBuchungsjournal table
+
+message BuchungsJournal {
+    int32 id = 1;
+    int32 mandant = 2;
+    int32 periode = 3;
+    int32 journal = 4;
+    int32 journal_alt = 5;
+    int32 position = 6;
+    int32 position_alt = 7;
+    string belegnummer = 8;
+    string belegdatum = 9;
+    string buchungsdatum = 10;
+    string buchungstext = 11;
+    string buchungsmemo = 12;
+    string kto = 13;                    // Account (customer number)
+    int32 kto_typ = 14;
+    string gegen_kto = 15;              // Counter account
+    int32 gegen_kto_typ = 16;
+    double soll_ew = 17;                // Debit in home currency
+    double haben_ew = 18;               // Credit in home currency
+    double soll_fw = 19;                // Debit in foreign currency
+    double haben_fw = 20;               // Credit in foreign currency
+    double saldovortrag_ew = 21;        // Balance forward in home currency
+    double saldovortrag_fw = 22;        // Balance forward in foreign currency
+    string steuerart = 23;
+    string steuercode = 24;
+    double steuer_ew = 25;
+    double steuer_fw = 26;
+    string wkz = 27;                    // Currency code
+    int32 tan = 28;
+    int32 ist_ausgeziffert = 29;        // Is cleared/settled
+    int32 sammelbuchung = 30;           // Collective booking
+    int32 steuerbuchung = 31;           // Tax booking
+    int32 anlagenbuchung = 32;          // Asset booking
+    int32 automatikbuchung = 33;        // Automatic booking
+    int32 druckstatus = 34;             // Print status
+    int32 eu_dreiecksgeschaeft = 35;    // EU triangular transaction
+    string eu_land = 36;
+    string eu_ust_id = 37;
+    int32 s_div_id = 38;
+}
+
+message ListBuchungsJournalRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string kto = 4;                     // Filter by customer account (Kto)
+    string query = 5;                   // Advanced search query
+    bool debug = 6;
+}
+
+message ListBuchungsJournalResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated BuchungsJournal items = 3;
+    repeated string queries = 4;
+    // Summary fields for balance calculation
+    double total_soll_ew = 5;           // Sum of all debit amounts
+    double total_haben_ew = 6;          // Sum of all credit amounts
+    bool is_balanced = 7;               // True if soll equals haben
 }
