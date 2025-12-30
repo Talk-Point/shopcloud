@@ -332,6 +332,7 @@ service SageHubService {
     // VKBeleg Close Operations
     rpc ListBelegCloseReasons(ListBelegCloseReasonsRequest) returns (ListBelegCloseReasonsResponse);
     rpc CloseBelege(CloseBelegeRequest) returns (CloseBelegeResponse);
+    rpc CloseBelegeByDocumentNumber(CloseBelegeByDocumentNumberRequest) returns (CloseBelegeByDocumentNumberResponse);
     // Photo-Picking
     rpc ListPhotoPickArticles(ListPhotoPickArticlesRequest) returns (ListPhotoPickArticlesResponse);
     rpc GetPhotoPickArticleDetails(GetPhotoPickArticleDetailsRequest) returns (GetPhotoPickArticleDetailsResponse);
@@ -3826,6 +3827,24 @@ message CloseBelegeResponse {
     repeated int64 failed_bel_ids = 3;
     repeated string error_messages = 4;
     repeated string queries = 5;
+}
+
+// CloseBelegeByDocumentNumber - Close a VKBeleg by document number (USER_BelegjahrBelegnummer)
+// This matches the interface used by shopcloud-sage-gateway
+message CloseBelegeByDocumentNumberRequest {
+    int32 mandant = 1;
+    string document_number = 2; // e.g. "2024-1234567"
+    string reason_id = 3;
+    string comment = 4;
+    string by_user = 5;
+    bool debug = 6;
+}
+
+message CloseBelegeByDocumentNumberResponse {
+    bool is_success = 1;
+    string document_number = 2;
+    repeated string error_messages = 3;
+    repeated string queries = 4;
 }
 
 // Photo-Picking Messages
