@@ -407,6 +407,8 @@ service SageHubService {
     // Utils
     rpc ValidateVatId(ValidateVatIdRequest) returns (ValidateVatIdResponse);
     rpc TransliterateToLatin(TransliterateToLatinRequest) returns (TransliterateToLatinResponse);
+    rpc ConvertHtmlToMarkdown(ConvertHtmlToMarkdownRequest) returns (ConvertHtmlToMarkdownResponse);
+    rpc ConvertMarkdownToHtml(ConvertMarkdownToHtmlRequest) returns (ConvertMarkdownToHtmlResponse);
 
     // Metrics
     rpc GetDashboardData(GetDashboardDataRequest) returns (GetDashboardDataResponse);
@@ -497,6 +499,22 @@ message TransliterateToLatinRequest {
 message TransliterateToLatinResponse {
     string original = 1;          // Original text with non-Latin characters
     string converted = 2;         // Text converted to Latin characters
+}
+
+message ConvertHtmlToMarkdownRequest {
+    string content = 1;           // HTML content to convert to Markdown
+}
+
+message ConvertHtmlToMarkdownResponse {
+    string content = 1;           // Converted Markdown content
+}
+
+message ConvertMarkdownToHtmlRequest {
+    string content = 1;           // Markdown content to convert to HTML
+}
+
+message ConvertMarkdownToHtmlResponse {
+    string content = 1;           // Converted HTML content
 }
 
 message CreateContentSnapshotRequest {
