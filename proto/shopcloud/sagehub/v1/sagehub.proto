@@ -3893,6 +3893,8 @@ message PhotoPickArticleDetail {
     string kurzbezeichnung = 8;
     string seriennummer = 9;
     double bestand = 10;
+    string ean_nummer = 11; // EAN/GTIN
+    string hartikelnummer = 12; // Herstellerartikelnummer (HAN)
 }
 
 message ListPhotoPickArticlesRequest {
@@ -3934,7 +3936,8 @@ message TransferStockRequest {
     double menge = 7; // Quantity
     repeated string seriennummern = 8; // Optional serial numbers
     string buchungsmemo = 9; // Optional booking memo
-    bool debug = 10;
+    bool debug = 10; // If true, includes xml_request and xml_response in response
+    bool dry_run = 11; // If true, generates XML without executing the transfer (implies debug=true)
 }
 
 message TransferStockResponse {
