@@ -3878,6 +3878,8 @@ message PhotoPickArticle {
     string standort = 9;
     string alle_platz_ids = 10;
     string alle_platzbezeichnungen = 11;
+    string ean_nummer = 12; // EAN/GTIN
+    string hartikelnummer = 13; // Herstellerartikelnummer (HAN)
 }
 
 message PhotoPickArticleDetail {
