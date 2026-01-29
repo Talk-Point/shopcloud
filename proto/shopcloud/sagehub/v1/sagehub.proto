@@ -387,6 +387,8 @@ service SageHubService {
     rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
     rpc GetArticleImage(GetArticleImageRequest) returns (GetArticleImageResponse);
     rpc ListArticleContentErrors(ListArticleContentErrorsRequest) returns (ListArticleContentErrorsResponse);
+    // Article Stock (Verfügbarkeit)
+    rpc GetArticleStock(GetArticleStockRequest) returns (GetArticleStockResponse);
 
     // Supplier Article Data
     rpc GetSoneparArticle(GetSoneparArticleRequest) returns (GetSoneparArticleResponse);
@@ -4033,4 +4035,26 @@ message ListBuchungsJournalResponse {
     double total_soll_ew = 5;           // Sum of all debit amounts
     double total_haben_ew = 6;          // Sum of all credit amounts
     bool is_balanced = 7;               // True if soll equals haben
+}
+
+// Article Stock (Verfügbarkeit)
+message ArticleStockData {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double qty_stock_in_warehouse = 4;       // Verfügbar im Lager (LagerbestandVerfuegbar)
+    double qty_stock_in_warehouse_dispo = 5; // Dispo im Lager (Summe aus KHKDispoArtikel)
+    double qty_stock_external_warehouse = 6; // Verfügbar Zulieferer (Summe: BestandSonepar + BestandEP + ZuliefererBestand)
+    double qty_in_stock = 7;                 // Verfügbar Shop (berechnet: Lager + Dispo + External)
+    string supplier_code = 8;                // Supplier Code: tp (Talk-Point), sp (Sonepar), ep (EP), oder custom code
+}
+
+message GetArticleStockRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message GetArticleStockResponse {
+    ArticleStockData stock = 1;
 }
