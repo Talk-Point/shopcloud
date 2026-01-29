@@ -336,6 +336,7 @@ service SageHubService {
     // Photo-Picking
     rpc ListPhotoPickArticles(ListPhotoPickArticlesRequest) returns (ListPhotoPickArticlesResponse);
     rpc GetPhotoPickArticleDetails(GetPhotoPickArticleDetailsRequest) returns (GetPhotoPickArticleDetailsResponse);
+    rpc GetPhotoPickStatistics(GetPhotoPickStatisticsRequest) returns (GetPhotoPickStatisticsResponse);
     // Stock Transfer
     rpc TransferStock(TransferStockRequest) returns (TransferStockResponse);
     // Report API
@@ -3922,6 +3923,28 @@ message GetPhotoPickArticleDetailsRequest {
 
 message GetPhotoPickArticleDetailsResponse {
     repeated PhotoPickArticleDetail items = 1;
+    repeated string queries = 2;
+}
+
+message PhotoPickStatistic {
+    string standort = 1;                      // EB, TG, Fotostudio, Andere
+    string hauptlager = 2;                    // Name des Hauptlagers oder "GESAMT"
+    bool ist_gesamt = 3;                      // true = Summenzeile pro Standort
+    int32 anzahl_artikel = 4;                 // Anzahl Artikel-Varianten
+    int32 anzahl_eindeutige_artikel = 5;      // Anzahl eindeutige Artikelnummern
+    double gesamt_bestand = 6;                // Summe aller Bestände
+    double gesamt_wert = 7;                   // Bestand × MittlererEK
+    int32 anzahl_im_fotostudio = 8;           // Artikel aktuell im Fotostudio
+    double bestand_im_fotostudio = 9;         // Bestand im Fotostudio
+}
+
+message GetPhotoPickStatisticsRequest {
+    int32 mandant = 1;
+    bool debug = 2;
+}
+
+message GetPhotoPickStatisticsResponse {
+    repeated PhotoPickStatistic items = 1;
     repeated string queries = 2;
 }
 
