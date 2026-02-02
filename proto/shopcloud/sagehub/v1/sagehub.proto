@@ -3883,6 +3883,9 @@ message PhotoPickArticle {
     string alle_platzbezeichnungen = 11;
     string ean_nummer = 12; // EAN/GTIN
     string hartikelnummer = 13; // Herstellerartikelnummer (HAN)
+    string variante = 14; // Variante aus KHKVariantenAuspraegungen
+    string auspraegung1 = 15; // Auspraegung1 aus KHKVariantenAuspraegungen
+    string auspraegung2 = 16; // Auspraegung2 aus KHKVariantenAuspraegungen
 }
 
 message PhotoPickArticleDetail {
@@ -3898,6 +3901,9 @@ message PhotoPickArticleDetail {
     double bestand = 10;
     string ean_nummer = 11; // EAN/GTIN
     string hartikelnummer = 12; // Herstellerartikelnummer (HAN)
+    string variante = 13; // Variante aus KHKVariantenAuspraegungen
+    string auspraegung1 = 14; // Auspraegung1 aus KHKVariantenAuspraegungen
+    string auspraegung2 = 15; // Auspraegung2 aus KHKVariantenAuspraegungen
 }
 
 message ListPhotoPickArticlesRequest {
