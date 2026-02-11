@@ -382,6 +382,7 @@ service SageHubService {
     rpc UpdateArticlePrice(UpdateArticlePriceRequest) returns (UpdateArticlePriceResponse);
     // Lagerplatzbuchungen
     rpc ListLagerplatzBuchungen(ListLagerplatzBuchungenRequest) returns (ListLagerplatzBuchungenResponse);
+    rpc ListLagerbewegungenAggregiert(ListLagerbewegungenAggregiertRequest) returns (ListLagerbewegungenAggregiertResponse);
     // Onlinbezeichner
     rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
     rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
@@ -4063,4 +4064,45 @@ message GetArticleStockRequest {
 
 message GetArticleStockResponse {
     ArticleStockData stock = 1;
+}
+
+// Aggregierte Lagerbewegungen (Bestandsverlauf)
+enum AggregationLevel {
+    AGGREGATION_LEVEL_DAILY = 0;
+    AGGREGATION_LEVEL_WEEKLY = 1;
+    AGGREGATION_LEVEL_MONTHLY = 2;
+}
+
+message ListLagerbewegungenAggregiertRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
+
+    string artikelnummer = 5;
+    optional int32 auspraegung_id = 6;
+    AggregationLevel group_by = 7;
+
+    oneof time_frame {
+        TimeRange range = 8;
+        google.protobuf.Duration duration = 9;
+        TimeFramePreset range_shortcut = 10;
+    }
+}
+
+message LagerbewegungenPeriode {
+    string periode = 1;
+    double zugaenge = 2;
+    double abgaenge = 3;
+    double netto = 4;
+    double bestand = 5;
+}
+
+message ListLagerbewegungenAggregiertResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated LagerbewegungenPeriode items = 3;
+    repeated string queries = 4;
+    google.protobuf.Timestamp start_at = 5;
+    google.protobuf.Timestamp end_at = 6;
 }
