@@ -286,6 +286,7 @@ service SageHubService {
 
     // VKBelege
     rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
+    rpc ListVKBelegsByArticle(ListVKBelegsByArticleRequest) returns (ListVKBelegsByArticleResponse);
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
     rpc ListVKBelegVersandarts(ListVKBelegVersandartsRequest) returns (ListVKBelegVersandartsResponse);
@@ -341,6 +342,10 @@ service SageHubService {
     rpc TransferStock(TransferStockRequest) returns (TransferStockResponse);
     // Report API
     rpc GetSalechannelReport(GetSalechannelReportRequest) returns (GetSalechannelReportResponse);
+    // Platform Price Analysis
+    rpc GetPlatformPriceAnalysis(GetPlatformPriceAnalysisRequest) returns (GetPlatformPriceAnalysisResponse);
+    // Season Analysis
+    rpc GetSeasonAnalysis(GetSeasonAnalysisRequest) returns (GetSeasonAnalysisResponse);
 
     // Feeds
     rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
@@ -3253,6 +3258,50 @@ message GetVKBelegV2Response {
     repeated VKBelegeWarehousePositionV1 warehouse_positions = 3;
 }
 
+message ListVKBelegsByArticleRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string artikelnummer = 4;
+    int32 auspraegung_id = 5;
+    VKBelegart belegart = 6;
+    bool debug = 7;
+    string query = 8;
+}
+
+message VKBelegByArticleItem {
+    int64 bel_id = 1;
+    string belegart = 2;
+    string referenznummer = 3;
+    string user_belegjahrbelegnummer = 4;
+    double menge = 5;
+    double einzelpreis = 6;
+    double gesamtpreis = 7;
+    double nettobetrag_ew = 8;
+    double bruttobetrag_ew = 9;
+    google.protobuf.Timestamp user_cd = 10;
+    string versand = 11;
+    string a0_empfaenger = 12;
+    string wkz = 13;
+    int64 vor_id = 14;
+    string kundengruppe = 15;
+    string a0_name1 = 16;
+    string kundengruppe_name = 17;
+    string a0_land = 18;
+    string belegdatum = 19;
+    bool ist_erledigt = 20;
+    string bezeichnung1 = 21;
+    int32 auspraegung_id = 22;
+    string artikelnummer = 23;
+}
+
+message ListVKBelegsByArticleResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated VKBelegByArticleItem items = 3;
+    repeated string queries = 4;
+}
+
 message ListVKBelegOpenPicksRequest {
     int32 mandant = 1;
     bool debug = 2;
@@ -4105,4 +4154,118 @@ message ListLagerbewegungenAggregiertResponse {
     repeated string queries = 4;
     google.protobuf.Timestamp start_at = 5;
     google.protobuf.Timestamp end_at = 6;
+}
+
+// Platform Price Analysis
+message GetPlatformPriceAnalysisRequest {
+    int32 mandant = 1;
+    oneof time_frame {
+        TimeRange range = 2;
+        google.protobuf.Duration duration = 3;
+        TimeFramePreset range_shortcut = 4;
+    }
+    string artikelnummer = 5;
+    int32 auspraegung_id = 6;
+    string hauptkategorie = 7;
+    string unterkategorie = 8;
+    string produkttyp = 9;
+    repeated VKBelegart belegart_items = 10;
+    bool include_quarterly = 11;
+    bool debug = 12;
+}
+
+message PlatformPriceItem {
+    string plattform_id = 1;
+    string plattform_name = 2;
+    int32 anzahl_belege = 3;
+    int32 anzahl_artikel = 4;
+    double menge = 5;
+    double min_preis = 6;
+    double max_preis = 7;
+    double avg_preis = 8;
+    double umsatz_netto = 9;
+    double gesamt_rabatt = 10;
+    double rabatt_prozent = 11;
+    double umsatz_anteil = 12;
+    repeated PlatformQuarterItem quarters = 13;
+}
+
+message PlatformQuarterItem {
+    int32 quartal = 1;
+    int32 belege = 2;
+    double menge = 3;
+    double avg_preis = 4;
+    double min_preis = 5;
+    double max_preis = 6;
+    double umsatz_netto = 7;
+}
+
+message GetPlatformPriceAnalysisResponse {
+    repeated PlatformPriceItem items = 1;
+    double total_umsatz = 2;
+    double total_menge = 3;
+    int32 total_belege = 4;
+    string filter_info = 5;
+    bool debug = 6;
+    repeated string queries = 7;
+}
+
+// Season Analysis
+message GetSeasonAnalysisRequest {
+    int32 mandant = 1;
+    string hauptkategorie = 2;
+    string unterkategorie = 3;
+    string produkttyp = 4;
+    string artikelnummer = 5;
+    int32 auspraegung_id = 6;
+    int32 years = 7;
+    int32 min_menge = 8;
+    bool debug = 9;
+}
+
+message SeasonAnalysisItem {
+    string label = 1;
+    double gesamt_menge = 2;
+    double q1_pct = 3;
+    double q2_pct = 4;
+    double q3_pct = 5;
+    double q4_pct = 6;
+    double delta_q1 = 7;
+    double delta_q2 = 8;
+    double delta_q3 = 9;
+    double delta_q4 = 10;
+    double chi_squared = 11;
+    double season_score = 12;
+    string peak_quarter = 13;
+    string tief_quarter = 14;
+    string signifikanz = 15;
+    string typ = 16;
+}
+
+message SeasonAnalysisMarktBaseline {
+    double q1_pct = 1;
+    double q2_pct = 2;
+    double q3_pct = 3;
+    double q4_pct = 4;
+    double gesamt_menge = 5;
+}
+
+message SeasonMonthDetail {
+    int32 monat = 1;
+    string plattform = 2;
+    double menge = 3;
+    int32 anzahl_belege = 4;
+    double umsatz_netto_eur = 5;
+    double avg_preis_eur = 6;
+    double min_preis_eur = 7;
+    double max_preis_eur = 8;
+    double gesamt_rabatt_eur = 9;
+}
+
+message GetSeasonAnalysisResponse {
+    repeated SeasonAnalysisItem items = 1;
+    SeasonAnalysisMarktBaseline markt = 2;
+    string level = 3;
+    repeated SeasonMonthDetail month_details = 4;
+    repeated string queries = 5;
 }
