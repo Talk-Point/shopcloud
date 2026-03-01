@@ -338,6 +338,7 @@ service SageHubService {
     rpc ListPhotoPickArticles(ListPhotoPickArticlesRequest) returns (ListPhotoPickArticlesResponse);
     rpc GetPhotoPickArticleDetails(GetPhotoPickArticleDetailsRequest) returns (GetPhotoPickArticleDetailsResponse);
     rpc GetPhotoPickStatistics(GetPhotoPickStatisticsRequest) returns (GetPhotoPickStatisticsResponse);
+    rpc ListFotolagerReturnArticles(ListFotolagerReturnArticlesRequest) returns (ListFotolagerReturnArticlesResponse);
     // Stock Transfer
     rpc TransferStock(TransferStockRequest) returns (TransferStockResponse);
     // Report API
@@ -4004,6 +4005,41 @@ message GetPhotoPickStatisticsRequest {
 message GetPhotoPickStatisticsResponse {
     repeated PhotoPickStatistic items = 1;
     repeated string queries = 2;
+}
+
+// Fotolager Return Messages
+message FotolagerReturnArticle {
+    string artikelnummer = 1;
+    int64 auspraegung_id = 2;
+    string bezeichnung1 = 3;
+    int32 mandant = 4;
+    string ean_nummer = 5;
+    double bestand = 6;
+    string standort = 7;               // "Foto EB" oder "Foto TG"
+    string eingangsdatum = 8;
+    int32 tage_im_lager = 9;
+    string artcontrol_status = 10;
+    double mittlerer_ek = 11;
+    string content_status = 12;
+    string herkunft_platz_id = 13;
+    string herkunft_platz_name = 14;
+    string seriennummer = 15;
+}
+
+message ListFotolagerReturnArticlesRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    string standort = 4;               // Optional: "Foto EB" oder "Foto TG"
+    bool debug = 5;
+    string query = 6;                  // Advanced search query
+}
+
+message ListFotolagerReturnArticlesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated FotolagerReturnArticle items = 3;
+    repeated string queries = 4;
 }
 
 // Stock Transfer Messages
