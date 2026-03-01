@@ -4024,6 +4024,9 @@ message FotolagerReturnArticle {
     string herkunft_platz_id = 13;
     string herkunft_platz_name = 14;
     string seriennummer = 15;
+    string variante = 16;
+    string auspraegung1 = 17;
+    string auspraegung2 = 18;
 }
 
 message ListFotolagerReturnArticlesRequest {
