@@ -348,6 +348,9 @@ service SageHubService {
     // Season Analysis
     rpc GetSeasonAnalysis(GetSeasonAnalysisRequest) returns (GetSeasonAnalysisResponse);
 
+    // EK Beleg Sales Analysis (Postenhub)
+    rpc AnalyzeEKBelegSales(AnalyzeEKBelegSalesRequest) returns (AnalyzeEKBelegSalesResponse);
+
     // Feeds
     rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
     rpc GetFeedByName(GetFeedByNameRequest) returns (GetFeedByNameResponse);
@@ -4307,4 +4310,101 @@ message GetSeasonAnalysisResponse {
     string level = 3;
     repeated SeasonMonthDetail month_details = 4;
     repeated string queries = 5;
+}
+
+// ── EK Beleg Sales Analysis (Postenhub) ─────────────────────────────
+
+message AnalyzeEKBelegSalesRequest {
+    int32 mandant = 1;
+    repeated string belegnummern = 2;
+    bool debug = 3;
+}
+
+message EKBelegSalesOverview {
+    int32 eingebuchte_menge = 1;
+    int32 verkauft = 2;
+    int32 retouren = 3;
+    int32 interne_entnahmen = 4;
+    int32 netto_verkauft = 5;
+    int32 lagerbestand = 6;
+    double sell_through_rate_pct = 7;
+    double gesamt_ek_wert = 8;
+    double gesamt_umsatz_netto = 9;
+    double gesamt_roherloes = 10;
+    double avg_ek = 11;
+    double avg_vk_netto = 12;
+    double rohmarge_pct = 13;
+    double avg_lagerdauer_tage = 14;
+    double min_lagerdauer_tage = 15;
+    double max_lagerdauer_tage = 16;
+    double verkauf_pro_tag = 17;
+    double verkauf_pro_woche = 18;
+    double tage_bis_leer = 19;
+    string voraussichtlich_leer_am = 20;
+}
+
+message EKBelegSalesArticlePerformance {
+    string artikelnummer = 1;
+    string artikelname = 2;
+    int32 eingebucht = 3;
+    int32 verkauft = 4;
+    int32 retouren = 5;
+    int32 netto_verkauft = 6;
+    double umsatz = 7;
+    double roherloes = 8;
+    double marge_pct = 9;
+    double verkaufsquote_pct = 10;
+    double retourenquote_pct = 11;
+}
+
+message EKBelegSalesChannelGroup {
+    string kundengruppe = 1;
+    string lieferland = 2;
+    int32 verkauft = 3;
+    int32 retouren = 4;
+    int32 netto_verkauft = 5;
+    double umsatz = 6;
+    double roherloes = 7;
+    double marge_pct = 8;
+    double retourenquote_pct = 9;
+}
+
+message EKBelegSalesEinkaufPosition {
+    string belegdatum = 1;
+    string ek_belegart = 2;
+    string artikelname = 3;
+    string sku = 4;
+    string belegnummer = 5;
+    string lieferantenname = 6;
+    string lieferantennummer = 7;
+    double menge = 8;
+    string artikelgruppe = 9;
+    string seriennummer = 10;
+    double einzelpreis_ek = 11;
+}
+
+message EKBelegSalesVerkaufPosition {
+    string belegnummer = 1;
+    string belegdatum = 2;
+    string belegart = 3;
+    string lieferland = 4;
+    string artikelname = 5;
+    string sku = 6;
+    string kundenname = 7;
+    string kundengruppe = 8;
+    double roherloes = 9;
+    string seriennummer = 10;
+    double netto_einzelpreis = 11;
+}
+
+message AnalyzeEKBelegSalesResponse {
+    EKBelegSalesOverview overview = 1;
+    repeated EKBelegSalesArticlePerformance top_articles = 2;
+    repeated EKBelegSalesArticlePerformance negative_articles = 3;
+    repeated EKBelegSalesArticlePerformance top_returns = 4;
+    repeated EKBelegSalesChannelGroup channel_groups = 5;
+    repeated EKBelegSalesChannelGroup channel_countries = 6;
+    repeated EKBelegSalesEinkaufPosition einkauf_positionen = 7;
+    repeated EKBelegSalesVerkaufPosition verkauf_positionen = 8;
+    repeated string queries = 9;
 }
