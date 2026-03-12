@@ -319,6 +319,8 @@ service SageHubService {
     // VKBelegDetails
     rpc GetVKBelegDetails(GetVKBelegDetailsRequest) returns (GetVKBelegDetailsResponse);
     rpc GetVKBelegPositionsLagerDetails(GetVKBelegPositionsLagerDetailsRequest) returns (GetVKBelegPositionsLagerDetailsResponse);
+    // VKBelegPublic
+    rpc SearchVKBelegPublic(SearchVKBelegPublicRequest) returns (SearchVKBelegPublicResponse);
     
     rpc ListVKBelegClassifiersV1(ListVKBelegClassifiersV1Request) returns (ListVKBelegClassifiersV1Response);
     // VKBelegPulse
@@ -4407,4 +4409,70 @@ message AnalyzeEKBelegSalesResponse {
     repeated EKBelegSalesEinkaufPosition einkauf_positionen = 7;
     repeated EKBelegSalesVerkaufPosition verkauf_positionen = 8;
     repeated string queries = 9;
+}
+
+// SearchVKBelegPublic - Public search for VK Belege (Retouren-Portal)
+message SearchVKBelegPublicRequest {
+    int32 mandant = 1;
+    string search = 2;
+    bool debug = 3;
+}
+
+message SearchVKBelegPublicPosition {
+    string artikelnummer = 1;
+    int32 auspraegung_id = 2;
+    string position = 3;
+    double menge = 4;
+    string mengeneinheit = 5;
+    double einzelpreis = 6;
+    double mittlerer_ek = 7;
+    string seriennummer = 8;
+    string bezeichnung1 = 9;
+    string bezeichnung2 = 10;
+    int64 bel_pos_id = 11;
+    string user_versandklasse = 12;
+}
+
+message SearchVKBelegPublicBeleg {
+    int64 vor_id = 1;
+    int64 bel_id = 2;
+    string belegart = 3;
+    string user_belegjahr_belegnummer = 4;
+    string versand = 5;
+    string referenznummer = 6;
+    string lieferbedingung = 7;
+    string kundengruppe = 8;
+    google.protobuf.Timestamp user_cd = 9;
+
+    // A0 Rechnungsadresse
+    string a0_empfaenger = 10;
+    string a0_name1 = 11;
+    string a0_name2 = 12;
+    string a0_zusatz = 13;
+    string a0_strasse = 14;
+    string a0_plz = 15;
+    string a0_ort = 16;
+    string a0_land = 17;
+    string a0_telefon = 18;
+    string a0_mobilfunk = 19;
+    string a0_telefax = 20;
+    string a0_email = 21;
+
+    // A1 Lieferadresse
+    string a1_name1 = 22;
+    string a1_name2 = 23;
+    string a1_zusatz = 24;
+    string a1_strasse = 25;
+    string a1_plz = 26;
+    string a1_ort = 27;
+    string a1_land = 28;
+
+    repeated SearchVKBelegPublicPosition positionen = 29;
+    int32 belegjahr = 30;
+    int32 belegnummer = 31;
+}
+
+message SearchVKBelegPublicResponse {
+    repeated SearchVKBelegPublicBeleg results = 1;
+    repeated string queries = 2;
 }
