@@ -433,6 +433,13 @@ service SageHubService {
 
     // BuchungsJournal (Customer payment tracking)
     rpc ListBuchungsJournal(ListBuchungsJournalRequest) returns (ListBuchungsJournalResponse);
+
+    // LogisticHub Transfer Endpoints
+    rpc GetArticleInfo(GetArticleInfoRequest) returns (GetArticleInfoResponse);
+    rpc ListArticleSerialNumbers(ListArticleSerialNumbersRequest) returns (ListArticleSerialNumbersResponse);
+    rpc SearchWarehousePlaces(SearchWarehousePlacesRequest) returns (SearchWarehousePlacesResponse);
+    rpc GetWarehousePlace(GetWarehousePlaceRequest) returns (GetWarehousePlaceResponse);
+    rpc SearchArticles(SearchArticlesRequest) returns (SearchArticlesResponse);
 }
 
 message ArticleLieferant {
@@ -4475,4 +4482,111 @@ message SearchVKBelegPublicBeleg {
 message SearchVKBelegPublicResponse {
     repeated SearchVKBelegPublicBeleg results = 1;
     repeated string queries = 2;
+}
+
+// === LogisticHub Transfer Messages ===
+
+// --- GetArticleInfo ---
+message GetArticleInfoRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    bool debug = 3;
+}
+
+message GetArticleInfoResponse {
+    string artikelnummer = 1;
+    string bezeichnung1 = 2;
+    string bezeichnung2 = 3;
+    repeated ArticleInfoVariant varianten = 4;
+    repeated string queries = 5;
+}
+
+message ArticleInfoVariant {
+    int32 auspraegung_id = 1;
+    string ean_nummer = 2;
+    string variante = 3;
+    string auspraegung1 = 4;
+    string auspraegung2 = 5;
+    double lagerbestand_verfuegbar = 6;
+}
+
+// --- ListArticleSerialNumbers ---
+message ListArticleSerialNumbersRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    int32 platz_id = 4;
+    bool debug = 5;
+}
+
+message ListArticleSerialNumbersResponse {
+    repeated string items = 1;
+    repeated string queries = 2;
+}
+
+// --- SearchWarehousePlaces ---
+message SearchWarehousePlacesRequest {
+    string search = 1;
+    int32 mandant = 2;
+    int32 page_size = 3;
+    bool debug = 4;
+}
+
+message SearchWarehousePlacesResponse {
+    repeated WarehousePlace items = 1;
+    repeated string queries = 2;
+}
+
+message WarehousePlace {
+    int32 platz_id = 1;
+    string lagerkennung = 2;
+    string kurzbezeichnung = 3;
+    string platzbezeichnung = 4;
+    bool ist_gesperrt = 5;
+}
+
+// --- GetWarehousePlace ---
+message GetWarehousePlaceRequest {
+    int32 platz_id = 1;
+    int32 mandant = 2;
+    bool debug = 3;
+}
+
+message GetWarehousePlaceResponse {
+    WarehousePlace item = 1;
+    repeated string queries = 2;
+}
+
+// --- SearchArticles ---
+message SearchArticlesRequest {
+    string search = 1;
+    SearchArticlesType search_type = 2;
+    int32 mandant = 3;
+    int32 page_size = 4;
+    bool debug = 5;
+}
+
+enum SearchArticlesType {
+    SEARCH_ARTICLES_TYPE_UNSPECIFIED = 0;
+    SEARCH_ARTICLES_TYPE_TITLE = 1;
+    SEARCH_ARTICLES_TYPE_EAN = 2;
+    SEARCH_ARTICLES_TYPE_SN = 3;
+    SEARCH_ARTICLES_TYPE_SKU = 4;
+}
+
+message SearchArticlesResponse {
+    repeated SearchArticlesItem items = 1;
+    repeated string queries = 2;
+}
+
+message SearchArticlesItem {
+    string artikelnummer = 1;
+    string bezeichnung1 = 2;
+    int32 auspraegung_id = 3;
+    string ean_nummer = 4;
+    string variante = 5;
+    string auspraegung1 = 6;
+    string seriennummer = 7;
+    int32 platz_id = 8;
+    string kurzbezeichnung = 9;
 }
