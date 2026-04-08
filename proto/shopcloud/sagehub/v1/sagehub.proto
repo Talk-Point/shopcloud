@@ -277,6 +277,8 @@ service SageHubService {
     rpc ListAmazonItems(ListAmazonItemsRequest) returns (ListAmazonItemsResponse);
     rpc UpdateAmazonItem(UpdateAmazonItemRequest) returns (UpdateAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
+    rpc CreateAmazonItem(CreateAmazonItemRequest) returns (CreateAmazonItemResponse);
+    rpc ListAmazonItemOptions(ListAmazonItemOptionsRequest) returns (ListAmazonItemOptionsResponse);
 
     // Ebay
     rpc GetEbayItem(GetEbayItemRequest) returns (GetEbayItemResponse);
@@ -440,6 +442,9 @@ service SageHubService {
     rpc SearchWarehousePlaces(SearchWarehousePlacesRequest) returns (SearchWarehousePlacesResponse);
     rpc GetWarehousePlace(GetWarehousePlaceRequest) returns (GetWarehousePlaceResponse);
     rpc SearchArticles(SearchArticlesRequest) returns (SearchArticlesResponse);
+
+    // Dispo
+    rpc ListDispoBlocked(ListDispoBlockedRequest) returns (ListDispoBlockedResponse);
 }
 
 message ArticleLieferant {
@@ -4589,4 +4594,68 @@ message SearchArticlesItem {
     string seriennummer = 7;
     int32 platz_id = 8;
     string kurzbezeichnung = 9;
+}
+
+message ListAmazonItemOptionsRequest {}
+
+message ListAmazonItemOptionsResponse {
+    repeated string condition_ids = 1;
+    repeated string marketplace_ids = 2;
+    repeated string product_id_types = 3;
+}
+
+message CreateAmazonItemRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int64 auspraegung_id = 3;
+    string title = 4;
+    string condition_id = 5;
+    string marketplace_id = 6;
+    double listing_price = 7;
+    string product_id = 8;
+    string product_id_type = 9;
+    string by_user = 10;
+}
+
+message CreateAmazonItemResponse {
+    bool is_success = 1;
+    repeated string queries = 2;
+}
+
+message DispoBlockedItem {
+    int64 vor_id = 1;
+    string belegart = 2;
+    string matchcode = 3;
+    string referenznummer = 4;
+    string versand = 5;
+    string user_cd = 6;
+    string user_belegjahrbelegnummer = 7;
+    int64 bel_id = 8;
+    string bel_sku = 9;
+    double bel_menge = 10;
+    string bezeichnung1 = 11;
+    double gesamtpreis_intern_brutto = 12;
+    double mittlerer_ek = 13;
+    int64 bel_pos_id = 14;
+    string dispo_sku = 15;
+    string liefertermin = 16;
+    double dispo_menge = 17;
+    double lb_sys_stock_bestand = 18;
+    double lb_sys_stock_ohne_dispo = 19;
+    double lb_sys_stock_dispo = 20;
+}
+
+message ListDispoBlockedRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 mandant = 3;
+    bool debug = 4;
+    int32 days = 5; // default 30, blocks older than this many days
+}
+
+message ListDispoBlockedResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated DispoBlockedItem items = 3;
+    repeated string queries = 4;
 }
