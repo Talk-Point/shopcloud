@@ -338,6 +338,9 @@ service SageHubService {
     rpc ListBelegCloseReasons(ListBelegCloseReasonsRequest) returns (ListBelegCloseReasonsResponse);
     rpc CloseBelege(CloseBelegeRequest) returns (CloseBelegeResponse);
     rpc CloseBelegeByDocumentNumber(CloseBelegeByDocumentNumberRequest) returns (CloseBelegeByDocumentNumberResponse);
+    // VKBeleg Transform Operations
+    rpc ListVKBelegarten(ListVKBelegartenRequest) returns (ListVKBelegartenResponse);
+    rpc TransformBelegByDocumentNumber(TransformBelegByDocumentNumberRequest) returns (TransformBelegByDocumentNumberResponse);
     // Photo-Picking
     rpc ListPhotoPickArticles(ListPhotoPickArticlesRequest) returns (ListPhotoPickArticlesResponse);
     rpc GetPhotoPickArticleDetails(GetPhotoPickArticleDetailsRequest) returns (GetPhotoPickArticleDetailsResponse);
@@ -4719,4 +4722,36 @@ message ListArticleDispoEntriesResponse {
     int32 page_size = 2;
     repeated ArticleDispoEntry items = 3;
     repeated string queries = 4;
+}
+
+// VKBelegartenEntry - Document type entry from KHKVKBelegarten table
+message VKBelegartenEntry {
+    string kennzeichen        = 1; // e.g. "VFR"
+    string bezeichnung        = 2; // e.g. "Rechnung" — used as transform_to value
+    string bezeichnung_report = 3; // e.g. "Rechnung"
+    bool   editierbar         = 4;
+    bool   ist_initialbeleg   = 5;
+    int32  anzeige_index      = 6;
+}
+
+message ListVKBelegartenRequest {}
+
+message ListVKBelegartenResponse {
+    repeated VKBelegartenEntry belegarten = 1;
+    repeated string queries = 2;
+}
+
+// TransformBelegByDocumentNumber - Transform a VKBeleg to a different document type
+message TransformBelegByDocumentNumberRequest {
+    int32  mandant         = 1;
+    string document_number = 2; // e.g. "2024-1234567"
+    string transform_to    = 3; // Bezeichnung from KHKVKBelegarten, e.g. "Rechnung"
+    string by_user         = 4;
+    bool   force           = 5; // skip duplicate check
+}
+
+message TransformBelegByDocumentNumberResponse {
+    bool            is_success          = 1;
+    string          new_document_number = 2;
+    repeated string error_messages      = 3;
 }
