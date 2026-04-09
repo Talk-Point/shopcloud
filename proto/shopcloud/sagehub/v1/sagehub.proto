@@ -445,6 +445,8 @@ service SageHubService {
 
     // Dispo
     rpc ListDispoBlocked(ListDispoBlockedRequest) returns (ListDispoBlockedResponse);
+    rpc GetArticleStockV2(GetArticleStockV2Request) returns (GetArticleStockV2Response);
+    rpc ListArticleDispoEntries(ListArticleDispoEntriesRequest) returns (ListArticleDispoEntriesResponse);
 }
 
 message ArticleLieferant {
@@ -4657,5 +4659,64 @@ message ListDispoBlockedResponse {
     int32 page = 1;
     int32 page_size = 2;
     repeated DispoBlockedItem items = 3;
+    repeated string queries = 4;
+}
+
+message ArticleStockDataV2 {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    double qty_stock_in_warehouse = 4;       // Verfügbar im Lager (LagerbestandVerfuegbar)
+    double qty_stock_in_warehouse_dispo = 5; // Dispo im Lager (Summe aus KHKDispoArtikel)
+    double qty_stock_external_warehouse = 6; // Verfügbar Zulieferer (Summe: BestandSonepar + BestandEP + ZuliefererBestand)
+    double qty_in_stock = 7;                 // Verfügbar Shop (berechnet: Lager + Dispo + External)
+    string supplier_code = 8;                // Supplier Code: tp (Talk-Point), sp (Sonepar), ep (EP), oder custom code
+    string dispo_min_belegdatum = 9;         // Ältestes Belegdatum der Dispo-Einträge (MIN aus KHKVKBelege.Belegdatum)
+}
+
+message GetArticleStockV2Request {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+}
+
+message GetArticleStockV2Response {
+    ArticleStockDataV2 stock = 1;
+}
+
+message ArticleDispoEntry {
+    int64  vor_id = 1;
+    string belegart = 2;
+    string matchcode = 3;
+    string referenznummer = 4;
+    string versand = 5;
+    string user_cd = 6;
+    string user_belegjahrbelegnummer = 7;
+    int64  bel_id = 8;
+    string bel_sku = 9;
+    double bel_menge = 10;
+    string bezeichnung1 = 11;
+    double gesamtpreis_intern_brutto = 12;
+    double mittlerer_ek = 13;
+    int64  bel_pos_id = 14;
+    string dispo_sku = 15;
+    string liefertermin = 16;
+    double dispo_menge = 17;
+    string belegdatum = 18;
+}
+
+message ListArticleDispoEntriesRequest {
+    int32 mandant = 1;
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3; // optional, 0 = kein Filter (alle Ausprägungen)
+    int32 page = 4;
+    int32 page_size = 5;
+    bool debug = 6;
+}
+
+message ListArticleDispoEntriesResponse {
+    int32 page = 1;
+    int32 page_size = 2;
+    repeated ArticleDispoEntry items = 3;
     repeated string queries = 4;
 }
