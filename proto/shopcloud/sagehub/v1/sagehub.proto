@@ -288,6 +288,7 @@ service SageHubService {
 
     // VKBelege
     rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
+    rpc ListVKBelegDuplicated(ListVKBelegDuplicatedRequest) returns (ListVKBelegDuplicatedResponse);
     rpc ListVKBelegsByArticle(ListVKBelegsByArticleRequest) returns (ListVKBelegsByArticleResponse);
     rpc GetVKBelegV2(GetVKBelegV2Request) returns (GetVKBelegV2Response);
     rpc ListVKBelegSalechannels(ListVKBelegSalechannelsRequest) returns (ListVKBelegSalechannelsResponse);
@@ -4754,4 +4755,29 @@ message TransformBelegByDocumentNumberResponse {
     bool            is_success          = 1;
     string          new_document_number = 2;
     repeated string error_messages      = 3;
+}
+
+message ListVKBelegDuplicatedRequest {
+    int32  page           = 1;
+    int32  page_size      = 2;
+    int32  mandant        = 3;
+    string query          = 4;  // Advanced query filter (mandant, vorid, belegart, referenznummer)
+    int32  months_back    = 5;  // How many months back to look, default 6
+    bool   debug          = 6;
+}
+
+message VKBelegDuplicatedItem {
+    int32  mandant                      = 1;
+    int64  vor_id                       = 2;
+    string belegart                     = 3;
+    int32  total                        = 4;  // Number of duplicate documents
+    string referenznummer               = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+message ListVKBelegDuplicatedResponse {
+    int32                        page      = 1;
+    int32                        page_size = 2;
+    repeated VKBelegDuplicatedItem items   = 3;
+    repeated string              queries   = 4;
 }
