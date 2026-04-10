@@ -386,6 +386,7 @@ service SageHubService {
     rpc ListArticleMovements(ListArticleMovementsRequest) returns (ListArticleMovementsResponse);
     rpc ListLastSaleForArticles(ListLastSaleForArticlesRequest) returns (ListLastSaleForArticlesResponse);
     rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse);
+    rpc CreateArticleV2(CreateArticleV2Request) returns (CreateArticleV2Response);
     rpc CreateContentSnapshot(CreateContentSnapshotRequest) returns (CreateContentSnapshotResponse);
     rpc ListContentSnapshots(ListContentSnapshotsRequest) returns (ListContentSnapshotsResponse);
     rpc ReadContentSnapshot(ReadContentSnapshotRequest) returns (ReadContentSnapshotResponse);
@@ -633,10 +634,85 @@ message CreateArticleResponse {
     string error  = 3;
 }
 
+message ArticleEanConfig {
+    bool validate = 1;
+    bool force    = 2;
+}
+
+message SoneparArticleConfig {
+    string artikel_nummer = 1;
+}
+
+message EpArticleConfig {
+    string artikel_nummer = 1;
+}
+
+message GenericSupplierArticleConfig {
+    string          code           = 1;
+    string          artikel_nummer = 2;
+    optional double bestand        = 3;
+}
+
+message CreateArticleV2Request {
+    int32  mandant                = 1;
+    string bezeichnung1           = 2;
+    string bezeichnung2           = 3;
+    string matchcode              = 4;
+    string artikelgruppe          = 5;
+    string basismengeneinheit    = 6;
+    string verkaufsmengeneinheit = 7;
+    string verpackungseinheit    = 8;
+    int32  vpme_enthaelt_vkme    = 9;
+    string grundpreiseinheit     = 10;
+    double grundpreisbasis        = 11;
+    double bmee_enthaelt_grundme  = 12;
+    string hersteller             = 13;
+    string hartikelnummer         = 14;
+    string ean                    = 15;
+    int32  aktiv                  = 16;
+    int32  favorit                = 17;
+    int32  dispositionsmethode    = 18;
+    double dispofaktor            = 19;
+    double laenge                 = 20;
+    double breite                 = 21;
+    double hoehe                  = 22;
+    int32  steuerklasse           = 23;
+    string memo                   = 24;
+    double gewicht                = 25;
+    int32  lagerfuehrung          = 26;
+    string letzter_lieferant      = 27;
+    double bewertungssatz         = 28;
+    int32  serienummernpflicht    = 29;
+    string dimensionstext         = 30;
+    int32  user_scmp_aktiv        = 31;
+    string versandklasse          = 32;
+    int32  preisberechnung        = 33;
+    string energieeffizienzklasse = 34;
+    double kalkulatorischer_ek    = 35;
+    double letzter_ek             = 36;
+    string sachkonto_vk           = 37;
+    int32  reverse_charge         = 38;
+
+    ArticleEanConfig ean_config = 40;
+
+    oneof supplier {
+        SoneparArticleConfig         sonepar = 50;
+        EpArticleConfig              ep      = 51;
+        GenericSupplierArticleConfig generic = 52;
+    }
+}
+
+message CreateArticleV2Response {
+    bool   is_success = 1;
+    string reference  = 2;
+    string error      = 3;
+    bool   is_created = 4;
+}
+
 message Address {
-    string adresse = 1;                     
-    string mandant = 2;                     
-    string kategorie = 3;                   
+    string adresse = 1;
+    string mandant = 2;
+    string kategorie = 3;
     string matchcode = 4;                   
     string anrede = 5;                      
     string name1 = 6;                       
