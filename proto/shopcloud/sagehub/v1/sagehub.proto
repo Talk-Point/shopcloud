@@ -452,6 +452,9 @@ service SageHubService {
     rpc ListDispoBlocked(ListDispoBlockedRequest) returns (ListDispoBlockedResponse);
     rpc GetArticleStockV2(GetArticleStockV2Request) returns (GetArticleStockV2Response);
     rpc ListArticleDispoEntries(ListArticleDispoEntriesRequest) returns (ListArticleDispoEntriesResponse);
+
+    // VKBeleg Create (Order) — create a VKBeleg directly in Sage ERP via XML API
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
 }
 
 message ArticleLieferant {
@@ -4856,4 +4859,50 @@ message ListVKBelegDuplicatedResponse {
     int32                        page_size = 2;
     repeated VKBelegDuplicatedItem items   = 3;
     repeated string              queries   = 4;
+}
+
+// CreateOrder — create a VKBeleg directly in Sage ERP via XML API
+message CreateOrderAddress {
+    string firstname  = 1;
+    string lastname   = 2;
+    string company    = 3;
+    string street     = 4;  // Full street line, e.g. "Musterstraße 1"
+    string additional = 5;  // Additional address line (DeliverAdditional)
+    string city       = 6;
+    string postal     = 7;
+    string iso        = 8;  // Country ISO code, e.g. "DE"
+    string phone      = 9;
+}
+
+message CreateOrderLineItem {
+    string artikelnummer  = 1;  // Sage Artikelnummer → <ItemNumber> in XML, e.g. "10069564"
+    int32  auspraegung_id = 2;  // Sage AusprägungsID → <ItemVersion> in XML, e.g. 225
+    string product_name   = 3;
+    int32  qty            = 4;
+    string price          = 5;  // Decimal as string, e.g. "29.99"
+}
+
+message CreateOrderRequest {
+    int32  mandant               = 1;
+    string order_id              = 2;   // → <OrderID> in XML
+    string reseller_customer_id  = 3;   // → <ResellerCustomerID> in XML
+    string email                 = 4;
+    string customer_group        = 5;   // → <CustomerGroup> in XML (optional)
+    string shipping_costs        = 6;   // → <ShippingCosts> in XML, decimal as string e.g. "4.99"
+    string payment_condition     = 7;   // → <PaymentMethod><Condition> in XML, e.g. "Vorkasse"
+    string payment_reference     = 8;   // → <PaymentMethod><Reference> in XML, e.g. transaction ID
+    string delivery_condition    = 9;   // → <DeliveryCondition> in XML (optional), e.g. "STD"
+    string shipping_method       = 10;  // → <ShippingMethod> in XML (optional), e.g. "DPI"
+    string currency              = 11;  // → <Currency> in XML. Default EUR (omit or pass "EUR" → element not sent)
+    string invoice               = 12;  // → <Invoice> in XML, Rechnungskreis (optional)
+    CreateOrderAddress shipping_address     = 13;
+    CreateOrderAddress billing_address      = 14;
+    repeated CreateOrderLineItem line_items = 15;
+    bool   dry_run               = 16;  // Generate XML but do not send to Sage ERP
+}
+
+message CreateOrderResponse {
+    bool            is_success  = 1;
+    repeated string errors      = 2;
+    string          xml_preview = 3;  // Generated XML (always populated)
 }
