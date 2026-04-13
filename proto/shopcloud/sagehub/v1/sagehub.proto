@@ -453,6 +453,9 @@ service SageHubService {
     rpc GetArticleStockV2(GetArticleStockV2Request) returns (GetArticleStockV2Response);
     rpc ListArticleDispoEntries(ListArticleDispoEntriesRequest) returns (ListArticleDispoEntriesResponse);
 
+    // Stock — Oversold items (IT#15121)
+    rpc ListOversoldItems(ListOversoldItemsRequest) returns (ListOversoldItemsResponse);
+
     // VKBeleg Create (Order) — create a VKBeleg directly in Sage ERP via XML API
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
 }
@@ -4905,4 +4908,43 @@ message CreateOrderResponse {
     bool            is_success  = 1;
     repeated string errors      = 2;
     string          xml_preview = 3;  // Generated XML (always populated)
+}
+
+message OversoldItem {
+    string sku                 = 1;
+    string artikelnummer       = 2;
+    string auspraegung_id      = 3;
+    string matchcode           = 4;
+    int32  bestand             = 5;
+    int32  dispo               = 6;
+    int32  fehlmenge           = 7;
+    int32  verfuegbar          = 8;
+    int32  verfuegbar_ebay     = 9;
+    int32  vor_id              = 10;
+    string belegnummer         = 11;
+    string referenznummer      = 12;
+    string belegdatum          = 13;
+    string kunde               = 14;
+    string kundengruppe        = 15;
+    string artikel_bezeichnung = 16;
+    string bestell_menge       = 17;
+    string belegart            = 18;
+    string user_cd             = 19;
+    string zahlungskond        = 20;
+    string versand_status      = 21;
+}
+
+message ListOversoldItemsRequest {
+    int32  page      = 1;
+    int32  page_size = 2;
+    int32  mandant   = 3;
+    bool   debug     = 4;
+    string query     = 5;
+}
+
+message ListOversoldItemsResponse {
+    int32              page      = 1;
+    int32              page_size = 2;
+    repeated OversoldItem items  = 3;
+    repeated string    queries   = 4;
 }
