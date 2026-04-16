@@ -139,6 +139,13 @@ enum DashboardStatus {
     DASHBOARD_STATUS_STALE = 3;
 }
 
+enum VKBelegSearchType {
+    VKBELEG_SEARCH_TYPE_UNSPECIFIED  = 0;
+    VKBELEG_SEARCH_TYPE_EMAIL        = 1;
+    VKBELEG_SEARCH_TYPE_REFERENZ     = 2;
+    VKBELEG_SEARCH_TYPE_KUNDENNUMMER = 3;
+}
+
 message Metric {
     string type = 1;
     string display_name = 2;
@@ -324,7 +331,9 @@ service SageHubService {
     rpc GetVKBelegPositionsLagerDetails(GetVKBelegPositionsLagerDetailsRequest) returns (GetVKBelegPositionsLagerDetailsResponse);
     // VKBelegPublic
     rpc SearchVKBelegPublic(SearchVKBelegPublicRequest) returns (SearchVKBelegPublicResponse);
-    
+    // SearchVKBelegeByType - typed, paginated search for VK Belege
+    rpc SearchVKBelegeByType(SearchVKBelegeByTypeRequest) returns (SearchVKBelegeByTypeResponse);
+
     rpc ListVKBelegClassifiersV1(ListVKBelegClassifiersV1Request) returns (ListVKBelegClassifiersV1Response);
     // VKBelegPulse
     rpc GetVKBelegPulse(GetVKBelegPulseRequest) returns (GetVKBelegPulseResponse);
@@ -4575,6 +4584,44 @@ message SearchVKBelegPublicBeleg {
 message SearchVKBelegPublicResponse {
     repeated SearchVKBelegPublicBeleg results = 1;
     repeated string queries = 2;
+}
+
+// SearchVKBelegeByType - typed, paginated VKBeleg search
+message SearchVKBelegeByTypeRequest {
+    int32             mandant     = 1;
+    VKBelegSearchType search_type = 2;
+    string            value       = 3;
+    int32             page        = 4;
+    int32             page_size   = 5;
+    bool              debug       = 6;
+}
+
+message VKBelegSearchItem {
+    google.protobuf.Timestamp user_cd = 1;
+    int64  bel_id                     = 2;
+    int64  vor_id                     = 3;
+    string user_belegjahrbelegnummer  = 4;
+    string belegart                   = 5;
+    string referenznummer             = 6;
+    string referenzzeichen            = 7;
+    string email                      = 8;
+    double bruttobetrag               = 9;
+    string kundengruppe               = 10;
+    string a0_name1                   = 11;
+    string a0_name2                   = 12;
+    string a0_ort                     = 13;
+    string a0_plz                     = 14;
+    string a1_name1                   = 15;
+    string a1_name2                   = 16;
+    string a1_ort                     = 17;
+    string a1_plz                     = 18;
+}
+
+message SearchVKBelegeByTypeResponse {
+    repeated VKBelegSearchItem items     = 1;
+    int32                      page      = 2;
+    int32                      page_size = 3;
+    repeated string            queries   = 4;
 }
 
 // === LogisticHub Transfer Messages ===
