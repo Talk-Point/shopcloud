@@ -292,6 +292,10 @@ service SageHubService {
     rpc ListEbayItems(ListEbayItemsRequest) returns (ListEbayItemsResponse);
     rpc UpdateEbayItem(UpdateEbayItemRequest) returns (UpdateEbayItemResponse);
     rpc ReviseEbayItems(ReviseEbayItemsRequest) returns (ReviseEbayItemsResponse);
+    rpc CreateEbayItem(CreateEbayItemRequest) returns (CreateEbayItemResponse);
+    rpc ListEbayCategories(ListEbayCategoriesRequest) returns (ListEbayCategoriesResponse);
+    rpc GetEbayCategoryItemSpecifics(GetEbayCategoryItemSpecificsRequest) returns (GetEbayCategoryItemSpecificsResponse);
+    rpc ListEbayBusinessPolicies(ListEbayBusinessPoliciesRequest) returns (ListEbayBusinessPoliciesResponse);
 
     // VKBelege
     rpc ListVKBelegs(ListVKBelegsRequest) returns (ListVKBelegsResponse);
@@ -4994,4 +4998,112 @@ message ListOversoldItemsResponse {
     int32              page_size = 2;
     repeated OversoldItem items  = 3;
     repeated string    queries   = 4;
+}
+
+message ItemSpecificValue {
+    string name = 1;
+    repeated string values = 2;
+}
+
+message CreateEbayItemRequest {
+    int32  mandant        = 1;
+    string artikelnummer  = 2;
+    int64  auspraegung_id = 3;
+    string title          = 4;
+    double start_price    = 5;
+    string ean            = 6;
+    int32  category_id    = 7;
+    string by_user        = 8;
+    int32  condition_id        = 9;
+    int32  seller_id           = 10;
+    int32  type                = 11;
+    int32  site_id             = 12;
+    double vat_percent         = 13;
+    int32  quantity            = 14;
+    int32  check_dispo         = 15;
+    int32  freigabe            = 16;
+    int32  aktiv               = 17;
+    int64  payment_profile_id  = 18;
+    int64  shipping_profile_id = 19;
+    int64  return_profile_id   = 20;
+    repeated ItemSpecificValue item_specifics = 21;
+    string certificate_of_analysis                   = 22;
+    string certificate_of_conformity                 = 23;
+    string declaration_of_conformity                 = 24;
+    string instructions_for_use                      = 25;
+    string other_safety_documents                    = 26;
+    string safety_data_sheet                         = 27;
+    string trouble_shooting_guide                    = 28;
+    string user_guide_or_manual                      = 29;
+    string installation_instructions                 = 30;
+    string energy_efficiency_image_description       = 31;
+    string energy_efficiency_image_url               = 32;
+    string energy_efficiency_product_informationsheet = 33;
+    string photo_url2                                = 34;
+    string photo_url3                                = 35;
+}
+
+message CreateEbayItemResponse {
+    bool            is_success = 1;
+    repeated string queries    = 2;
+}
+
+message EbayCategory {
+    int32  category_id        = 1;
+    string category_name      = 2;
+    int32  category_parent_id = 3;
+    int32  category_level     = 4;
+    bool   leaf_category      = 5;
+}
+
+message ListEbayCategoriesRequest {
+    int32  mandant   = 1;
+    int32  site_id   = 2;
+    string search    = 3;
+    bool   leaf_only = 4;
+}
+
+message ListEbayCategoriesResponse {
+    repeated EbayCategory categories = 1;
+    repeated string        queries   = 2;
+}
+
+message EbayItemSpecific {
+    string          name               = 1;
+    string          usage_constraint   = 2;
+    int32           max_values         = 3;
+    repeated string value_recommendations = 4;
+}
+
+message GetEbayCategoryItemSpecificsRequest {
+    int32 mandant     = 1;
+    int32 category_id = 2;
+    int32 site_id     = 3;
+    bool  debug       = 4;
+}
+
+message GetEbayCategoryItemSpecificsResponse {
+    int32                    category_id    = 1;
+    repeated EbayItemSpecific item_specifics = 2;
+    repeated string           queries        = 3;
+}
+
+message EbayBusinessPolicy {
+    int64  ebay_profile_id = 1;
+    string profile_name    = 2;
+    string profile_type    = 3;
+    int32  seller_id       = 4;
+}
+
+message ListEbayBusinessPoliciesRequest {
+    int32  mandant      = 1;
+    int32  site_id      = 2;
+    int32  seller_id    = 3;
+    string profile_type = 4;
+    bool   debug        = 5;
+}
+
+message ListEbayBusinessPoliciesResponse {
+    repeated EbayBusinessPolicy policies = 1;
+    repeated string             queries  = 2;
 }
