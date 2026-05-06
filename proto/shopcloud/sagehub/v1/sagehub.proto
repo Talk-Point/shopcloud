@@ -5039,6 +5039,7 @@ message CreateEbayItemRequest {
     string energy_efficiency_image_description       = 31;
     string energy_efficiency_image_url               = 32;
     string energy_efficiency_product_informationsheet = 33;
+    string photo_url                                 = 36;
     string photo_url2                                = 34;
     string photo_url3                                = 35;
 }
