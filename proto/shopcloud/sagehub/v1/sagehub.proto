@@ -923,6 +923,24 @@ message UpdateAmazonItemRequest {
     UpdateMask update_mask = 4;
     bool aktiv = 5;
     bool offer_only = 6;
+
+    // Neue Felder, freigeschaltet via IT #15434 (GRANT UPDATE auf LBAmazonItems).
+    string sub_title = 7;
+    string condition_id = 8;
+    string sku = 9;
+    string memo = 10;
+    string marketplace_id = 11;
+    int32 seller_id = 12;
+    bool listing_aktiv = 13;
+    string condition_note = 14;
+    double listing_price = 15;
+    int32 min_listing_quantity = 16;
+    int32 max_listing_quantity = 17;
+    bool check_dispo = 18;
+    string product_id = 19;
+    string product_id_type = 20;
+    double business_price = 21;
+    string product_type = 22;
 }
 
 message UpdateAmazonItemResponse {
