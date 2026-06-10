@@ -2248,6 +2248,9 @@ message GetArticleImageRequest {
     int32 mandant = 1;
     string artikelnummer = 2;
     int32 auspraegung_id = 3;
+    // Optional. Sprache der Bildzeile (LBSysArtikelOnlinebezeichnung ist je Sprache getrennt).
+    // Leer = Default 'D' (Pflege-Sprache, symmetrisch zum Write-Pfad). IT#15788.
+    string sprache = 4;
 }
 
 message GetArticleImageResponse {
