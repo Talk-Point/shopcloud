@@ -941,6 +941,10 @@ message UpdateAmazonItemRequest {
     string product_id_type = 20;
     double business_price = 21;
     string product_type = 22;
+
+    // Mask-Pfad "lead_time_to_ship": Pfad gesetzt + Feld gesetzt => Wert schreiben,
+    // Pfad gesetzt + Feld nicht gesetzt/null => LeadtimeToShip auf NULL setzen.
+    optional int32 lead_time_to_ship = 23;
 }
 
 message UpdateAmazonItemResponse {
@@ -3776,7 +3780,10 @@ message UpdateScopesByApiKeyResponse {
 message UpdateAmazonItemLeadTimeToShipItem {
     int32 mandant = 1;
     int64 item_id = 2;
-    int32 lead_time_to_ship = 3;
+    // Nicht gesetzt bzw. JSON null => LeadtimeToShip wird auf NULL gesetzt
+    // (=> unsere Standard-Versandzeit greift in den Angeboten).
+    // Ein explizit gesendeter Wert - auch 0 - wird unveraendert geschrieben.
+    optional int32 lead_time_to_ship = 3;
 }
 
 message UpdateAmazonLeadTimesRequest {
