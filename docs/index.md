@@ -17,7 +17,6 @@ The ShopCloud API is composed of the following microservices:
 | HeartbeatHub | [HeartbeatHub Documentation](heartbeathub.md) | [heartbeathub.proto](heartbeathub.proto) | [heartbeathub.talk-point.de](https://heartbeathub.talk-point.de) |
 | ImageHub | [ImageHub Documentation](imagehub.md) | [imagehub.proto](imagehub.proto) | [imagehub.talk-point.de](https://imagehub.talk-point.de) |
 | Barcode API | [Barcode API Documentation](barcode-api.md) | [api.json](api.json) | [barcode.talk-point.de](https://barcode.talk-point.de) |
-| MetaHub | [MetaHub Documentation](metahub.md) | [metahub.proto](metahub.proto) | [metahub.talk-point.de](https://metahub.talk-point.de) |
 | MailHub | [MailHub Documentation](mailhub.md) | [mailhub.proto](mailhub.proto) | [mailhub.talk-point.de](https://mailhub.talk-point.de) |
 | ConsoleHub | [ConsoleHub Documentation](consolehub.md) | [consolehub.proto](consolehub.proto) | [consolehub.talk-point.de](https://consolehub.talk-point.de) |
 | EventHub | [EventHub Documentation](eventhub.md) | [eventhub.proto](eventhub.proto) | [eventhub.talk-point.de](https://eventhub.talk-point.de) |

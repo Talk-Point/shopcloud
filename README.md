@@ -14,7 +14,6 @@ Interface definitions of Talk-Point APIs.
 - SuppliuerHub - API for managing supplier product and orders
 - WarehousebrainHub - API automatic trading system
 - [BarcodeHub](https://github.com/Talk-Point/shopcloud/tree/master/proto/shopcloud/barcodehub/v1) - API for managing barcodes
-- [MetaHub](https://github.com/Talk-Point/shopcloud/tree/master/proto/shopcloud/metahub/v1) - API for managing meta data like documents
 
 ## Building
 
