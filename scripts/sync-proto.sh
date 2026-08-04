@@ -19,7 +19,6 @@ REPOS=(
     "heartbeathub|Talk-Point/heartbeathub|master|proto/shopcloud/heartbeathub/v1/heartbeathub.proto"
     "imagehub|Talk-Point/imagehub|master|proto/shopcloud/imagehub/v1/imagehub.proto"
     "mailhub|Talk-Point/mailhub|master|proto/shopcloud/mailhub/v2/mailhub.proto"
-    "metahub|Talk-Point/metahub|master|proto/shopcloud/metahub/v1/metahub.proto"
     "notificationhub|Talk-Point/notificationhub|master|proto/shopcloud/notificationhub/v1/notificationhub.proto"
     "supplierhub|Talk-Point/supplierhub|master|proto/shopcloud/supplierhub/v1/supplierhub.proto"
     "warehousebrainhub|Talk-Point/warehousebrainhub|master|proto/shopcloud/warehousebrainhub/v1/warehousebrainhub.proto"
