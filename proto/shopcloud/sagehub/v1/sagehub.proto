@@ -400,6 +400,12 @@ service SageHubService {
     rpc ListLastSaleForArticles(ListLastSaleForArticlesRequest) returns (ListLastSaleForArticlesResponse);
     rpc CreateArticle(CreateArticleRequest) returns (CreateArticleResponse);
     rpc CreateArticleV2(CreateArticleV2Request) returns (CreateArticleV2Response);
+    // Artikelanlage per direktem SQL (Spec 004)
+    rpc CreateArticleV3(CreateArticleV3Request) returns (CreateArticleV3Response);
+    rpc CreateArticleFromTemplate(CreateArticleFromTemplateRequest) returns (CreateArticleFromTemplateResponse);
+    rpc CreateArticleVariant(CreateArticleVariantRequest) returns (CreateArticleVariantResponse);
+    rpc ListVariantAuspraegungen(ListVariantAuspraegungenRequest) returns (ListVariantAuspraegungenResponse);
+    rpc DeleteArticle(DeleteArticleRequest) returns (DeleteArticleResponse);
     rpc CreateContentSnapshot(CreateContentSnapshotRequest) returns (CreateContentSnapshotResponse);
     rpc ListContentSnapshots(ListContentSnapshotsRequest) returns (ListContentSnapshotsResponse);
     rpc ReadContentSnapshot(ReadContentSnapshotRequest) returns (ReadContentSnapshotResponse);
@@ -726,6 +732,154 @@ message CreateArticleV2Response {
     string reference  = 2;
     string error      = 3;
     bool   is_created = 4;
+}
+
+// CreateArticleV3 (Spec 004): Neuanlage per direktem SQL ueber den Sage-Gateway.
+// Nummer aus Praefix-Maske (nummernkreis, Default "3", 8 Stellen) oder explizit
+// per artikelnummer (dann nur Kollisions-/Verwendungscheck).
+message CreateArticleV3Request {
+    int32  mandant       = 1;
+    string nummernkreis  = 2;   // Praefix, Default "3"
+    string artikelnummer = 3;   // optional; gesetzt = keine Vergabe, nur Kollisions-/Verwendungscheck
+
+    string bezeichnung1   = 10;
+    string bezeichnung2   = 11;
+    string matchcode      = 12;
+    string artikelgruppe  = 13;
+    string hersteller     = 14;
+    string hartikelnummer = 15;
+    string ean            = 16;
+
+    string basismengeneinheit    = 17;
+    string verkaufsmengeneinheit = 18;
+    string verpackungseinheit    = 19;
+    int32  vpme_enthaelt_vkme    = 20;
+    string grundpreiseinheit     = 21;
+    double grundpreisbasis       = 22;
+    double bmee_enthaelt_grundme = 23;
+    // Sage-Boolsemantik: -1 = aktiv, 0 = inaktiv. Nicht gesetzt (0) wird auf
+    // -1 gedefaultet - ein Artikel kann ueber diesen Endpunkt nicht inaktiv
+    // angelegt werden (gilt analog fuer alle gedefaulteten Felder: 0 ist
+    // nicht von "nicht gesetzt" unterscheidbar, siehe SetDefaults).
+    int32  aktiv                 = 24;
+    int32  favorit               = 25;
+    int32  dispositionsmethode   = 26;
+    double dispofaktor           = 27;
+    double laenge                = 28;
+    double breite                = 29;
+    double hoehe                 = 30;
+    int32  steuerklasse          = 31;
+    string memo                  = 32;
+    double gewicht               = 33;
+    int32  lagerfuehrung         = 34;
+    string letzter_lieferant     = 35;
+    double bewertungssatz        = 36;
+    int32  nachweispflicht       = 37;
+    string dimensionstext        = 38;
+    int32  user_scmp_aktiv       = 39;
+    string versandklasse         = 40;
+    int32  preisberechnung       = 41;
+    string energieeffizienzklasse = 42;
+    double kalkulatorischer_ek   = 43;
+    double letzter_ek            = 44;
+    string sachkonto_vk          = 45;
+    string langtext              = 46;
+
+    // BEWUSST KEIN ean_config (Entscheidung 05.08.2026, Spec 004 Abschnitt 3):
+    // EAN ist in dieser DB kein Schluessel; Dedup ist Aufrufer-Sache
+    // (GetArticleGtin / ListArticles mit gtin-Filter).
+    oneof supplier {
+        SoneparArticleConfig         sonepar = 50;
+        EpArticleConfig              ep      = 51;
+        GenericSupplierArticleConfig generic = 52;
+    }
+    string by_user = 60;
+    bool   debug   = 61;
+}
+
+message CreateArticleV3Response {
+    bool            is_success    = 1;
+    string          artikelnummer = 2;
+    reserved 3;   // war is_created (V2) - entfaellt ohne ean_config
+    string          error         = 4;
+    repeated string queries       = 5;   // nur bei debug
+}
+
+// CreateArticleFromTemplate (Spec 004, Workflow A): Artikel + Varianten aus Vorlage kopieren.
+message CreateArticleFromTemplateRequest {
+    int32  mandant               = 1;
+    string vorlage_artikelnummer = 2;   // PFLICHT - kein Default
+    string nummernkreis          = 3;   // Default "3"
+    string artikelnummer         = 4;   // optional
+    // Overrides; leer = Wert aus Vorlage
+    string bezeichnung1 = 10;
+    string bezeichnung2 = 11;
+    string matchcode    = 12;
+    string ean          = 13;
+    bool   only_stammvariante     = 20;  // true = Varianten der Vorlage nicht kopieren (Default false = alle kopieren)
+    bool   copy_onlinebezeichnung = 21;  // Default false
+    string by_user = 60;
+    bool   debug   = 61;
+}
+
+message CreateArticleFromTemplateResponse {
+    bool            is_success      = 1;
+    string          artikelnummer   = 2;
+    repeated int32  auspraegung_ids = 3;
+    string          error           = 4;
+    repeated string queries         = 5;
+}
+
+// CreateArticleVariant (Spec 004, Workflow B Phase 2): Auspraegung ergaenzen + Webshop-Vererbung.
+message CreateArticleVariantRequest {
+    int32  mandant                  = 1;
+    string artikelnummer            = 2;
+    int32  auspraegung_id           = 3;
+    bool   skip_webshop_inheritance = 4;  // true = Vererbung auslassen (Default false = vererben)
+    string by_user = 60;
+    bool   debug   = 61;
+}
+
+message CreateArticleVariantResponse {
+    bool            is_success = 1;
+    string          error      = 2;
+    repeated string queries    = 3;
+}
+
+// ListVariantAuspraegungen (Spec 004): Lookup der Auspraegungsklassen (z.B. B-Ware -> A, B, C, Defekt, ...).
+message VariantAuspraegung {
+    int32  auspraegung_id = 1;
+    string variante       = 2;
+    string auspraegung1   = 3;
+    int32  sortierung1    = 4;
+    string auspraegung2   = 5;
+    int32  sortierung2    = 6;
+}
+
+message ListVariantAuspraegungenRequest {
+    int32  mandant  = 1;
+    string variante = 2;   // optional, z.B. "B-Ware"
+    string search   = 3;   // optional, LIKE auf Auspraegung1
+}
+
+message ListVariantAuspraegungenResponse {
+    repeated VariantAuspraegung items = 1;
+}
+
+// DeleteArticle (Spec 004, Workflow C): loeschen mit Verwendungscheck.
+message DeleteArticleRequest {
+    int32  mandant       = 1;
+    string artikelnummer = 2;
+    bool   force         = 3;   // Verwendungscheck ueberspringen (Bestand blockt trotzdem)
+    string by_user = 60;
+    bool   debug   = 61;
+}
+
+message DeleteArticleResponse {
+    bool            is_success = 1;
+    string          error      = 2;
+    repeated string blocked_by = 3;   // gefundene Verwendungen
+    repeated string queries    = 4;
 }
 
 message Address {
