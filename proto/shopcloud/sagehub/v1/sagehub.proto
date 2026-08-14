@@ -632,6 +632,10 @@ message CreateArticleRequest {
     double laenge = 20;
     double breite = 21;
     double hoehe = 22;
+    // 0 ist hier nicht schreibbar: der Wert laeuft in den Default 1 (19 %).
+    // Dieser Endpunkt schreibt ueber die Sage-Product-API, die Maske aus
+    // IT#16500 gibt es nur bei CreateArticleV3 - wer steuerklasse 0 braucht,
+    // nimmt V3.
     int32 steuerklasse = 23;
     string memo = 24;
     double gewicht = 25;
@@ -701,6 +705,7 @@ message CreateArticleV2Request {
     double laenge                 = 20;
     double breite                 = 21;
     double hoehe                  = 22;
+    // 0 ist hier nicht schreibbar, siehe CreateArticleRequest.steuerklasse.
     int32  steuerklasse           = 23;
     string memo                   = 24;
     double gewicht                = 25;
@@ -758,9 +763,9 @@ message CreateArticleV3Request {
     double grundpreisbasis       = 22;
     double bmee_enthaelt_grundme = 23;
     // Sage-Boolsemantik: -1 = aktiv, 0 = inaktiv. Nicht gesetzt (0) wird auf
-    // -1 gedefaultet - ein Artikel kann ueber diesen Endpunkt nicht inaktiv
-    // angelegt werden (gilt analog fuer alle gedefaulteten Felder: 0 ist
-    // nicht von "nicht gesetzt" unterscheidbar, siehe SetDefaults).
+    // -1 gedefaultet; wer den Artikel inaktiv anlegen will, nimmt "aktiv" in
+    // die update_mask (gilt analog fuer alle gedefaulteten Zahlenfelder,
+    // siehe Kommentar an update_mask).
     int32  aktiv                 = 24;
     int32  favorit               = 25;
     int32  dispositionsmethode   = 26;
@@ -793,6 +798,27 @@ message CreateArticleV3Request {
         EpArticleConfig              ep      = 51;
         GenericSupplierArticleConfig generic = 52;
     }
+    // Optional. Pfade, die der Aufrufer bewusst gesetzt hat. Ein Zahlenfeld,
+    // das hier steht, wird so uebernommen wie gesendet - auch die 0. Ohne
+    // Eintrag greift bei 0 weiter der Anlage-Default (proto3 kennt keinen
+    // Unterschied zwischen "0 gesendet" und "nicht gesendet"), IT#16500.
+    //
+    // ACHTUNG, andere Bedeutung als die update_mask von UpdateArticle: sie
+    // waehlt NICHT aus, was geschrieben wird. Bei der Anlage wird immer der
+    // ganze Request geschrieben; die Maske sagt nur, welche 0 Absicht ist.
+    // Sie ist deshalb optional, waehrend UpdateArticle ohne Maske ablehnt.
+    //
+    // Gueltige Pfade sind ausschliesslich die gedefaulteten Zahlenfelder:
+    // steuerklasse, aktiv, lagerfuehrung, dispositionsmethode, dispofaktor,
+    // bewertungssatz, vpme_enthaelt_vkme, grundpreisbasis,
+    // bmee_enthaelt_grundme. Beispiel: steuerklasse 0 (steuerfrei, z. B.
+    // §25a) braucht update_mask { paths: ["steuerklasse"] }.
+    //
+    // paths erwartet die Proto-Feldnamen in snake_case, nicht die JSON-Namen
+    // aus dieser Doku. Jeder andere Pfad -> invalid_argument, damit ein
+    // Tippfehler nicht wieder still im Default landet.
+    UpdateMask update_mask = 62;
+
     string by_user = 60;
     bool   debug   = 61;
 }
@@ -2323,6 +2349,15 @@ message UpdateArticleRequest {
     string user_artcontrol_nutzer = 68;
     string hartikelnummer = 69;  // Herstellerartikelnummer (HAN)
     bool user_preisberechnung = 70;  // Preisberechnung aktivieren/deaktivieren
+
+    // Steuerklasse eines Bestandsartikels korrigieren (KHKArtikel.Steuerklasse).
+    // Wie jedes Feld hier nur wirksam, wenn "steuerklasse" in der update_mask
+    // steht - damit ist auch die 0 (steuerfrei) schreibbar (IT#16500).
+    //
+    // 71-74 bleiben bewusst frei: IT#16449 belegt sie mit matchcode,
+    // artikelgruppe, langtext und dimensionstext. Beide Aenderungen laufen so
+    // ohne Nummernkonflikt zusammen.
+    int32 steuerklasse = 75;
 }
 
 message UpdateArticleResponse {
