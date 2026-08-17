@@ -789,6 +789,16 @@ message CreateArticleV3Request {
     double letzter_ek            = 44;
     string sachkonto_vk          = 45;
     string langtext              = 46;
+    // Besteuerungsart (KHKArtikel.Besteuerungsart) - in der Sage-Artikelmaske
+    // das Dropdown "Reverse Charge". FK auf KHKBesteuerungsarten.Nummer:
+    // -1 = keine Umkehr der Steuerschuld, 52 = §13b UStG Bauleistungen,
+    // 55 = §13b UStG Mobilfunk (IT#16504).
+    //
+    // Default ist -1. Die 0 ist kein Katalogwert: Sage haengt sie in der Maske
+    // als ueberzaehligen vierten Eintrag ans Dropdown, statt "Keine" zu zeigen.
+    // Wer sie trotzdem schreiben will, nimmt "besteuerungsart" in die
+    // update_mask.
+    int32  besteuerungsart       = 47;
 
     // BEWUSST KEIN ean_config (Entscheidung 05.08.2026, Spec 004 Abschnitt 3):
     // EAN ist in dieser DB kein Schluessel; Dedup ist Aufrufer-Sache
@@ -811,8 +821,8 @@ message CreateArticleV3Request {
     // Gueltige Pfade sind ausschliesslich die gedefaulteten Zahlenfelder:
     // steuerklasse, aktiv, lagerfuehrung, dispositionsmethode, dispofaktor,
     // bewertungssatz, vpme_enthaelt_vkme, grundpreisbasis,
-    // bmee_enthaelt_grundme. Beispiel: steuerklasse 0 (steuerfrei, z. B.
-    // §25a) braucht update_mask { paths: ["steuerklasse"] }.
+    // bmee_enthaelt_grundme, besteuerungsart. Beispiel: steuerklasse 0
+    // (steuerfrei, z. B. §25a) braucht update_mask { paths: ["steuerklasse"] }.
     //
     // paths erwartet die Proto-Feldnamen in snake_case, nicht die JSON-Namen
     // aus dieser Doku. Jeder andere Pfad -> invalid_argument, damit ein
@@ -2358,6 +2368,18 @@ message UpdateArticleRequest {
     // artikelgruppe, langtext und dimensionstext. Beide Aenderungen laufen so
     // ohne Nummernkonflikt zusammen.
     int32 steuerklasse = 75;
+
+    // Besteuerungsart eines Bestandsartikels korrigieren
+    // (KHKArtikel.Besteuerungsart, "Reverse Charge" in der Sage-Maske):
+    // -1 = keine Umkehr der Steuerschuld, 52 = §13b UStG Bauleistungen,
+    // 55 = §13b UStG Mobilfunk (IT#16504). Nur wirksam, wenn
+    // "besteuerungsart" in der update_mask steht - so ist auch der Weg
+    // zurueck auf -1 eindeutig.
+    //
+    // 76-90 bleiben bewusst frei: IT#16449 belegt sie mit den restlichen
+    // Feldern der Artikelanlage. Beide Aenderungen laufen so ohne
+    // Nummernkonflikt zusammen.
+    int32 besteuerungsart = 91;
 }
 
 message UpdateArticleResponse {
