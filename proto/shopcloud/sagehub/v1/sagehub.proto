@@ -798,6 +798,11 @@ message CreateArticleV3Request {
     // als ueberzaehligen vierten Eintrag ans Dropdown, statt "Keine" zu zeigen.
     // Wer sie trotzdem schreiben will, nimmt "besteuerungsart" in die
     // update_mask.
+    //
+    // Jeder andere Wert wird gegen KHKBesteuerungsarten.Nummer geprueft und bei
+    // fehlendem Treffer mit invalid_argument abgelehnt; der Artikel wird dann
+    // nicht angelegt. -1 und 0 sind von der Pruefung ausgenommen: beide stehen
+    // im Bestand, aber nicht im Katalog (IT#16412).
     int32  besteuerungsart       = 47;
 
     // BEWUSST KEIN ean_config (Entscheidung 05.08.2026, Spec 004 Abschnitt 3):
@@ -2375,6 +2380,11 @@ message UpdateArticleRequest {
     // 55 = §13b UStG Mobilfunk (IT#16504). Nur wirksam, wenn
     // "besteuerungsart" in der update_mask steht - so ist auch der Weg
     // zurueck auf -1 eindeutig.
+    //
+    // Der Wert wird vor dem UPDATE gegen KHKBesteuerungsarten.Nummer geprueft.
+    // Kein Treffer -> invalid_argument unter Nennung des Werts, der Artikel
+    // bleibt unveraendert. Ausgenommen sind -1 und 0: beide stehen im Bestand,
+    // aber nicht im Katalog, und muessen roundtrip-faehig bleiben (IT#16412).
     //
     // 76-90 bleiben bewusst frei: IT#16449 belegt sie mit den restlichen
     // Feldern der Artikelanlage. Beide Aenderungen laufen so ohne
