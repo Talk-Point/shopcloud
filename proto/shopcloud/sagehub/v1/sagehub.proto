@@ -2390,6 +2390,16 @@ message UpdateArticleRequest {
     // Feldern der Artikelanlage. Beide Aenderungen laufen so ohne
     // Nummernkonflikt zusammen.
     int32 besteuerungsart = 91;
+
+    // Erloeskonto eines Bestandsartikels korrigieren (KHKArtikel.SachkontoVK).
+    // Nur wirksam, wenn "sachkonto_vk" in der update_mask steht - so laesst
+    // sich das Konto auch wieder leeren (IT#16412).
+    //
+    // Der Wert wird bewusst NICHT gegen den Sachkontenstamm KHKSachkonten
+    // (Schluesselspalte SaKto) geprueft: CreateArticleV3 schreibt das Feld
+    // ebenfalls ungeprueft, und ein Update, das strenger waere als die Anlage,
+    // waere fuer Aufrufer nicht nachvollziehbar.
+    string sachkonto_vk = 92;
 }
 
 message UpdateArticleResponse {
