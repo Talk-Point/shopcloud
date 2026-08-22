@@ -477,6 +477,12 @@ service SageHubService {
 
     // VKBeleg Create (Order) — create a VKBeleg directly in Sage ERP via XML API
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+
+    // Lagerplatzzuordnung + Bestandszugang per direktem SQL (Spec 006, IT#16375)
+    rpc ListBelegPositionStoragePlaces(ListBelegPositionStoragePlacesRequest) returns (ListBelegPositionStoragePlacesResponse);
+    rpc SetBelegPositionStoragePlaces(SetBelegPositionStoragePlacesRequest) returns (SetBelegPositionStoragePlacesResponse);
+    rpc BookStockReceipt(BookStockReceiptRequest) returns (BookStockReceiptResponse);
+    rpc GetStockBooking(GetStockBookingRequest) returns (GetStockBookingResponse);
 }
 
 message ArticleLieferant {
@@ -5375,4 +5381,158 @@ message ListEbayBusinessPoliciesRequest {
 message ListEbayBusinessPoliciesResponse {
     repeated EbayBusinessPolicy policies = 1;
     repeated string             queries  = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Spec 006 — Lagerplatzzuordnung an der Belegposition und Bestandszugang
+// (IT#16375). Vollstaendige Herleitung: specs/006-lagerplatzzuordnung/
+// ---------------------------------------------------------------------------
+
+enum BelegType {
+    BELEG_TYPE_UNSPECIFIED = 0;
+    BELEG_TYPE_VK          = 1;
+    BELEG_TYPE_EK          = 2;
+}
+
+// Ein Lagerplatz im Kontext einer Belegposition — zugeordnet und/oder Kandidat.
+// Ein gesetztes Gate-Flag heisst: als Ziel einer Zuordnung nicht zulaessig.
+message BelegPositionStoragePlace {
+    int32  platz_id        = 1;
+    string kurzbezeichnung = 2;   // Scanner-Format "KURZBEZ;N;N;N"
+    string lagerkennung    = 3;
+    double bestand         = 4;   // Bestand DIESER SKU auf diesem Platz
+
+    bool   is_assigned     = 10;
+    double menge           = 11;  // zugeordnete Menge (nur bei is_assigned)
+    double menge_basis     = 12;
+    int32  lagerbuchung_id = 13;  // != 0 -> Zuordnung haengt an einer Buchung
+
+    bool   is_gesperrt            = 20;
+    bool   is_gesperrt_inventur   = 21;
+    bool   is_sperrlager          = 22;
+    bool   is_fremdreserviert     = 23;  // KHKArtikelVariantenLagerplatz, anderer Artikel
+    bool   is_permanente_inventur = 24;
+}
+
+message ListBelegPositionStoragePlacesRequest {
+    int32     mandant       = 1;
+    BelegType beleg_type    = 2;
+    int64     bel_pos_id    = 3;
+    int32     bel_pos_st_id = 4;   // Default 0 (keine Stuecklisten-Unterposition)
+    // true = gesperrte / reservierte / inventurgeprueffte Plaetze mitliefern,
+    // markiert ueber die Gate-Flags. Default false = nur zulaessige Ziele,
+    // zugeordnete Plaetze aber immer.
+    bool      include_blocked = 5;
+    bool      debug           = 6;
+}
+
+message ListBelegPositionStoragePlacesResponse {
+    string artikelnummer  = 1;
+    int32  auspraegung_id = 2;
+    double menge          = 3;   // Positionsmenge
+    double menge_basis    = 4;
+    string belegart       = 5;
+    // true -> SetBelegPositionStoragePlaces lehnt die Position ab, weil die
+    // Belegart bestandswirksam ist (KHK*Belegarten.Lagerbuchung <> 0).
+    bool   belegart_bucht = 6;
+    string belegnummer    = 7;
+
+    repeated BelegPositionStoragePlace assigned   = 10;
+    repeated BelegPositionStoragePlace candidates = 11;
+    repeated string queries = 20;
+}
+
+message StoragePlaceAssignment {
+    int32  platz_id = 1;
+    // 0 = gesamte Positionsmenge. Nur bei genau einem Platz zulaessig.
+    double menge    = 2;
+}
+
+message SetBelegPositionStoragePlacesRequest {
+    int32     mandant       = 1;
+    BelegType beleg_type    = 2;
+    int64     bel_pos_id    = 3;
+    int32     bel_pos_st_id = 4;
+    // Leere Liste = Zuordnung aufheben: eine Zeile mit PlatzID 0 ueber die
+    // volle Positionsmenge — so legt der TaskService sie bei der Anlage an.
+    repeated StoragePlaceAssignment places = 5;
+    // true = Summe der Mengen darf kleiner als die Positionsmenge sein.
+    bool      allow_partial = 6;
+
+    string by_user = 60;
+    bool   debug   = 61;
+    bool   dry_run = 62;   // Batch bauen und zurueckgeben, nicht ausfuehren
+}
+
+message SetBelegPositionStoragePlacesResponse {
+    bool is_success = 1;
+    // Readback aus derselben Transaktion — kein zweiter Call noetig.
+    repeated BelegPositionStoragePlace assigned = 2;
+    repeated string queries = 3;
+}
+
+message BookStockReceiptRequest {
+    int32  mandant        = 1;
+    string artikelnummer  = 2;
+    int32  auspraegung_id = 3;
+    int32  platz_id       = 4;   // Zielplatz
+    double menge          = 5;   // bei Serienpflicht == Anzahl seriennummern
+    // Zugangs-Bewegungsart, Default "ZM" (Zugang, manuell). Zulaessig ist jede
+    // Art mit KHKLagerbewegungsarten.Bestandswirkung = 1 und Schwebt = 0.
+    // Entnahme und Umbuchung sind bewusst nicht unterstuetzt (Spec 006 §1.1).
+    string bewegungsart   = 6;
+    double einstandspreis = 7;   // EK je Einheit
+    repeated string seriennummern = 8;
+
+    string referenz  = 20;  // z.B. Belegnummer -> KHKLagerplatzbuchungen.Referenz
+    string memo      = 21;
+    string lieferant = 22;  // optional -> KHKArtikelVarianten.LetzterLieferant
+
+    // Optionaler Belegbezug: verknuepft die Buchung mit einer Belegposition.
+    // Ohne diese Felder ist es eine freie Buchung.
+    BelegType beleg_type    = 30;
+    int64     bel_pos_id    = 31;
+    int32     bel_pos_st_id = 32;
+
+    string by_user = 60;
+    bool   debug   = 61;
+    bool   dry_run = 62;
+}
+
+message BookStockReceiptResponse {
+    bool   is_success  = 1;
+    int64  buchungs_id = 2;
+    int64  bestands_id = 3;
+    int64  job         = 4;
+    double bestand_neu = 5;   // Bestand des Layers nach der Buchung
+    repeated string queries = 6;
+}
+
+message GetStockBookingRequest {
+    int32 mandant     = 1;
+    int64 buchungs_id = 2;
+    bool  debug       = 3;
+}
+
+message GetStockBookingResponse {
+    int64  buchungs_id      = 1;
+    int64  job              = 2;
+    string artikelnummer    = 3;
+    int32  auspraegung_id   = 4;
+    string bewegungsart     = 5;
+    int32  bestandswirkung  = 6;
+    // Trotz der Namen in der DB sind das PlatzIDs, nicht Lagerkennungen.
+    // 0 = von aussen.
+    int32  herkunft_platz_id = 7;
+    int32  ziel_platz_id     = 8;
+    double menge             = 9;
+    double menge_basis       = 10;
+    double einstandspreis    = 11;
+    string referenz          = 12;
+    string memo              = 13;
+    google.protobuf.Timestamp bewegungsdatum = 14;  // reines Datum, ohne Uhrzeit
+    int64  bestands_id       = 15;
+    double bestand_layer     = 16;  // aktueller Bestand des Layers
+    repeated string seriennummern = 17;
+    repeated string queries = 20;
 }
