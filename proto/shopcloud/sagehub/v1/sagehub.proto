@@ -5258,6 +5258,61 @@ message ListOversoldItemsRequest {
     int32  mandant   = 3;
     bool   debug     = 4;
     string query     = 5;
+    // Filtert das Belegdatum der offenen Positionen. Ohne Angabe: kein Zeitfilter.
+    // Belegdatum ist in Sage tagesgranular, der Zeitanteil ist immer 00:00:00.
+    // Der Zeitraum wird deshalb in allen drei Zweigen auf ganze Tage gezogen:
+    // start_at auf den Tagesbeginn, end_at auf 23:59:59. duration = 3600s
+    // meint damit "heute", nicht "die letzte Stunde".
+    oneof time_frame {
+        TimeRange range                     = 6;
+        google.protobuf.Duration duration   = 7;
+        TimeFramePreset range_shortcut      = 8;
+    }
+}
+
+// Kennzahlen der Ueberverkauf-Ansicht. total_articles und total_fehlmenge
+// beziehen sich auf EINDEUTIGE Artikel, nicht auf Positionszeilen.
+message OversalesOverview {
+    int32 total_articles  = 1;
+    int32 total_positions = 2;
+    int32 total_fehlmenge = 3;
+    int32 total_platforms = 4;
+    int32 oldest_days     = 5;
+}
+
+message OversalesPlatformStat {
+    string kundengruppe      = 1;
+    string kundengruppe_name = 2;
+    // Anzahl BELEGE, nicht Positionen: ein Beleg mit drei ueberverkauften
+    // Positionen ist eine Bestellung. Die Positionsebene steht in
+    // overview.total_positions. share_pct rechnet auf derselben Basis.
+    int32  order_count       = 3;
+    double share_pct         = 4;
+}
+
+// Zaehlt offene Positionen nach BESTELLDATUM. Das ist ausdruecklich KEIN
+// Verlauf "neue Ueberverkaeufe pro Tag" - dafuer fehlt in Sage jede Historie.
+message OversalesDayStat {
+    string day         = 1;
+    string label       = 2;
+    // Anzahl BELEGE an diesem Bestelltag, nicht Positionen - wie in
+    // OversalesPlatformStat.
+    int32  order_count = 3;
+    double share_pct   = 4;
+}
+
+message OversalesCriticalArticle {
+    string sku            = 1;
+    string artikelnummer  = 2;
+    int32  auspraegung_id = 3;
+    // Der Matchcode aus dem Artikelstamm. Bewusst nicht die Positions-
+    // bezeichnung: die unterscheidet sich je Beleg, der Name spraenge dann
+    // zwischen zwei Aufrufen desselben Artikels.
+    string bezeichnung    = 4;
+    int32  fehlmenge      = 5;
+    int32  positions      = 6;
+    int32  oldest_days    = 7;
+    string platforms      = 8;
 }
 
 message ListOversoldItemsResponse {
@@ -5265,6 +5320,10 @@ message ListOversoldItemsResponse {
     int32              page_size = 2;
     repeated OversoldItem items  = 3;
     repeated string    queries   = 4;
+    OversalesOverview                 overview          = 5;
+    repeated OversalesPlatformStat    platform_stats    = 6;
+    repeated OversalesDayStat         day_stats         = 7;
+    repeated OversalesCriticalArticle critical_articles = 8;
 }
 
 message ItemSpecificValue {
