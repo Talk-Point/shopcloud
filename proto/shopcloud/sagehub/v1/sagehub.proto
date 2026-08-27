@@ -1678,6 +1678,12 @@ message UpdateEbayItemRequest {
     string safety_statement6 = 77;
     string safety_statement7 = 78;
     string safety_statement8 = 79;
+
+    // Geplante Startzeit des Angebots (LBebayItems.Start). RFC3339 mit Offset,
+    // wird vor dem Schreiben nach Europe/Berlin konvertiert. Pfad start in der
+    // update_mask ohne Wert loescht die Planung (NULL).
+    // Die Ist-Startzeit (Spalte Startzeit) bleibt unberuehrt.
+    google.protobuf.Timestamp start = 80;
 }
 
 message UpdateEbayItemResponse {
@@ -1774,6 +1780,12 @@ message EbayItem {
     string safety_statement8 = 82;
 
     int32 duration = 83;
+
+    // Geplante Startzeit des Angebots (LBebayItems.Start), RFC3339 mit Offset.
+    // Der Wert steht in der DB als Berliner Ortszeit und wird beim Lesen als
+    // Europe/Berlin interpretiert. Nicht gesetzt -> leer.
+    // Die Ist-Startzeit (Spalte Startzeit) wird hier nicht abgebildet.
+    google.protobuf.Timestamp start = 84;
 }
 
 message GetEbayItemRequest {
@@ -5375,6 +5387,10 @@ message CreateEbayItemRequest {
     string description                               = 39;
     string condition_description                     = 40;
     string store_category_id                         = 41;
+    // Geplante Startzeit des Angebots (LBebayItems.Start). RFC3339 mit Offset,
+    // wird vor dem Schreiben nach Europe/Berlin konvertiert. Leer -> NULL.
+    // Die Ist-Startzeit (Spalte Startzeit) bleibt unberuehrt.
+    google.protobuf.Timestamp start                   = 42;
 }
 
 message CreateEbayItemResponse {
