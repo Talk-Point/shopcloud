@@ -420,6 +420,7 @@ service SageHubService {
     // Lagerplatzbuchungen
     rpc ListLagerplatzBuchungen(ListLagerplatzBuchungenRequest) returns (ListLagerplatzBuchungenResponse);
     rpc ListLagerbewegungenAggregiert(ListLagerbewegungenAggregiertRequest) returns (ListLagerbewegungenAggregiertResponse);
+    rpc ListLostBuchungen(ListLostBuchungenRequest) returns (ListLostBuchungenResponse);
     // Onlinbezeichner
     rpc GetArticleOnlinebezeichner(GetArticleOnlinebezeichnerRequest) returns (GetArticleOnlinebezeichnerResponse);
     rpc UpdateArticleOnlinebezeichner(UpdateArticleOnlinebezeichnerRequest) returns (UpdateArticleOnlinebezeichnerResponse);
@@ -4198,6 +4199,60 @@ message ListLagerplatzBuchungenResponse {
     int32 page_size = 3;
     int32 total_count = 4;
     repeated string queries = 5;
+}
+
+// Buchungen in ein bestimmtes Lager (Default "Lost") ueber einen Zeitraum.
+// Loest den ETL-Job report-sage-buchung-ins-lost.py ab (IT#16644).
+message ListLostBuchungenRequest {
+    // Zeitraum ist Pflicht; ohne Angabe greift der 7-Tage-Default, nie "alles".
+    oneof time_frame {
+        TimeRange range = 1;
+        google.protobuf.Duration duration = 2;
+        TimeFramePreset range_shortcut = 3;
+    }
+    int32 mandant = 4;
+    // Lagerkennung, Default "Lost" - gebundener Parameter, damit der RPC auch
+    // fuer andere Kennungen taugt.
+    string lagerkennung = 5;
+    int32 page = 6;
+    int32 page_size = 7;
+    string query = 8;
+    string order_by = 9;
+    Direction direction = 10;
+    bool debug = 11;
+}
+
+message LostBuchung {
+    int32 mandant = 1;
+    string job = 2;
+    int64 buchungs_id = 3;
+    // Erfassungsdatum des Buchungs-Jobs (KHKLagerplatzbuchungenJobs), tagesgenau.
+    google.protobuf.Timestamp erfassungsdatum = 4;
+    // Ohne Domaenen-Praefix (z. B. "TALK-POINT\").
+    string benutzer = 5;
+    string memo = 6;
+    string artikelnummer = 7;
+    int32 auspraegung_id = 8;
+    string matchcode = 9;
+    double menge_basis = 10;
+    string lagerkennung = 11;
+}
+
+// Summe der Menge je Artikelnummer im Zeitraum, fuer den Report-Block.
+message LostBuchungAggregat {
+    string artikelnummer = 1;
+    string matchcode = 2;
+    double menge_basis = 3;
+}
+
+message ListLostBuchungenResponse {
+    repeated LostBuchung items = 1;
+    repeated LostBuchungAggregat aggregate = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+    int32 total_count = 5;
+    TimeRange range = 6;
+    repeated string queries = 7;
 }
 
 // VKBelegsWhatsUp Messages - Zeitraum-Analyse für VK Belege für schnellen Überblick
