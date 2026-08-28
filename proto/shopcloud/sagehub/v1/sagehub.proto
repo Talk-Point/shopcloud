@@ -393,6 +393,8 @@ service SageHubService {
     rpc DisableShopArticle(DisableShopArticleRequest) returns (DisableShopArticleResponse);
     rpc SetArticleContentStatus(SetArticleContentStatusRequest) returns (SetArticleContentStatusResponse);
     rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse);
+    // Steuerklassen-Katalog fuer die Artikelpflege (IT#11656)
+    rpc ListSteuerklassen(ListSteuerklassenRequest) returns (ListSteuerklassenResponse);
     rpc ListArticleRanks(ListArticleRanksRequest) returns (ListArticleRanksResponse);
     rpc ListArticleWarehouseStocks(ListArticleWarehouseStocksRequest) returns (ListArticleWarehouseStocksResponse);
     rpc ListArticleWarehouseStoragePlaceStocks(ListArticleWarehouseStoragePlaceStocksRequest) returns (ListArticleWarehouseStoragePlaceStocksResponse);
@@ -780,6 +782,10 @@ message CreateArticleV3Request {
     double laenge                = 28;
     double breite                = 29;
     double hoehe                 = 30;
+    // Schluessel in KHKSteuerklassen (Land '*'), Default 1 = Normalsatz;
+    // Katalog per ListSteuerklassen. Ein Wert ausserhalb bricht den
+    // Anlage-Batch mit invalid_argument ab (IT#11656). Fuer die 0 siehe
+    // update_mask (IT#16500).
     int32  steuerklasse          = 31;
     string memo                  = 32;
     double gewicht               = 33;
@@ -2388,6 +2394,12 @@ message UpdateArticleRequest {
     // Wie jedes Feld hier nur wirksam, wenn "steuerklasse" in der update_mask
     // steht - damit ist auch die 0 (steuerfrei) schreibbar (IT#16500).
     //
+    // Der Wert ist ein Schluessel in KHKSteuerklassen (Land '*'), kein
+    // Prozentsatz: 0 = steuerfrei, 1 = Normalsatz (19 %), 2 = Ermaessigter
+    // Satz (7 %), ... - die Liste liefert ListSteuerklassen. Ein Wert
+    // ausserhalb des Katalogs -> invalid_argument, vor jedem UPDATE
+    // (IT#11656).
+    //
     // 71-74 bleiben bewusst frei: IT#16449 belegt sie mit matchcode,
     // artikelgruppe, langtext und dimensionstext. Beide Aenderungen laufen so
     // ohne Nummernkonflikt zusammen.
@@ -2423,6 +2435,50 @@ message UpdateArticleRequest {
 
 message UpdateArticleResponse {
     bool is_success = 1;
+    repeated string queries = 2;
+}
+
+// Steuerklassen-Katalog aus KHKSteuerklassen, fuer das Select in der
+// Artikeldetailansicht (IT#11656).
+//
+// KHKArtikel.Steuerklasse ist KEIN Steuersatz, sondern ein Schluessel: das
+// Paar (Steuerklasse, Land des Kunden) fuehrt auf einen Steuercode, und erst
+// KHKSteuertabelle.Steuersatz zu diesem Code ist der Prozentsatz. Land '*' ist
+// der Inland-/Default-Eintrag - gegen diese Zeilen prueft UpdateArticle den
+// Wert von steuerklasse; die Sage-Artikelmaske bietet genau sie an. Daneben
+// gibt es laenderspezifische Zeilen ('*D', '*E', 'AT', 'CY', ...), die den
+// Liefercode fuer einzelne EU-Laender festlegen.
+message ListSteuerklassenRequest {
+    // Land-Schluessel aus KHKSteuerklassen.Land; leer = '*' (Inland). Nur
+    // Buchstaben und '*', hoechstens 4 Zeichen - sonst invalid_argument.
+    string land = 1;
+    bool debug = 2;
+}
+
+message SteuerklasseItem {
+    // Schluessel, so wie er in KHKArtikel.Steuerklasse steht (0, 1, 2, ...).
+    int32 steuerklasse = 1;
+    // Bezeichnung der Klasse, z. B. "steuerfrei", "Normalsatz",
+    // "Ermaessigter Satz".
+    string bezeichnung = 2;
+    string land = 3;
+    // Steuercode fuer Lieferungen bzw. Erwerb (KHKSteuertabelle.Steuercode).
+    // Inland: 0 = steuerfrei, 2 = ermaessigt, 101 = Normalsatz, 4 = Normalsatz
+    // Provisionen. Die Klassen 3-6 haben keinen Inlandscode (Lieferung 0),
+    // nur Liefercodes fuer einzelne EU-Laender - im Inland wirken sie wie
+    // steuerfrei.
+    int32 steuercode_lieferung = 4;
+    int32 steuercode_erwerb = 5;
+    // Steuersatz in Prozent zum Liefer-Code (KHKSteuertabelle.Steuersatz),
+    // z. B. 19, 7 oder 0. Das ist der Wert fuers Select-Label.
+    double steuersatz = 6;
+    // Bezeichnung des Liefer-Codes, z. B. "Normalsatz 19%".
+    string steuercode_bezeichnung = 7;
+}
+
+message ListSteuerklassenResponse {
+    // Aufsteigend nach steuerklasse.
+    repeated SteuerklasseItem items = 1;
     repeated string queries = 2;
 }
 
