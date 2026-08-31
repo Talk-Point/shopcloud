@@ -470,6 +470,11 @@ service SageHubService {
     rpc GetWarehousePlace(GetWarehousePlaceRequest) returns (GetWarehousePlaceResponse);
     rpc SearchArticles(SearchArticlesRequest) returns (SearchArticlesResponse);
 
+    // Stock-Booking Lesestrecke (Spec 005 §3.4, IT#15452) — die Abfragen, die
+    // das Umbuchen-Formular vor der Buchung braucht.
+    rpc GetWarehousePlaceStock(GetWarehousePlaceStockRequest) returns (GetWarehousePlaceStockResponse);
+    rpc GetSerialPurchaseHistory(GetSerialPurchaseHistoryRequest) returns (GetSerialPurchaseHistoryResponse);
+
     // Dispo
     rpc ListDispoBlocked(ListDispoBlockedRequest) returns (ListDispoBlockedResponse);
     rpc GetArticleStockV2(GetArticleStockV2Request) returns (GetArticleStockV2Response);
@@ -486,6 +491,21 @@ service SageHubService {
     rpc SetBelegPositionStoragePlaces(SetBelegPositionStoragePlacesRequest) returns (SetBelegPositionStoragePlacesResponse);
     rpc BookStockReceipt(BookStockReceiptRequest) returns (BookStockReceiptResponse);
     rpc GetStockBooking(GetStockBookingRequest) returns (GetStockBookingResponse);
+
+    // Stock-Booking — ein Endpunkt je Bewegungsart (Spec 005, IT#15452).
+    // Der Server baut das <Bestand>-XML, validiert die Feld-Matrix und liefert
+    // Buchungs-Schritte + Verify-Zeilen zurueck. TransferStock bleibt als
+    // Low-Level-Primitive fuer die LogisticHub-Worker bestehen.
+    rpc BookStockIn(BookStockInRequest) returns (BookingResponse);
+    rpc BookStockOut(BookStockOutRequest) returns (BookingResponse);
+    rpc BookStockMove(BookStockMoveRequest) returns (BookingResponse);
+
+    // Stock-Booking Kompositionen (Spec 005 §3.1) — mehrere XMLs pro Aufruf,
+    // sequenziell, ohne Rollback. Bricht eine Sequenz mittendrin ab, liefert
+    // die Antwort fertige Rueckbuchungs-Vorschlaege (compensation).
+    rpc BookSkuChange(BookSkuChangeRequest) returns (BookingResponse);
+    rpc BookBinMove(BookBinMoveRequest) returns (BookingResponse);
+    rpc BookBatch(BookBatchRequest) returns (BookingResponse);
 }
 
 message ArticleLieferant {
@@ -1636,6 +1656,9 @@ message UpdateEbayItemRequest {
     bool list_after_end = 32;
     UpdateMask update_mask = 33;
 
+    // Nicht schreibbar: LBebayItems.RestrictedToBusiness ist smallint, dieses
+    // Feld ein string. Der Pfad hat noch nie eine Spalte geschrieben und wird
+    // seit dem Pfad-Guard mit 400 abgelehnt statt still ignoriert (IT#16691).
     string restricted_to_business = 34;
     string signal_word = 35;
     string pictogram1 = 36;
@@ -1691,6 +1714,18 @@ message UpdateEbayItemRequest {
     // update_mask ohne Wert loescht die Planung (NULL).
     // Die Ist-Startzeit (Spalte Startzeit) bleibt unberuehrt.
     google.protobuf.Timestamp start = 80;
+
+    // Merkmale (LBebayItems.ItemSpecifics). Wirkt nur mit Pfad item_specifics in der
+    // update_mask und wird je Merkmalsname mit dem Bestand zusammengefuehrt: gleichnamige
+    // Merkmale werden ueberschrieben, neue angehaengt, nicht genannte bleiben stehen.
+    // Ein Merkmal ohne values wird entfernt. Kein Komplettersatz (IT#16691).
+    repeated ItemSpecificValue item_specifics = 81;
+
+    // Energielabel-URL-Spalten (alter Weg, nachrangig zu den Merkmalen).
+    // Leerstring mit Pfad leert die Spalte.
+    string energy_efficiency_image_description        = 82;
+    string energy_efficiency_image_url                = 83;
+    string energy_efficiency_product_informationsheet = 84;
 }
 
 message UpdateEbayItemResponse {
@@ -1793,6 +1828,18 @@ message EbayItem {
     // Europe/Berlin interpretiert. Nicht gesetzt -> leer.
     // Die Ist-Startzeit (Spalte Startzeit) wird hier nicht abgebildet.
     google.protobuf.Timestamp start = 84;
+
+    // Merkmale aus LBebayItems.ItemSpecifics, geparst aus dem XML der Spalte.
+    // Leere oder nicht lesbare Spalte -> leere Liste; ein Parse-Fehler wird
+    // geloggt, laesst das Lesen des Items aber nicht scheitern (IT#16691).
+    repeated ItemSpecificValue item_specifics = 85;
+
+    // Energielabel-Spalten von LBebayItems. Sie sind ueber UpdateEbayItem
+    // schreibbar; ohne sie hier liesse sich der Erfolg -- gerade das Leeren
+    // einer falsch befuellten Spalte -- nur per Rohquery pruefen (IT#16691).
+    string energy_efficiency_image_description = 86;
+    string energy_efficiency_image_url = 87;
+    string energy_efficiency_product_informationsheet = 88;
 }
 
 message GetEbayItemRequest {
@@ -5077,6 +5124,8 @@ message WarehousePlace {
     string kurzbezeichnung = 3;
     string platzbezeichnung = 4;
     bool ist_gesperrt = 5;
+    // Summe des Lagerbestands ueber alle Artikel auf diesem Platz.
+    double bestand_gesamt = 6;
 }
 
 // --- GetWarehousePlace ---
@@ -5098,6 +5147,9 @@ message SearchArticlesRequest {
     int32 mandant = 3;
     int32 page_size = 4;
     bool debug = 5;
+    // true laesst den Filter "Lagerbestand > 0" weg. Das ZM-Ziel (Zugang) darf
+    // leer oder inaktiv sein — sonst faende man den Artikel gar nicht erst.
+    bool include_no_stock = 6;
 }
 
 enum SearchArticlesType {
@@ -5123,6 +5175,64 @@ message SearchArticlesItem {
     string seriennummer = 7;
     int32 platz_id = 8;
     string kurzbezeichnung = 9;
+    // Nachweispflicht aus KHKArtikel: true = seriennummernpflichtig (Sage 3),
+    // false = keine Seriennummern (Sage 0).
+    bool nachweispflicht = 10;
+    double mittlerer_ek = 11;
+    double lagerbestand = 12;
+    string auspraegung2 = 13;
+}
+
+// --- GetWarehousePlaceStock (Spec 005 §3.4 Schritt 5) ---
+message GetWarehousePlaceStockRequest {
+    int32 mandant = 1;
+    int32 platz_id = 2;
+    bool debug = 3;
+}
+
+message GetWarehousePlaceStockResponse {
+    repeated WarehousePlaceStockItem items = 1;
+    WarehousePlace place = 2;
+    repeated string queries = 3;
+}
+
+message WarehousePlaceStockItem {
+    string artikelnummer = 1;
+    string bezeichnung1 = 2;
+    int32 auspraegung_id = 3;
+    string variante = 4;
+    // Bestand der SKU auf dem Platz. Bei seriennummerngefuehrten Artikeln
+    // entspricht die Menge der Anzahl der Seriennummern.
+    double menge = 5;
+    repeated string seriennummern = 6;
+    bool nachweispflicht = 7;
+    double mittlerer_ek = 8;
+    string ean_nummer = 9;
+}
+
+// --- GetSerialPurchaseHistory (Spec 005 §3.4 Schritt 4) ---
+message GetSerialPurchaseHistoryRequest {
+    int32 mandant = 1;
+    // Optionaler SKU-Filter. Leer = Historie ueber alle SKUs, unter denen die
+    // Seriennummer je zugegangen ist (fuer SP-Mismatch-Erkennung).
+    string artikelnummer = 2;
+    int32 auspraegung_id = 3;
+    string seriennummer = 4;
+    bool debug = 5;
+}
+
+message GetSerialPurchaseHistoryResponse {
+    repeated SerialPurchaseEntry items = 1;
+    repeated string queries = 2;
+}
+
+message SerialPurchaseEntry {
+    int64 buchungs_id = 1;
+    // Einstandspreis je Stueck (Sage speichert den Gesamtwert der Buchung).
+    double einstandspreis = 2;
+    google.protobuf.Timestamp bewegungsdatum = 3;
+    string bewegungsart = 4;
+    int32 platz_id = 5;
 }
 
 message ListAmazonItemOptionsRequest {}
@@ -5692,6 +5802,266 @@ message BookStockReceiptResponse {
     int64  job         = 4;
     double bestand_neu = 5;   // Bestand des Layers nach der Buchung
     repeated string queries = 6;
+}
+
+// ========== STOCK BOOKING (Spec 005) ==========
+//
+// Feld-Matrix der Sage-BestandsBuchung (Spec 005 §2). Verletzungen sind
+// InvalidArgument, sie erreichen Sage nicht:
+//
+//   Feld                  | ZM (In) | EM (Out) | IU (Move)
+//   ----------------------|---------|----------|----------
+//   ek                    | Pflicht | verboten | verboten
+//   ziel_lagerplatz       | Pflicht | verboten | Pflicht
+//   herkunfts_lagerplatz  | verboten| Pflicht  | Pflicht (!= Ziel)
+//   seriennummern         | optional; wenn gesetzt: menge == Anzahl
+//
+// Das Buchungsmemo baut der Server nach der Konvention
+// "{by_user} - {HH:MM:SS} {memo}"; das XML-Escaping passiert beim Marshal.
+
+// BookStockInRequest bucht Zugang (ZM): Bestand erhoehen ohne Belegbezug.
+message BookStockInRequest {
+    int32  mandant        = 1;
+    string artikelnummer  = 2;
+    int64  auspraegung_id = 3;   // 0 fuer Artikel ohne Variante
+    int32  ziel_lagerplatz = 4;  // PlatzID
+    double menge          = 5;   // bei gesetzten seriennummern == deren Anzahl
+    double ek             = 6;   // Einstandspreis je Einheit, Pflicht
+    // allow_zero_ek erlaubt ek = 0. Ohne das Flag ist ek = 0 ein Fehler —
+    // ein versehentlich leeres EK-Feld soll keinen Nullwert-Zugang buchen.
+    bool   allow_zero_ek  = 7;
+    repeated string seriennummern = 8;
+
+    string memo    = 20;
+    string by_user = 60;   // leer -> Benutzer des API-Tokens
+    bool   dry_run = 62;   // XML bauen und zurueckgeben, nicht buchen
+}
+
+// BookStockOutRequest bucht Entnahme (EM): Bestand reduzieren ohne Belegbezug.
+message BookStockOutRequest {
+    int32  mandant        = 1;
+    string artikelnummer  = 2;
+    int64  auspraegung_id = 3;
+    int32  herkunfts_lagerplatz = 4;
+    double menge          = 5;
+    repeated string seriennummern = 8;
+
+    string memo    = 20;
+    string by_user = 60;
+    bool   dry_run = 62;
+}
+
+// BookStockMoveRequest bucht eine interne Umbuchung (IU) zwischen zwei
+// Lagerplaetzen. Kein SKU-Wechsel — dafuer kommt BookSkuChange.
+message BookStockMoveRequest {
+    int32  mandant        = 1;
+    string artikelnummer  = 2;
+    int64  auspraegung_id = 3;
+    int32  herkunfts_lagerplatz = 4;
+    int32  ziel_lagerplatz      = 5;
+    double menge          = 6;
+    repeated string seriennummern = 8;
+
+    string memo    = 20;
+    string by_user = 60;
+    bool   dry_run = 62;
+}
+
+// ---------- Kompositionen (Spec 005 §3.1): mehrere XMLs je Aufruf ----------
+//
+// Gemeinsame Semantik von BookSkuChange, BookBinMove und BookBatch:
+//
+//   * Die Schritte laufen strikt sequenziell in der Reihenfolge von `steps`.
+//   * Der erste FAILED-Schritt bricht die Sequenz ab; alle folgenden Schritte
+//     kommen als SKIPPED_AFTER_ERROR zurueck. Es gibt kein Rollback.
+//   * Bleibt dabei eine Entnahme (EM) ohne ihren Zugang (ZM) stehen, ist der
+//     Bestand "in der Luft". Fuer jedes nicht gebuchte Stueck liefert
+//     `compensation` eine fertige Gegenbuchung; ausfuehren muss sie der
+//     Aufrufer (bewusst kein Auto-Rollback: die Gegenbuchung kann selbst
+//     fehlschlagen und soll sichtbar sein).
+//   * Das Buchungsmemo bekommt je Schritt ein Suffix, damit die Zeilen im
+//     Sage-Job-Log ihrer Sequenz zuzuordnen sind: [SP-EM], [SP-ZM], [LP-IU],
+//     [BU-EM], [BU-ZM], [BU-IU].
+//   * dry_run baut alle XMLs und liefert sie als STATUS_PLANNED zurueck.
+
+// SkuChangeItem ist ein Stueck des SKU-Wechsels: eine Seriennummer mit ihrem
+// Einstandspreis. Je Item entsteht eine ZM ueber Menge 1.
+message SkuChangeItem {
+    string seriennummer = 1;
+    // ek ist der Einstandspreis dieses Stuecks (aus GetSerialPurchaseHistory
+    // oder dem mittleren EK). 0 nur mit allow_zero_ek des Requests.
+    double ek = 2;
+    // neue_seriennummer vergibt beim Wechsel eine andere Seriennummer.
+    // Leer = die alte Seriennummer wird uebernommen.
+    string neue_seriennummer = 3;
+}
+
+// BookSkuChangeRequest wechselt die SKU eines Bestands (SP): 1x EM auf der
+// alten SKU, dann je Stueck 1x ZM auf der neuen SKU.
+//
+// Quell- und Ziel-SKU muessen sich unterscheiden (Artikelnummer oder
+// Ausprägung). Herkunfts- und Ziel-Lagerplatz sind Pflicht und duerfen gleich
+// sein — der uebliche Fall ist ein Zustandswechsel am selben Platz.
+message BookSkuChangeRequest {
+    int32  mandant        = 1;
+    string artikelnummer  = 2;
+    int64  auspraegung_id = 3;
+    // ziel_artikelnummer leer = dieselbe Artikelnummer, nur andere Auspraegung.
+    string ziel_artikelnummer  = 4;
+    int64  ziel_auspraegung_id = 5;
+    int32  herkunfts_lagerplatz = 6;
+    int32  ziel_lagerplatz      = 7;
+
+    // menge und ek gelten nur ohne items (Artikel ohne Seriennummern).
+    double menge = 8;
+    double ek    = 9;
+    // allow_zero_ek erlaubt Einstandspreis 0 — fuer den Request wie fuer jedes
+    // Item.
+    bool   allow_zero_ek = 10;
+    // items ist der Serienfall: je Item eine ZM ueber Menge 1 mit dem EK des
+    // Items. Die EM traegt alle Seriennummern der Items.
+    repeated SkuChangeItem items = 11;
+
+    string memo    = 20;
+    string by_user = 60;
+    bool   dry_run = 62;
+}
+
+// BinMoveItem ist eine Zeile des Platz-Umzugs.
+message BinMoveItem {
+    string artikelnummer  = 1;
+    int64  auspraegung_id = 2;
+    // seriennummern gesetzt -> menge = deren Anzahl (menge darf 0 bleiben).
+    repeated string seriennummern = 3;
+    double menge = 4;
+}
+
+// BookBinMoveRequest raeumt einen Lagerplatz auf einen anderen um (LP):
+// je Item eine IU. Kein SKU-Wechsel, kein EK.
+message BookBinMoveRequest {
+    int32 mandant = 1;
+    int32 herkunfts_lagerplatz = 2;
+    int32 ziel_lagerplatz      = 3;
+    repeated BinMoveItem items = 4;
+
+    string memo    = 20;
+    string by_user = 60;
+    bool   dry_run = 62;
+}
+
+// BatchLine ist eine Zeile der gemischten Buchungsliste. Was daraus wird,
+// entscheidet der Server:
+//
+//   neue_artikelnummer/neue_auspraegung_id gesetzt und != alt -> EM + ZM
+//   sonst ziel_lagerplatz gesetzt und != Herkunft             -> IU
+//   sonst                                                     -> SKIPPED_NO_CHANGE
+//
+// "gesetzt" heisst hier ungleich dem Nullwert. Ein Wechsel *auf*
+// auspraegung_id 0 laesst sich ueber BookBatch daher nicht ausdruecken —
+// dafuer BookSkuChange nehmen.
+message BatchLine {
+    string artikelnummer  = 1;
+    int64  auspraegung_id = 2;
+    // seriennummer gesetzt -> menge ist 1 (oder darf 0 bleiben).
+    string seriennummer   = 3;
+    double menge          = 4;
+    // ziel_lagerplatz 0 = am Herkunftsplatz bleiben.
+    int32  ziel_lagerplatz = 5;
+
+    string neue_artikelnummer  = 6;
+    int64  neue_auspraegung_id = 7;
+    string neue_seriennummer   = 8;
+    // ek gilt nur fuer den ZM-Anteil eines SKU-Wechsels.
+    double ek = 9;
+    bool   allow_zero_ek = 10;
+}
+
+// BookBatchRequest bucht eine gemischte Liste ab einem Herkunftsplatz (BU).
+message BookBatchRequest {
+    int32 mandant = 1;
+    int32 herkunfts_lagerplatz = 2;
+    repeated BatchLine lines = 3;
+
+    string memo    = 20;
+    string by_user = 60;
+    bool   dry_run = 62;
+}
+
+// BookingStep ist ein geplantes oder ausgefuehrtes XML — direkt anzeigbar.
+message BookingStep {
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_PLANNED = 1;              // dry_run: gebaut, nicht gesendet
+        STATUS_SUCCESS = 2;
+        STATUS_FAILED = 3;
+        STATUS_SKIPPED_AFTER_ERROR = 4;  // Sequenz nach einem Fehler abgebrochen
+        STATUS_SKIPPED_NO_CHANGE = 5;    // Zeile ohne Aenderung
+    }
+    // label ist direkt anzeigbar, z.B.
+    // "IU 99999994-0 59100 -> 59105 (Menge 1)". Traegt der Schritt genau eine
+    // Seriennummer, steht sie im Label ("Menge 1, SN 99999992_06") — erst
+    // dadurch sind die n ZM einer Sequenz unterscheidbar; bei mehreren steht
+    // dort ihre Anzahl ("Menge 3, 3 SN").
+    string label       = 1;
+    Status status      = 2;
+    string buchungs_id = 3;  // BuchungsID aus der Sage-Antwort
+    string error       = 4;
+    string xml         = 5;  // das gebaute <Bestand>-Dokument
+}
+
+// StockBookingRow ist eine Zeile des Buchungs-Logs (KHKLagerplatzbuchungen),
+// gelesen nach der Buchung. Feldgleich mit GetStockBookingResponse.
+message StockBookingRow {
+    int64  buchungs_id      = 1;
+    int64  job              = 2;
+    string artikelnummer    = 3;
+    int32  auspraegung_id   = 4;
+    string bewegungsart     = 5;
+    int32  bestandswirkung  = 6;
+    // Trotz der Namen in der DB sind das PlatzIDs, nicht Lagerkennungen.
+    // 0 = von aussen.
+    int32  herkunft_platz_id = 7;
+    int32  ziel_platz_id     = 8;
+    double menge             = 9;
+    double menge_basis       = 10;
+    double einstandspreis    = 11;
+    string referenz          = 12;
+    string memo              = 13;
+    google.protobuf.Timestamp bewegungsdatum = 14;  // reines Datum, ohne Uhrzeit
+    int64  bestands_id       = 15;
+    double bestand_layer     = 16;  // aktueller Bestand des Layers
+    repeated string seriennummern = 17;
+}
+
+// CompensationHint ist ein fertiger Rueckbuchungs-Vorschlag fuer den Fall,
+// dass eine Sequenz mittendrin abbricht — Buchungen sind ueber mehrere XMLs
+// hinweg nicht transaktional, ein Rollback gibt es nicht.
+//
+// Die Ein-Schritt-Endpunkte BookStockIn/Out/Move koennen nicht teilweise
+// fehlschlagen und lassen das Feld leer; gefuellt wird es von den Sequenz-
+// Endpunkten (BookSkuChange, BookBinMove, BookBatch).
+message CompensationHint {
+    string label          = 1;  // was rueckgaengig zu machen ist
+    string bewegungsart   = 2;  // vorgeschlagene Gegenbuchung: ZM | EM | IU
+    string artikelnummer  = 3;
+    int64  auspraegung_id = 4;
+    int32  herkunfts_lagerplatz = 5;
+    int32  ziel_lagerplatz      = 6;
+    double menge          = 7;
+    double ek             = 8;
+    repeated string seriennummern = 9;
+    string reason         = 10;  // warum kompensiert werden muss
+}
+
+// BookingResponse ist die gemeinsame Antwort aller Buchungs-Endpunkte.
+message BookingResponse {
+    repeated BookingStep steps = 1;  // in Ausfuehrungsreihenfolge
+    int32 ok_count    = 2;
+    int32 error_count = 3;
+    // booked_rows ist der eingebaute Verify-Lookup der erfolgreichen
+    // BuchungsIDs — kein zweiter Call noetig.
+    repeated StockBookingRow booked_rows = 4;
+    repeated CompensationHint compensation = 5;
 }
 
 message GetStockBookingRequest {
