@@ -285,6 +285,7 @@ service SageHubService {
     rpc UpdateAmazonItem(UpdateAmazonItemRequest) returns (UpdateAmazonItemResponse);
     rpc UpdateAmazonLeadTimes(UpdateAmazonLeadTimesRequest) returns (UpdateAmazonLeadTimesResponse);
     rpc CreateAmazonItem(CreateAmazonItemRequest) returns (CreateAmazonItemResponse);
+    rpc DeleteAmazonItem(DeleteAmazonItemRequest) returns (DeleteAmazonItemResponse);
     rpc ListAmazonItemOptions(ListAmazonItemOptionsRequest) returns (ListAmazonItemOptionsResponse);
 
     // Ebay
@@ -5259,6 +5260,21 @@ message CreateAmazonItemRequest {
 message CreateAmazonItemResponse {
     bool is_success = 1;
     repeated string queries = 2;
+}
+
+// DeleteAmazonItem loescht genau eine LBAmazonItems-Zeile (Mandant + ItemID).
+// Kein Treffer ist ein Fehler (NotFound), damit ein Tippfehler im Massenlauf
+// nicht als stiller Erfolg durchgeht (IT#16695).
+message DeleteAmazonItemRequest {
+    int32  mandant = 1;
+    string item_id = 2;   // numerisch, wie UpdateAmazonItemRequest.item_id
+    string by_user = 60;
+    bool   debug   = 61;
+}
+
+message DeleteAmazonItemResponse {
+    bool            is_success = 1;
+    repeated string queries    = 2;
 }
 
 message DispoBlockedItem {
