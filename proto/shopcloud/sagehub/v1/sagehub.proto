@@ -464,6 +464,10 @@ service SageHubService {
     // BuchungsJournal (Customer payment tracking)
     rpc ListBuchungsJournal(ListBuchungsJournalRequest) returns (ListBuchungsJournalResponse);
 
+    // Zahlstand eines Vorgangs (IT#16789): ist bezahlt, wann kam das Geld,
+    // darf die Ware raus.
+    rpc GetVorgangPaymentStatus(GetVorgangPaymentStatusRequest) returns (GetVorgangPaymentStatusResponse);
+
     // LogisticHub Transfer Endpoints
     rpc GetArticleInfo(GetArticleInfoRequest) returns (GetArticleInfoResponse);
     rpc ListArticleSerialNumbers(ListArticleSerialNumbersRequest) returns (ListArticleSerialNumbersResponse);
@@ -6107,4 +6111,61 @@ message GetStockBookingResponse {
     double bestand_layer     = 16;  // aktueller Bestand des Layers
     repeated string seriennummern = 17;
     repeated string queries = 20;
+}
+
+// ---------------------------------------------------------------------------
+// GetVorgangPaymentStatus (IT#16789)
+// ---------------------------------------------------------------------------
+
+message GetVorgangPaymentStatusRequest {
+    int64 vor_id  = 1;
+    int32 mandant = 2;  // 0 = Mandant 1
+    bool  debug   = 3;
+}
+
+message GetVorgangPaymentStatusResponse {
+    int64  vor_id       = 1;
+    string zahlungskond = 2;
+
+    // inkasso_typ: "vorkasse" | "kanal" | "rechnung".
+    string inkasso_typ = 3;
+    // zahlstand: "kein_op" | "unpaid" | "prepaid" | "partially_paid" | "paid"
+    //            | "overpaid" | "refunded".
+    string zahlstand = 4;
+    // versandfreigabe beantwortet "darf die Ware raus" und ist NICHT dasselbe
+    // wie zahlstand: bei Marktplaetzen bucht die Buchhaltung die Zahlung erst
+    // nach der Kanal-Abrechnung, teils einen Monat spaeter.
+    bool   versandfreigabe = 5;
+    string freigabegrund   = 6;
+
+    // Geldhistorie aus KHKOpNebensatz, je Tan gruppiert. geld_netto ist
+    // geld_ein - geld_raus.
+    double geld_ein   = 10;
+    double geld_raus  = 11;
+    double geld_netto = 12;
+    // Datumsangaben als YYYY-MM-DD, leer = nie.
+    string erste_zahlung_am  = 13;
+    string letzte_zahlung_am = 14;
+    string erstattet_am      = 15;
+
+    // OP-Salden ueber alle Belege des Vorgangs.
+    double forderung    = 20;
+    double op_ausgleich = 21;
+    double skonto       = 22;
+
+    // Erfuellungsstand aus KHKVKVorgaengePositionen. Belastbar sind
+    // pos_gesamt und pos_offen; bestellt/geliefert/berechnet/retour sind
+    // Mengensummen ueber alle Positionen und mischen Einheiten, weil eine
+    // Versandkostenzeile ihren Betrag als Menge fuehrt (2 Positionen koennen
+    // "bestellt=6,99" ergeben).
+    int32  pos_gesamt = 30;
+    int32  pos_offen  = 31;
+    double bestellt   = 32;
+    double geliefert  = 33;
+    double berechnet  = 34;
+    double retour     = 35;
+    // erledigt: alle Positionen erfuellt UND Rechnung ausgeglichen.
+    bool   erledigt   = 36;
+
+    repeated string queries = 40;
 }
