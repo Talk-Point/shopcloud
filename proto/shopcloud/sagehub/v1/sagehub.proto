@@ -2452,10 +2452,19 @@ message UpdateArticleRequest {
     // ausserhalb des Katalogs -> invalid_argument, vor jedem UPDATE
     // (IT#11656).
     //
-    // 71-74 bleiben bewusst frei: IT#16449 belegt sie mit matchcode,
-    // artikelgruppe, langtext und dimensionstext. Beide Aenderungen laufen so
-    // ohne Nummernkonflikt zusammen.
+    // 71-73 bleiben bewusst frei: IT#16449 belegt sie mit matchcode,
+    // artikelgruppe und langtext. Beide Aenderungen laufen so ohne
+    // Nummernkonflikt zusammen.
     int32 steuerklasse = 75;
+
+    // Dimensionstext eines Bestandsartikels aendern (KHKArtikel.Dimensionstext).
+    // Nur wirksam, wenn "dimensionstext" in der update_mask steht - so laesst
+    // sich der Text auch wieder leeren (IT#16449).
+    //
+    // Einzeilig: Zeilenumbrueche im Wert ueberleben den Transport zum
+    // SQL-Gateway nicht und werden zu Leerzeichen. DimensionstextHTML und
+    // DimensionstextRTF bleiben unberuehrt.
+    string dimensionstext = 74;
 
     // Besteuerungsart eines Bestandsartikels korrigieren
     // (KHKArtikel.Besteuerungsart, "Reverse Charge" in der Sage-Maske):
