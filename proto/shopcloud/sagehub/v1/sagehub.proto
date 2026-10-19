@@ -491,6 +491,11 @@ service SageHubService {
     // VKBeleg Create (Order) — create a VKBeleg directly in Sage ERP via XML API
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
 
+    // Ankauf-Beleg (Spec 010, IT#17330): Bausteine + Orchestrator
+    rpc FindVKBelegeByReference(FindVKBelegeByReferenceRequest) returns (FindVKBelegeByReferenceResponse);
+    rpc SetVKBelegPositionText(SetVKBelegPositionTextRequest) returns (SetVKBelegPositionTextResponse);
+    rpc CreateBuybackDocument(CreateBuybackDocumentRequest) returns (CreateBuybackDocumentResponse);
+
     // Lagerplatzzuordnung + Bestandszugang per direktem SQL (Spec 006, IT#16375)
     rpc ListBelegPositionStoragePlaces(ListBelegPositionStoragePlacesRequest) returns (ListBelegPositionStoragePlacesResponse);
     rpc SetBelegPositionStoragePlaces(SetBelegPositionStoragePlacesRequest) returns (SetBelegPositionStoragePlacesResponse);
@@ -5482,12 +5487,133 @@ message CreateOrderRequest {
     CreateOrderAddress billing_address      = 14;
     repeated CreateOrderLineItem line_items = 15;
     bool   dry_run               = 16;  // Generate XML but do not send to Sage ERP
+    bool   strict                = 17;  // Längen prüfen statt kürzen → InvalidArgument je Feld (nach sanitizeForSage, Runen)
 }
 
 message CreateOrderResponse {
     bool            is_success  = 1;
     repeated string errors      = 2;
     string          xml_preview = 3;  // Generated XML (always populated)
+}
+
+// --- Ankauf-Beleg (Spec 010, IT#17330) ---
+
+// Scope read, exakte Übereinstimmung auf KHKVKBelege.Referenznummer.
+message FindVKBelegeByReferenceRequest {
+    int32  mandant        = 1;
+    string referenznummer = 2;
+}
+
+message VKBelegByReferencePosition {
+    int64  bel_pos_id     = 1;
+    string artikelnummer  = 2;
+    int32  auspraegung_id = 3;
+    string bezeichnung1   = 4;
+    string bezeichnung2   = 5;
+    string langtext       = 6;
+    string menge          = 7;
+    string einzelpreis    = 8;
+    string gesamtpreis    = 9;
+}
+
+message VKBelegByReference {
+    int64  bel_id           = 1;
+    int64  vor_id           = 2;
+    string document_number  = 3;   // USER_BelegjahrBelegnummer
+    string belegart         = 4;   // e.g. "Rechnung"
+    string belegkennzeichen = 5;   // e.g. "VFR"
+    string brutto           = 6;
+    string netto            = 7;
+    string referenznummer   = 8;
+    string zahlungsreferenz = 9;
+    string kundengruppe     = 10;
+    string belegdatum       = 11;
+    repeated VKBelegByReferencePosition positions = 12;
+}
+
+message FindVKBelegeByReferenceResponse {
+    repeated VKBelegByReference items = 1;
+}
+
+message SetVKBelegPositionTextRequest {
+    int32  mandant         = 1;
+    string document_number = 2;
+    string artikelnummer   = 3;
+    int32  auspraegung_id  = 4;
+    int64  bel_pos_id      = 5;  // optional: direkt adressieren, wenn Artikel mehrfach auf dem Beleg
+    string langtext        = 6;  // leer = nicht anfassen
+    string bezeichnung1    = 7;  // leer = nicht anfassen, ≤ 50
+    string bezeichnung2    = 8;  // leer = nicht anfassen, ≤ 50
+}
+
+message SetVKBelegPositionTextResponse {
+    bool  is_success = 1;
+    int64 bel_pos_id = 2;
+    bool  changed    = 3;
+}
+
+enum BuybackStep {
+    BUYBACK_STEP_UNSPECIFIED = 0;
+    BUYBACK_STEP_FIND        = 1;
+    BUYBACK_STEP_ORDER       = 2;
+    BUYBACK_STEP_TEXT        = 3;
+    BUYBACK_STEP_TRANSFORM   = 4;
+    BUYBACK_STEP_VERIFY      = 5;
+}
+
+enum BuybackStepStatus {
+    BUYBACK_STEP_STATUS_UNSPECIFIED    = 0;
+    BUYBACK_STEP_STATUS_DONE           = 1;
+    BUYBACK_STEP_STATUS_SKIPPED_EXISTS = 2;
+    BUYBACK_STEP_STATUS_PENDING        = 3;
+    BUYBACK_STEP_STATUS_FAILED         = 4;
+    BUYBACK_STEP_STATUS_NOT_RUN        = 5;
+}
+
+message BuybackStepResult {
+    BuybackStep       step            = 1;
+    BuybackStepStatus status          = 2;
+    string            rpc             = 3;  // Einzel-RPC für Nacharbeit: "FindVKBelegeByReference" | "CreateOrder" | "SetVKBelegPositionText" | "TransformBelegByDocumentNumber"
+    string            message         = 4;
+    string            document_number = 5;
+}
+
+// Eine Ankauf-Position: ein Order-LineItem, danach die Texte auf der Auftragsposition.
+message BuybackPosition {
+    string artikelnummer        = 1;  // Pflicht, ≤ 31
+    int32  auspraegung_id       = 2;
+    int32  qty                  = 3;  // ≠ 0, Ankauf = -1
+    string price                = 4;  // Dezimal-String ^-?\d+(\.\d{1,2})?$, Pflicht
+    string position_title       = 5;  // → Langtext
+    string position_condition   = 6;  // → Bezeichnung2, ≤ 50
+    string position_short_title = 7;  // → Bezeichnung1, ≤ 50, optional
+}
+
+message CreateBuybackDocumentRequest {
+    int32                    mandant              = 1;   // Pflicht, nur 1 (Order-Import)
+    string                   reference            = 2;   // Pflicht, ≤ 20 → OrderID = ResellerCustomerID = Referenznummer
+    CreateOrderAddress       seller               = 3;   // Pflicht (Billing = Shipping)
+    string                   email                = 4;
+    string                   customer_group       = 5;   // Pflicht
+    repeated BuybackPosition positions            = 6;   // Pflicht, mindestens 1
+    string                   payment_condition    = 7;   // Pflicht, KHKZahlungskonditionen: "AusPayPal" (Auszahlung per PayPal) | "AusBank" (Auszahlung per Überweisung)
+    string                   payment_reference    = 8;   // IMEI → USER_Zahlungsreferenz, ≤ 250
+    string                   delivery_condition   = 9;   // optional, Default "ANK" (Sage-Gruppe Ankauf)
+    string                   shipping_method      = 10;  // optional, Default "ANK" (Sage-Gruppe Ankauf)
+    string                   target_document_type = 11;  // Default "Rechnung"
+    string                   by_user              = 12;  // Pflicht
+    bool                     dry_run              = 13;  // nur XML, kein FIND, Sage unberührt
+    BuybackStep              stop_after           = 14;  // optional
+}
+
+message CreateBuybackDocumentResponse {
+    bool                       is_success              = 1;
+    repeated BuybackStepResult steps                   = 2;
+    string                     order_document_number   = 3;
+    string                     invoice_document_number = 4;
+    int64                      bel_id                  = 5;
+    string                     xml_preview             = 6;
+    repeated string            error_messages          = 7;
 }
 
 message OversoldItem {
