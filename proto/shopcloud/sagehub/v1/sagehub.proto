@@ -2536,6 +2536,14 @@ message UpdateArticleRequest {
     bool user_zentral_dispo = 107;
     // KHKArtikelVarianten.USER_SCMPAktiv je auspraegung_id.
     bool user_scmp_aktiv = 108;
+
+    // KHKArtikel.Memo ueberschreiben, leerer String leert es (IT#17338).
+    string memo = 109;
+    // Haengt den Text mit CRLF an KHKArtikel.Memo an, in einem UPDATE auf dem
+    // Server - parallele Eintraege gehen nicht verloren. Nicht zusammen mit
+    // "memo" in der Maske, leer (auch nur Whitespace) -> invalid_argument.
+    // Nicht idempotent: ein Retry nach Timeout kann den Text doppelt anhaengen (IT#17338).
+    string memo_append = 110;
 }
 
 message UpdateArticleResponse {
