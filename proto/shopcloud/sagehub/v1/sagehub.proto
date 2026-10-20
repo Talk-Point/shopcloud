@@ -2503,6 +2503,39 @@ message UpdateArticleRequest {
     // ebenfalls ungeprueft, und ein Update, das strenger waere als die Anlage,
     // waere fuer Aufrufer nicht nachvollziehbar.
     string sachkonto_vk = 92;
+
+    // IT#17338 - Felder, die bei der Anlage gesetzt werden und sich danach
+    // korrigieren lassen muessen. Wie alle Felder nur wirksam, wenn der Pfad
+    // in der update_mask steht.
+
+    // Muss in KHKArtikelgruppen existieren, sonst invalid_argument.
+    // Hauptartikelgruppe/Vaterartikelgruppe werden mitgezogen.
+    string artikelgruppe = 93;
+    string matchcode = 94;
+    // Name der Variantenvorlage (z. B. "B-Ware"), leer = keine Vorlage.
+    // Unbekannter Name -> invalid_argument. Gehoert eine vorhandene
+    // Auspraegung nicht zur neuen Vorlage -> failed_precondition. Ohne
+    // "user_bware" in der Maske wird USER_Bware passend mitgesetzt
+    // (-1 bei "B-Ware", sonst 0).
+    string variante = 95;
+    bool user_bware = 96;
+    // KHKArtikelVarianten.Dispoformel/Dispofaktor je auspraegung_id.
+    int32 dispositionsmethode = 97;
+    double dispofaktor = 98;
+    bool lagerfuehrung = 99;
+    // Nur solange der Artikel nirgends verwendet ist (Belege, Bestand,
+    // Lagerplatz, Dispo, PPS), sonst failed_precondition.
+    // Lagermengeneinheit bleibt unveraendert.
+    string basismengeneinheit = 100;
+    string verkaufsmengeneinheit = 101;
+    string verpackungseinheit = 102;  // KHKArtikel.VerpackungseinheitVK
+    bool ist_kundenkartei = 103;
+    bool ist_lieferantenkartei = 104;
+    bool ist_unterbaugruppe = 105;
+    bool ist_provisionierbar = 106;
+    bool user_zentral_dispo = 107;
+    // KHKArtikelVarianten.USER_SCMPAktiv je auspraegung_id.
+    bool user_scmp_aktiv = 108;
 }
 
 message UpdateArticleResponse {
