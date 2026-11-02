@@ -3832,6 +3832,14 @@ message ListVKBelegsByArticleRequest {
     VKBelegart belegart = 6;
     bool debug = 7;
     string query = 8;
+    // Zeitraum auf KHKVKBelege.USER_CD (IT#17567). Ohne time_frame: kein Zeitfilter.
+    oneof time_frame {
+        TimeRange range = 9;
+        google.protobuf.Duration duration = 10;
+        TimeFramePreset range_shortcut = 11;
+    }
+    // Mehrere Belegarten; leer = `belegart` gilt.
+    repeated VKBelegart belegart_items = 12;
 }
 
 message VKBelegByArticleItem {
@@ -3858,6 +3866,9 @@ message VKBelegByArticleItem {
     string bezeichnung1 = 21;
     int32 auspraegung_id = 22;
     string artikelnummer = 23;
+    double gesamtpreis_intern_ew = 24; // Positionsnetto in Hauswaehrung
+    double mittlerer_ek = 25;
+    double roherloes = 26;
 }
 
 message ListVKBelegsByArticleResponse {
@@ -3865,6 +3876,8 @@ message ListVKBelegsByArticleResponse {
     int32 page_size = 2;
     repeated VKBelegByArticleItem items = 3;
     repeated string queries = 4;
+    int32 total_count = 5; // Treffer ueber alle Seiten
+    TimeRange range = 6;   // aufgeloester Zeitraum, nur gesetzt wenn time_frame im Request
 }
 
 message ListVKBelegOpenPicksRequest {
