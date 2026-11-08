@@ -2271,12 +2271,16 @@ message BatchSetVersandOnVKBelegResponse {
     string query = 1;
 }
 
+// Setzt die Versandfelder eines Belegkopfs (IT#17637). Je Feld: nicht
+// gesetzt = unveraendert, "" = NULL (Versandstopp), sonst der Sage-Code.
+// Mindestens eines von versand/lieferbedingung muss gesetzt sein.
 message SetVersandOnVKBelegRequest {
     int32 mandant = 1;
     int64 bel_id = 2;
-    string versand = 3;
+    optional string versand = 3;
     string by_user = 4;
     bool debug = 5;
+    optional string lieferbedingung = 6;
 }
 
 message SetVersandOnVKBelegResponse {
