@@ -1088,6 +1088,8 @@ message CreateAddressRequest {
 message CreateAddressResponse {
     bool is_success = 1;
     repeated string queries = 2;
+    // Vergebene Adressnummer (KHKAdressen.Adresse), direkt nutzbar fuer GetAddress/UpdateAddress.
+    string id = 3;
 }
 
 message UpdateAddressRequest {
