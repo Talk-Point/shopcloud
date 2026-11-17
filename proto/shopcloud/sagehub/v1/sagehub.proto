@@ -488,7 +488,10 @@ service SageHubService {
     // Stock — Oversold items (IT#15121)
     rpc ListOversoldItems(ListOversoldItemsRequest) returns (ListOversoldItemsResponse);
 
-    // VKBeleg Create (Order) — create a VKBeleg directly in Sage ERP via XML API
+    // VKBeleg Create (Order) — create a VKBeleg directly in Sage ERP via XML API.
+    // Kein Doppel-Schutz: der Sage-Importer dedupliziert nicht, der Aufrufer sucht vorher per FindVKBelegeByReference.
+    // Fehler nach dem Senden (IT#17717): failed_precondition = von Sage abgelehnt, nichts angelegt;
+    // internal = Ausgang unklar, Auftrag kann angelegt sein, nicht erneut senden.
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
 
     // Ankauf-Beleg (Spec 010, IT#17330): Bausteine + Orchestrator
@@ -5537,7 +5540,7 @@ message CreateOrderLineItem {
 }
 
 message CreateOrderRequest {
-    int32  mandant               = 1;
+    int32  mandant               = 1;   // 0 = 1; nur Mandant 1, sonst InvalidArgument
     string order_id              = 2;   // → <OrderID> in XML
     string reseller_customer_id  = 3;   // → <ResellerCustomerID> in XML
     string email                 = 4;
