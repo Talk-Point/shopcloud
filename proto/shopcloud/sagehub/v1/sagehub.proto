@@ -347,6 +347,11 @@ service SageHubService {
     rpc GetVKBelegsWhatsUp(GetVKBelegsWhatsUpRequest) returns (GetVKBelegsWhatsUpResponse);
     // VKBelegOpenPicks
     rpc ListVKBelegOpenPicks(ListVKBelegOpenPicksRequest) returns (ListVKBelegOpenPicksResponse);
+    // Komm-Status (Cockpit-V1 /komm-status, IT#17730) - drei getrennte RPCs, damit das
+    // Frontend sie parallel ruft und eine langsame Query die anderen nicht mitreisst
+    rpc GetCommissionCanPick(GetCommissionCanPickRequest) returns (GetCommissionCanPickResponse);
+    rpc GetCommissionOpenPicks(GetCommissionOpenPicksRequest) returns (GetCommissionOpenPicksResponse);
+    rpc GetCommissionStats(GetCommissionStatsRequest) returns (GetCommissionStatsResponse);
     // VKBelegLineItemsOpens
     rpc ListVKBelegLineItemsOpens(ListVKBelegLineItemsOpensRequest) returns (ListVKBelegLineItemsOpensResponse);
     // VKBeleg Close Operations
@@ -6372,4 +6377,79 @@ message GetVorgangPaymentStatusResponse {
     bool   erledigt   = 36;
 
     repeated string queries = 40;
+}
+
+// Komm-Status (IT#17730)
+
+message GetCommissionCanPickRequest {
+    int32 mandant = 1;
+    bool debug = 2;
+}
+
+message CommissionCanPickItem {
+    string lagerkennung = 1; // leer = kein eindeutiger Lagerplatz
+    int32 total = 2;         // Anzahl Vorgaenge
+}
+
+message GetCommissionCanPickResponse {
+    repeated CommissionCanPickItem items = 1;
+    int32 total = 2;
+    string stichtag = 3; // yyyy-MM-dd (morgen, Europe/Berlin): Belegdatum/Liefertermin < stichtag
+    repeated string queries = 4;
+}
+
+message GetCommissionOpenPicksRequest {
+    int32 mandant = 1;
+    bool debug = 2;
+}
+
+message CommissionOpenPickItem {
+    string date = 1; // yyyy-MM-dd, Datum der Pickliste
+    string versand = 2;
+    int32 total = 3;
+}
+
+message GetCommissionOpenPicksResponse {
+    repeated CommissionOpenPickItem items = 1;
+    int32 total = 2;
+    repeated string queries = 3;
+}
+
+message GetCommissionStatsRequest {
+    int32 mandant = 1;
+    TimeRange range = 2; // leer = heute (Europe/Berlin), max. 31 Tage
+    bool debug = 3;
+}
+
+message CommissionVersandCount {
+    string versand = 1;
+    int32 total = 2;
+}
+
+message CommissionUserStat {
+    string username = 1;
+    int32 total = 2;
+    repeated CommissionVersandCount by_versand = 3;
+    google.protobuf.Timestamp first = 4;
+    google.protobuf.Timestamp last = 5;
+}
+
+message CommissionHourCount {
+    int32 hour = 1; // 0-23
+    int32 total = 2;
+}
+
+message CommissionHourSeries {
+    string belegart = 1; // Kommissionierauftrag | Kommissionierrechnung
+    repeated CommissionHourCount hours = 2; // immer 24 Eintraege
+}
+
+message GetCommissionStatsResponse {
+    repeated CommissionUserStat by_user = 1;
+    int32 total = 2;
+    repeated CommissionHourSeries per_hour = 3;
+    // Ø Kommissionierrechnungen je Stunde ueber die letzten 30 Tage (INT-Durchschnitt wie Cockpit V1)
+    repeated CommissionHourCount per_hour_avg_30d = 4;
+    TimeRange range = 5;
+    repeated string queries = 6;
 }
